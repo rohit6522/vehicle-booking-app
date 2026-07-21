@@ -12,10 +12,10 @@ export default auth((req) => {
 
   if (!isProtected) return NextResponse.next();
 
-  if (!session) {
-    const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+ if (!session) {
+    const homeUrl = new URL("/", req.url);
+    homeUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(homeUrl);
   }
 
   const role = (session.user as any)?.role;
