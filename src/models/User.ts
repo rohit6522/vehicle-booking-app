@@ -22,6 +22,7 @@ export interface IUser extends mongoose.Document {
   // Driver-only fields
   vehicle?: IVehicle;
   kycStatus?: KycStatus;
+  partnerStatus?: "not_applied" | "pending" | "approved" | "rejected";
   kycVideoUrl?: string;
   isOnline?: boolean;
   currentLocation?: {
@@ -59,6 +60,11 @@ const UserSchema = new Schema<IUser>(
       type: String,
       enum: ["not_submitted", "pending", "approved", "rejected"],
       default: "not_submitted",
+    },
+    partnerStatus: {
+      type: String,
+      enum: ["not_applied", "pending", "approved", "rejected"],
+      default: "not_applied",
     },
     kycVideoUrl: String,
     isOnline: { type: Boolean, default: false },

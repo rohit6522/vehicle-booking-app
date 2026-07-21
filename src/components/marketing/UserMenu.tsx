@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { signOut } from "next-auth/react";
-import { Bike, Car, ChevronRight, LogOut } from "lucide-react";
+import { Bike, Car, ChevronRight, LogOut, ShieldCheck } from "lucide-react";
 
 export function UserMenu({
   name,
@@ -44,24 +44,63 @@ export function UserMenu({
 
           <div className="h-px bg-neutral-100 my-4" />
 
-          
-           <a href="/become-a-partner"
-            className="flex items-center justify-between group"
-          >
-            <span className="flex items-center gap-3">
-              <span className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center gap-0.5">
-                <Bike size={12} />
-                <Car size={12} />
+          {role === "admin" ? (
+            <a
+              href="/admin/partners"
+              className="flex items-center justify-between group"
+            >
+              <span className="flex items-center gap-3">
+                <span className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center">
+                  <ShieldCheck size={16} />
+                </span>
+                <span className="text-sm font-medium text-black">
+                  Admin Dashboard
+                </span>
               </span>
-              <span className="text-sm font-medium text-black">
-                Become a Partner
+              <ChevronRight
+                size={16}
+                className="text-neutral-400 group-hover:translate-x-0.5 transition-transform"
+              />
+            </a>
+          ) : role === "driver" ? (
+            <a
+              href="/driver/requests"
+              className="flex items-center justify-between group"
+            >
+              <span className="flex items-center gap-3">
+                <span className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center gap-0.5">
+                  <Bike size={12} />
+                  <Car size={12} />
+                </span>
+                <span className="text-sm font-medium text-black">
+                  Ride Requests
+                </span>
               </span>
-            </span>
-            <ChevronRight
-              size={16}
-              className="text-neutral-400 group-hover:translate-x-0.5 transition-transform"
-            />
-          </a>
+              <ChevronRight
+                size={16}
+                className="text-neutral-400 group-hover:translate-x-0.5 transition-transform"
+              />
+            </a>
+          ) : (
+            <a
+              href="/become-a-partner"
+              className="flex items-center justify-between group"
+            >
+              <span className="flex items-center gap-3">
+                <span className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center gap-0.5">
+                  <Bike size={12} />
+                  <Car size={12} />
+                </span>
+                <span className="text-sm font-medium text-black">
+                  Become a Partner
+                </span>
+              </span>
+              <ChevronRight
+                size={16}
+                className="text-neutral-400 group-hover:translate-x-0.5 transition-transform"
+              />
+            </a>
+          )}
 
           <button
             onClick={() => signOut({ callbackUrl: "/" })}

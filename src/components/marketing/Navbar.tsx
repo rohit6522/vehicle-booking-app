@@ -7,7 +7,7 @@ import { UserMenu } from "./UserMenu";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Bookings", href: "/bookings" },
+ { label: "Bookings", href: "/rider/book" },
   { label: "Fleet", href: "#fleet" },
   { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
