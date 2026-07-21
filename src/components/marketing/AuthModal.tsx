@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { X, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { X, Mail, Lock, User, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
-type Mode = "login" | "register";
+type Mode = "login" | "register" | "verify-otp";
 
 function GoogleIcon() {
   return (
@@ -36,7 +36,7 @@ export function AuthModal({
   onClose,
 }: {
   open: boolean;
-  initialMode?: Mode;
+  initialMode?: "login" | "register";
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -45,6 +45,7 @@ export function AuthModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [otp, setOtp] = useState("");
 
   if (!open) return null;
 
@@ -74,24 +75,47 @@ export function AuthModal({
     router.refresh();
   }
 
-  // Note: real OTP verification (SMS/email) is a future-phase enhancement.
-  // For now this creates the account directly and logs the user in, so the
-  // rest of the flow (KYC, bookings) has something to build on.
-  async function handleRegister(e: React.FormEvent) {
+  async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/register", {
+      const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, role: "rider" }),
+        body: JSON.stringify(form),
       });
       const data = await res.json();
 
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
+        return;
+      }
+
+      setMode("verify-otp");
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, otp }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "Invalid OTP");
         return;
       }
 
@@ -102,6 +126,7 @@ export function AuthModal({
       });
 
       if (signInRes?.error) {
+        setError("Account created — please log in.");
         setMode("login");
         return;
       }
@@ -117,14 +142,12 @@ export function AuthModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      {/* Backdrop */}
       <button
         aria-label="Close"
         onClick={onClose}
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
       />
 
-      {/* Modal card */}
       <div className="relative w-full max-w-[420px] bg-white rounded-3xl shadow-2xl p-8">
         <button
           onClick={onClose}
@@ -139,125 +162,194 @@ export function AuthModal({
           <p className="text-sm text-neutral-500 mt-1">Premium Vehicle Booking</p>
         </div>
 
-        <button
-          onClick={handleGoogle}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-full border border-neutral-200 text-sm font-medium text-neutral-800 hover:bg-neutral-50 transition-colors"
-        >
-          <GoogleIcon />
-          Continue with Google
-        </button>
+        {mode !== "verify-otp" && (
+          <>
+            <button
+              onClick={handleGoogle}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full border border-neutral-200 text-sm font-medium text-neutral-800 hover:bg-neutral-50 transition-colors"
+            >
+              <GoogleIcon />
+              Continue with Google
+            </button>
 
-        <div className="flex items-center gap-3 my-6">
-          <div className="h-px flex-1 bg-neutral-200" />
-          <span className="text-xs text-neutral-400">OR</span>
-          <div className="h-px flex-1 bg-neutral-200" />
-        </div>
+            <div className="flex items-center gap-3 my-6">
+              <div className="h-px flex-1 bg-neutral-200" />
+              <span className="text-xs text-neutral-400">OR</span>
+              <div className="h-px flex-1 bg-neutral-200" />
+            </div>
+          </>
+        )}
 
-        <h3 className="text-lg font-bold text-black mb-4">
-          {mode === "login" ? "Welcome back" : "Create account"}
-        </h3>
+        {mode === "login" && (
+          <>
+            <h3 className="text-lg font-bold text-black mb-4">Welcome back</h3>
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div className="relative">
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="email"
+                  required
+                  placeholder="Email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
+                />
+              </div>
+              <div className="relative">
+                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  placeholder="Password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  className="w-full pl-11 pr-11 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
 
-        <form
-          onSubmit={mode === "login" ? handleLogin : handleRegister}
-          className="space-y-3"
-        >
-          {mode === "register" && (
-            <div className="relative">
-              <User
-                size={16}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-              />
+              {error && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
+              >
+                {loading ? "Please wait..." : "Login"}
+              </button>
+            </form>
+            <p className="text-center text-sm text-neutral-500 mt-5">
+              Don&apos;t have an account?{" "}
+              <button onClick={() => { setError(""); setMode("register"); }} className="font-semibold text-black">
+                Sign up
+              </button>
+            </p>
+          </>
+        )}
+
+        {mode === "register" && (
+          <>
+            <h3 className="text-lg font-bold text-black mb-4">Create account</h3>
+            <form onSubmit={handleSendOtp} className="space-y-3">
+              <div className="relative">
+                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  required
+                  placeholder="Full name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
+                />
+              </div>
+              <div className="relative">
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="email"
+                  required
+                  placeholder="Email address"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
+                />
+              </div>
+              <div className="relative">
+                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  placeholder="Password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  className="w-full pl-11 pr-11 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+
+              {error && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
+              >
+                {loading ? "Sending OTP..." : "Send OTP"}
+              </button>
+            </form>
+            <p className="text-center text-sm text-neutral-500 mt-5">
+              Already have an account?{" "}
+              <button onClick={() => { setError(""); setMode("login"); }} className="font-semibold text-black">
+                Login
+              </button>
+            </p>
+          </>
+        )}
+
+        {mode === "verify-otp" && (
+          <>
+            <div className="flex items-center gap-2 mb-1">
+              <ShieldCheck size={18} className="text-black" />
+              <h3 className="text-lg font-bold text-black">Verify your email</h3>
+            </div>
+            <p className="text-sm text-neutral-500 mb-5">
+              We sent a 6-digit code to <span className="font-medium text-black">{form.email}</span>
+            </p>
+            <form onSubmit={handleVerifyOtp} className="space-y-3">
               <input
                 type="text"
                 required
-                placeholder="Full name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="Enter 6-digit OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                className="w-full px-4 py-3 rounded-full border border-neutral-200 text-sm text-center tracking-[0.4em] font-semibold placeholder:text-neutral-400 placeholder:tracking-normal placeholder:font-normal focus:outline-none focus:border-black"
               />
-            </div>
-          )}
 
-          <div className="relative">
-            <Mail
-              size={16}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-            />
-            <input
-              type="email"
-              required
-              placeholder={mode === "login" ? "Email" : "Email address"}
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
-            />
-          </div>
+              {error && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                  {error}
+                </p>
+              )}
 
-          <div className="relative">
-            <Lock
-              size={16}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-            />
-            <input
-              type={showPassword ? "text" : "password"}
-              required
-              minLength={6}
-              placeholder="Password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full pl-11 pr-11 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((s) => !s)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-              {error}
+              <button
+                type="submit"
+                disabled={loading || otp.length !== 6}
+                className="w-full py-3 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
+              >
+                {loading ? "Verifying..." : "Verify & Create Account"}
+              </button>
+            </form>
+            <p className="text-center text-sm text-neutral-500 mt-5">
+              Wrong email?{" "}
+              <button onClick={() => { setError(""); setOtp(""); setMode("register"); }} className="font-semibold text-black">
+                Go back
+              </button>
             </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
-          >
-            {loading
-              ? "Please wait..."
-              : mode === "login"
-              ? "Login"
-              : "Send OTP"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-neutral-500 mt-5">
-          {mode === "login" ? (
-            <>
-              Don&apos;t have an account?{" "}
-              <button
-                onClick={() => setMode("register")}
-                className="font-semibold text-black"
-              >
-                Sign up
-              </button>
-            </>
-          ) : (
-            <>
-              Already have an account?{" "}
-              <button
-                onClick={() => setMode("login")}
-                className="font-semibold text-black"
-              >
-                Login
-              </button>
-            </>
-          )}
-        </p>
+          </>
+        )}
       </div>
     </div>
   );
