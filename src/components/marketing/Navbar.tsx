@@ -5,17 +5,30 @@ import { useSession } from "next-auth/react";
 import { AuthModal } from "./AuthModal";
 import { UserMenu } from "./UserMenu";
 
-const NAV_LINKS = [
+const RIDER_LINKS = [
   { label: "Home", href: "/" },
- { label: "Bookings", href: "/rider/book" },
+  { label: "Bookings", href: "/rider/book" },
   { label: "Fleet", href: "#fleet" },
   { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
 ];
 
+const DRIVER_LINKS = [
+  { label: "Dashboard", href: "/driver/dashboard" },
+  { label: "Active Ride", href: "/driver/requests" },
+  { label: "Pending Requests", href: "/driver/requests" },
+  { label: "My Bookings", href: "/driver/dashboard" },
+];
+
+const ADMIN_LINKS = [{ label: "Dashboard", href: "/admin/dashboard" }];
+
 export function Navbar() {
   const { data: session, status } = useSession();
   const [modalOpen, setModalOpen] = useState(false);
+
+  const role = (session?.user as any)?.role;
+  const links =
+    role === "driver" ? DRIVER_LINKS : role === "admin" ? ADMIN_LINKS : RIDER_LINKS;
 
   return (
     <>
@@ -26,7 +39,7 @@ export function Navbar() {
           </span>
 
           <nav className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
+            {links.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
@@ -40,7 +53,7 @@ export function Navbar() {
           {status === "authenticated" && session?.user ? (
             <UserMenu
               name={session.user.name ?? "User"}
-              role={(session.user as any)?.role ?? "rider"}
+              role={role ?? "rider"}
             />
           ) : (
             <button

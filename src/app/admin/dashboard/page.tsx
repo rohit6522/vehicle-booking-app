@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { PieChart, Pie, Cell } from "recharts";
 import { Users, CheckCircle2, Clock, XCircle, ShieldCheck, Check, X } from "lucide-react";
+import { Navbar } from "@/components/marketing/Navbar";
+import { Footer } from "@/components/marketing/Footer";
 
 interface Stats {
   total: number;
@@ -68,6 +70,8 @@ export default function AdminDashboardPage() {
   const totalForChart = stats?.total || 1; // avoid divide-by-zero
 
   return (
+    <>
+      <Navbar />
     <main className="min-h-screen bg-neutral-100">
       {/* Header */}
       <header className="bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
@@ -241,6 +245,8 @@ export default function AdminDashboardPage() {
         )}
       </div>
     </main>
+     <Footer />
+    </>
   );
 }
 
