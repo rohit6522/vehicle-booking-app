@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Ride from "@/models/Ride";
+import { getIO } from "@/lib/socketServer";
 
 export async function POST(
   req: Request,
@@ -41,6 +42,8 @@ export async function POST(
   ride.cancelledAt = new Date();
   ride.cancelledBy = isRider ? "rider" : "driver";
   await ride.save();
+
+  getIO()?.to(`ride:${id}`).emit("ride:update", { ride });
 
   return NextResponse.json({ ride });
 }

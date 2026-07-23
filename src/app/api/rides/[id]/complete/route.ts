@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Ride from "@/models/Ride";
+import { getIO } from "@/lib/socketServer";
 
 export async function POST(
   req: Request,
@@ -34,6 +35,8 @@ export async function POST(
   ride.completedAt = new Date();
   ride.fare.final = ride.fare.estimated; // Phase 6 (Razorpay) will settle real payment
   await ride.save();
+
+  getIO()?.to(`ride:${id}`).emit("ride:update", { ride });
 
   return NextResponse.json({ ride });
 }

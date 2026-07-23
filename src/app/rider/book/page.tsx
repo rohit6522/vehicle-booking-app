@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Bike, Car, CarFront, Bus, Navigation } from "lucide-react";
+import { getSocket } from "@/lib/socketClient";
 
 const VEHICLES = [
   { type: "bike", label: "Bike", icon: Bike },
@@ -29,6 +30,10 @@ export default function BookRidePage() {
   const [booking, setBooking] = useState(false);
   const [error, setError] = useState("");
   const [ride, setRide] = useState<any>(null);
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+  const rideIdRef = useRef<string | null>(null);
 
   const coordsReady =
     pickup.lat && pickup.lng && drop.lat && drop.lng && pickup.address && drop.address;
@@ -101,18 +106,30 @@ export default function BookRidePage() {
     }
   }
 
-  // Poll ride status until a driver accepts (or it's cancelled)
+  // Join the ride's realtime room and listen for status + location updates.
   useEffect(() => {
-    if (!ride || ride.status !== "requested") return;
-    const interval = setInterval(async () => {
-      const res = await fetch(`/api/rides/${ride._id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setRide(data.ride);
-      }
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [ride]);
+    if (!ride?._id) return;
+
+    const socket = getSocket();
+    rideIdRef.current = ride._id;
+    socket.emit("ride:join", ride._id);
+
+    function handleUpdate({ ride: updatedRide }: { ride: any }) {
+      setRide(updatedRide);
+    }
+    function handleLocation({ lat, lng }: { lat: number; lng: number }) {
+      setDriverLocation({ lat, lng });
+    }
+
+    socket.on("ride:update", handleUpdate);
+    socket.on("driver:location", handleLocation);
+
+    return () => {
+      socket.emit("ride:leave", ride._id);
+      socket.off("ride:update", handleUpdate);
+      socket.off("driver:location", handleLocation);
+    };
+  }, [ride?._id]);
 
   if (ride) {
     return (
@@ -121,21 +138,35 @@ export default function BookRidePage() {
           <h1 className="text-2xl font-black mb-2">
             {ride.status === "requested" && "Looking for a driver..."}
             {ride.status === "accepted" && "Driver on the way!"}
+            {ride.status === "ongoing" && "Ride in progress"}
+            {ride.status === "completed" && "Ride completed"}
             {ride.status === "cancelled" && "Ride cancelled"}
           </h1>
           <p className="text-neutral-500 mb-6">
             {ride.pickup.address} → {ride.drop.address}
           </p>
           <p className="text-3xl font-black mb-6">₹{ride.fare.estimated}</p>
+
           {ride.status === "requested" && (
             <div className="animate-pulse text-neutral-400 text-sm">
               Waiting for a nearby {vehicleType} driver to accept…
             </div>
           )}
-          {ride.status === "accepted" && (
-            <p className="text-emerald-600 font-medium">
-              Driver assigned. (Live tracking arrives in Phase 3.)
-            </p>
+
+          {(ride.status === "accepted" || ride.status === "ongoing") && (
+            <div className="text-left bg-neutral-50 rounded-xl p-4 mb-4">
+              <p className="font-semibold">{ride.driver?.name}</p>
+              <p className="text-sm text-neutral-500">
+                {ride.driver?.vehicle?.make} {ride.driver?.vehicle?.model} ·{" "}
+                {ride.driver?.vehicle?.numberPlate}
+              </p>
+              {driverLocation && (
+                <p className="text-xs text-emerald-600 mt-2">
+                  Live location: {driverLocation.lat.toFixed(4)},{" "}
+                  {driverLocation.lng.toFixed(4)} (map view arrives in Phase 4)
+                </p>
+              )}
+            </div>
           )}
         </div>
       </main>
@@ -148,7 +179,6 @@ export default function BookRidePage() {
         <h1 className="text-3xl font-black mb-1">Book a ride</h1>
         <p className="text-neutral-500 mb-8">Enter your trip details</p>
 
-        {/* Vehicle type */}
         <div className="grid grid-cols-4 gap-2 mb-6">
           {VEHICLES.map((v) => (
             <button
@@ -166,7 +196,6 @@ export default function BookRidePage() {
           ))}
         </div>
 
-        {/* Pickup */}
         <label className="block text-sm font-medium mb-1.5">Pickup</label>
         <div className="flex gap-2 mb-3">
           <input
@@ -198,7 +227,6 @@ export default function BookRidePage() {
           />
         </div>
 
-        {/* Drop */}
         <label className="block text-sm font-medium mb-1.5">Drop</label>
         <input
           placeholder="Address"

@@ -21,6 +21,19 @@ export interface IUser extends mongoose.Document {
 
   // Driver-only fields
   vehicle?: IVehicle;
+  documents?: {
+    aadhaarUrl?: string;
+    licenseUrl?: string;
+    rcUrl?: string;
+  };
+  bankDetails?: {
+    accountHolderName?: string;
+    accountNumber?: string;
+    ifsc?: string;
+    mobile?: string;
+    upi?: string;
+  };
+  partnerStep?: "vehicle" | "documents" | "bank" | "submitted";
   kycStatus?: KycStatus;
   partnerStatus?: "not_applied" | "pending" | "approved" | "rejected";
   kycVideoUrl?: string;
@@ -56,6 +69,22 @@ const UserSchema = new Schema<IUser>(
     avatarUrl: String,
 
     vehicle: VehicleSchema,
+    documents: {
+      aadhaarUrl: String,
+      licenseUrl: String,
+      rcUrl: String,
+    },
+    bankDetails: {
+      accountHolderName: String,
+      accountNumber: String,
+      ifsc: String,
+      mobile: String,
+      upi: String,
+    },
+    partnerStep: {
+      type: String,
+      enum: ["vehicle", "documents", "bank", "submitted"],
+    },
     kycStatus: {
       type: String,
       enum: ["not_submitted", "pending", "approved", "rejected"],

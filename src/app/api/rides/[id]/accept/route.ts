@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Ride from "@/models/Ride";
 import User from "@/models/User";
+import { getIO } from "@/lib/socketServer";
 
 export async function POST(
   req: Request,
@@ -26,13 +27,11 @@ export async function POST(
     );
   }
 
-  // Atomic: only succeeds if the ride is still unassigned. Prevents two
-  // drivers accepting the same ride in a race condition.
   const ride = await Ride.findOneAndUpdate(
     { _id: id, status: "requested", driver: { $exists: false } },
     { driver: driverId, status: "accepted", acceptedAt: new Date() },
     { new: true }
-  );
+  ).populate("driver", "name phone vehicle rating");
 
   if (!ride) {
     return NextResponse.json(
@@ -40,6 +39,9 @@ export async function POST(
       { status: 409 }
     );
   }
+
+  // Notify the rider (and anyone else in this ride's room) instantly.
+  getIO()?.to(`ride:${id}`).emit("ride:update", { ride });
 
   return NextResponse.json({ ride });
 }

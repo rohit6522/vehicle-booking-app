@@ -46,7 +46,7 @@ export function UserMenu({
 
           {role === "admin" ? (
             <a
-              href="/admin/partners"
+              href="/admin/dashboard"
               className="flex items-center justify-between group"
             >
               <span className="flex items-center gap-3">

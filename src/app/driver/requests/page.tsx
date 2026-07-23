@@ -1,13 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MapPin, Navigation2 } from "lucide-react";
+import { getSocket } from "@/lib/socketClient";
 
 export default function DriverRequestsPage() {
   const [rides, setRides] = useState<any[]>([]);
+  const [activeRide, setActiveRide] = useState<any>(null);
   const [error, setError] = useState("");
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [completing, setCompleting] = useState(false);
+  const watchIdRef = useRef<number | null>(null);
 
   const fetchRides = useCallback(async () => {
     const res = await fetch("/api/rides/available");
@@ -22,10 +26,11 @@ export default function DriverRequestsPage() {
   }, []);
 
   useEffect(() => {
+    if (activeRide) return; // no need to poll for new requests while on a ride
     fetchRides();
     const interval = setInterval(fetchRides, 5000);
     return () => clearInterval(interval);
-  }, [fetchRides]);
+  }, [fetchRides, activeRide]);
 
   async function handleAccept(id: string) {
     setAcceptingId(id);
@@ -37,11 +42,97 @@ export default function DriverRequestsPage() {
         await fetchRides();
         return;
       }
-      // Remove accepted ride from the list immediately
-      setRides((prev) => prev.filter((r) => r._id !== id));
+      setActiveRide(data.ride);
+      setRides([]);
     } finally {
       setAcceptingId(null);
     }
+  }
+
+  async function handleComplete() {
+    if (!activeRide) return;
+    setCompleting(true);
+    try {
+      const res = await fetch(`/api/rides/${activeRide._id}/complete`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Could not complete ride");
+        return;
+      }
+      setActiveRide(null);
+    } finally {
+      setCompleting(false);
+    }
+  }
+
+  // While there's an active ride, join its room and stream live GPS location.
+  useEffect(() => {
+    if (!activeRide?._id) return;
+
+    const socket = getSocket();
+    socket.emit("ride:join", activeRide._id);
+
+    if ("geolocation" in navigator) {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          socket.emit("driver:location", {
+            rideId: activeRide._id,
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        (err) => console.error("Geolocation error:", err),
+        { enableHighAccuracy: true, maximumAge: 5000 }
+      );
+    }
+
+    return () => {
+      socket.emit("ride:leave", activeRide._id);
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, [activeRide?._id]);
+
+  if (activeRide) {
+    return (
+      <main className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
+          <h1 className="text-2xl font-black mb-1">Active ride</h1>
+          <p className="text-neutral-500 mb-6">
+            Sharing your live location with the rider.
+          </p>
+
+          <div className="border border-neutral-200 rounded-2xl p-5 mb-6">
+            <div className="flex items-start gap-2 mb-2">
+              <MapPin size={14} className="mt-0.5 text-neutral-400" />
+              <p className="text-sm">{activeRide.pickup.address}</p>
+            </div>
+            <div className="flex items-start gap-2 mb-4">
+              <Navigation2 size={14} className="mt-0.5 text-neutral-400" />
+              <p className="text-sm">{activeRide.drop.address}</p>
+            </div>
+            <p className="font-black text-xl">₹{activeRide.fare.estimated}</p>
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-4">
+              {error}
+            </p>
+          )}
+
+          <button
+            onClick={handleComplete}
+            disabled={completing}
+            className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+          >
+            {completing ? "Completing..." : "Mark Ride Completed"}
+          </button>
+        </div>
+      </main>
+    );
   }
 
   return (
