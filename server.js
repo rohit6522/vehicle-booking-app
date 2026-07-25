@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+
+require("dotenv").config({ path: ".env.local" });
+const mongoose = require("mongoose");
+
 const { createServer } = require("http");
 const next = require("next");
 const { Server } = require("socket.io");
@@ -49,5 +53,33 @@ app.prepare().then(() => {
 
   httpServer.listen(port, () => {
     console.log(`> Ready on http://${hostname}:${port}`);
+  });
+
+
+  // --- Auto-expire stale ride requests (Rapido/Uber-style) ---
+  mongoose.connect(process.env.MONGODB_URI).then(() => {
+    const RideSchema = new mongoose.Schema({}, { strict: false });
+    const Ride = mongoose.models.Ride || mongoose.model("Ride", RideSchema);
+
+    const EXPIRY_MINUTES = 10;
+
+    setInterval(async () => {
+      const cutoff = new Date(Date.now() - EXPIRY_MINUTES * 60 * 1000);
+      const staleRides = await Ride.find({
+        status: "requested",
+        requestedAt: { $lt: cutoff },
+      });
+
+      for (const ride of staleRides) {
+        ride.status = "cancelled";
+        ride.cancelledAt = new Date();
+        ride.cancelledBy = "rider"; // system-expired, closest existing enum value
+        await ride.save();
+        io.to(`ride:${ride._id}`).emit("ride:update", { ride });
+        console.log(`Auto-cancelled stale ride ${ride._id}`);
+      }
+    }, 60 * 1000); // check every 1 minute
+  }).catch((err) => {
+    console.error("Auto-expiry: MongoDB connection failed:", err);
   });
 });

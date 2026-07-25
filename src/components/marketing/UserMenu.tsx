@@ -62,26 +62,10 @@ export function UserMenu({
                 className="text-neutral-400 group-hover:translate-x-0.5 transition-transform"
               />
             </a>
-          ) : role === "driver" ? (
-            <a
-              href="/driver/requests"
-              className="flex items-center justify-between group"
-            >
-              <span className="flex items-center gap-3">
-                <span className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center gap-0.5">
-                  <Bike size={12} />
-                  <Car size={12} />
-                </span>
-                <span className="text-sm font-medium text-black">
-                  Ride Requests
-                </span>
-              </span>
-              <ChevronRight
-                size={16}
-                className="text-neutral-400 group-hover:translate-x-0.5 transition-transform"
-              />
-            </a>
-          ) : (
+
+          ) : role === "driver" ? null : (
+
+
             <a
               href="/become-a-partner"
               className="flex items-center justify-between group"

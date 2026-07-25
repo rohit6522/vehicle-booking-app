@@ -174,28 +174,20 @@ export default function BecomePartnerPage() {
     </>
   );
 
-  // Already an approved driver.
-  if (status.role === "driver") {
+if (status.role === "driver") {
     return shell(
-      <div className="bg-white rounded-2xl p-6 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-          <PartyPopper size={18} />
-        </div>
-        <div>
-          <p className="font-semibold">You&apos;re live!</p>
-          <p className="text-sm text-neutral-500">
-            Head to your{" "}
-            <a href="/driver/requests" className="underline">
-              ride requests
-            </a>{" "}
-            to start accepting bookings.
-          </p>
-        </div>
-      </div>,
+      <div className="bg-black text-white rounded-2xl p-6 flex items-center justify-between">
+        <p className="text-lg font-bold">🚀 You&apos;re Live</p>
+        <a
+          href="/driver/requests"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 transition-colors"
+        >
+          Go to Orders →
+        </a>
+      </div>
     );
   }
 
-  // Submitted, waiting on admin — unless they're actively resubmitting after a rejection.
   if (status.partnerStatus === "pending" && !editingAfterRejection) {
     return shell(
       <div className="bg-white rounded-2xl p-6 flex items-center gap-3">

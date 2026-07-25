@@ -67,6 +67,17 @@ export default function DriverRequestsPage() {
     }
   }
 
+  async function handleCancel() {
+    if (!activeRide) return;
+    setCompleting(true);
+    try {
+      await fetch(`/api/rides/${activeRide._id}/cancel`, { method: "POST" });
+      setActiveRide(null);
+    } finally {
+      setCompleting(false);
+    }
+  }
+
   // While there's an active ride, join its room and stream live GPS location.
   useEffect(() => {
     if (!activeRide?._id) return;
@@ -123,13 +134,23 @@ export default function DriverRequestsPage() {
             </p>
           )}
 
-          <button
-            onClick={handleComplete}
-            disabled={completing}
-            className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
-          >
-            {completing ? "Completing..." : "Mark Ride Completed"}
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={handleComplete}
+              disabled={completing}
+              className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+            >
+              {completing ? "Completing..." : "Mark Ride Completed"}
+            </button>
+            <button
+              onClick={handleCancel}
+              disabled={completing}
+              className="w-full py-3 rounded-full border border-neutral-200 text-red-500 font-medium hover:border-red-300 transition-colors disabled:opacity-40"
+            >
+              Cancel Ride
+            </button>
+          </div>
+
         </div>
       </main>
     );

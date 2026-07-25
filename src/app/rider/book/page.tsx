@@ -1,8 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Bike, Car, CarFront, Bus, Navigation } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Bike, Car, CarFront, Bus } from "lucide-react";
 import { getSocket } from "@/lib/socketClient";
+
+
+const LocationPicker = dynamic(
+  () => import("@/components/map/LocationPicker").then((m) => m.LocationPicker),
+  { ssr: false, loading: () => <div className="h-56 bg-neutral-100 rounded-xl animate-pulse" /> }
+);
 
 const VEHICLES = [
   { type: "bike", label: "Bike", icon: Bike },
@@ -15,14 +22,14 @@ type VehicleType = (typeof VEHICLES)[number]["type"];
 
 interface Point {
   address: string;
-  lat: string;
-  lng: string;
+  lat: number | null;
+  lng: number | null;
 }
 
 export default function BookRidePage() {
   const [vehicleType, setVehicleType] = useState<VehicleType>("car");
-  const [pickup, setPickup] = useState<Point>({ address: "", lat: "", lng: "" });
-  const [drop, setDrop] = useState<Point>({ address: "", lat: "", lng: "" });
+  const [pickup, setPickup] = useState<Point>({ address: "", lat: null, lng: null });
+  const [drop, setDrop] = useState<Point>({ address: "", lat: null, lng: null });
   const [estimate, setEstimate] = useState<{ distanceKm: number; fare: number } | null>(
     null
   );
@@ -33,13 +40,12 @@ export default function BookRidePage() {
   const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
-  const rideIdRef = useRef<string | null>(null);
 
   const coordsReady =
-    pickup.lat && pickup.lng && drop.lat && drop.lng && pickup.address && drop.address;
+    pickup.lat != null && pickup.lng != null && drop.lat != null && drop.lng != null;
 
   const getEstimate = useCallback(async () => {
-    if (!pickup.lat || !pickup.lng || !drop.lat || !drop.lng) return;
+    if (!coordsReady) return;
     setEstimating(true);
     setError("");
     try {
@@ -47,8 +53,8 @@ export default function BookRidePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pickup: { lat: parseFloat(pickup.lat), lng: parseFloat(pickup.lng) },
-          drop: { lat: parseFloat(drop.lat), lng: parseFloat(drop.lng) },
+          pickup: { lat: pickup.lat, lng: pickup.lng },
+          drop: { lat: drop.lat, lng: drop.lng },
           vehicleType,
         }),
       });
@@ -57,22 +63,11 @@ export default function BookRidePage() {
     } finally {
       setEstimating(false);
     }
-  }, [pickup.lat, pickup.lng, drop.lat, drop.lng, vehicleType]);
+  }, [pickup.lat, pickup.lng, drop.lat, drop.lng, vehicleType, coordsReady]);
 
   useEffect(() => {
-    if (pickup.lat && pickup.lng && drop.lat && drop.lng) getEstimate();
-  }, [getEstimate, pickup.lat, pickup.lng, drop.lat, drop.lng]);
-
-  function useMyLocation() {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setPickup((p) => ({
-        ...p,
-        address: p.address || "Current location",
-        lat: pos.coords.latitude.toString(),
-        lng: pos.coords.longitude.toString(),
-      }));
-    });
-  }
+    if (coordsReady) getEstimate();
+  }, [getEstimate, coordsReady]);
 
   async function handleBook() {
     setBooking(true);
@@ -83,16 +78,8 @@ export default function BookRidePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           vehicleType,
-          pickup: {
-            address: pickup.address,
-            lat: parseFloat(pickup.lat),
-            lng: parseFloat(pickup.lng),
-          },
-          drop: {
-            address: drop.address,
-            lat: parseFloat(drop.lat),
-            lng: parseFloat(drop.lng),
-          },
+          pickup: { address: pickup.address, lat: pickup.lat, lng: pickup.lng },
+          drop: { address: drop.address, lat: drop.lat, lng: drop.lng },
         }),
       });
       const data = await res.json();
@@ -106,12 +93,17 @@ export default function BookRidePage() {
     }
   }
 
-  // Join the ride's realtime room and listen for status + location updates.
+
+  async function handleCancel() {
+    if (!ride?._id) return;
+    await fetch(`/api/rides/${ride._id}/cancel`, { method: "POST" });
+    setRide(null);
+  }
+
   useEffect(() => {
     if (!ride?._id) return;
 
     const socket = getSocket();
-    rideIdRef.current = ride._id;
     socket.emit("ride:join", ride._id);
 
     function handleUpdate({ ride: updatedRide }: { ride: any }) {
@@ -147,24 +139,29 @@ export default function BookRidePage() {
           </p>
           <p className="text-3xl font-black mb-6">₹{ride.fare.estimated}</p>
 
-          {ride.status === "requested" && (
-            <div className="animate-pulse text-neutral-400 text-sm">
-              Waiting for a nearby {vehicleType} driver to accept…
-            </div>
+         {ride.status === "requested" && (
+            <>
+              <div className="animate-pulse text-neutral-400 text-sm mb-4">
+                Waiting for a nearby {vehicleType} driver to accept…
+              </div>
+              <button
+                onClick={handleCancel}
+                className="text-sm font-medium text-red-500 hover:text-red-600"
+              >
+                Cancel Ride
+              </button>
+            </>
           )}
 
           {(ride.status === "accepted" || ride.status === "ongoing") && (
-            <div className="text-left bg-neutral-50 rounded-xl p-4 mb-4">
+            <div className="text-left bg-neutral-50 rounded-xl p-4">
               <p className="font-semibold">{ride.driver?.name}</p>
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-neutral-500 mb-3">
                 {ride.driver?.vehicle?.make} {ride.driver?.vehicle?.model} ·{" "}
                 {ride.driver?.vehicle?.numberPlate}
               </p>
               {driverLocation && (
-                <p className="text-xs text-emerald-600 mt-2">
-                  Live location: {driverLocation.lat.toFixed(4)},{" "}
-                  {driverLocation.lng.toFixed(4)} (map view arrives in Phase 4)
-                </p>
+                <LiveDriverMap driverLocation={driverLocation} />
               )}
             </div>
           )}
@@ -196,64 +193,21 @@ export default function BookRidePage() {
           ))}
         </div>
 
-        <label className="block text-sm font-medium mb-1.5">Pickup</label>
-        <div className="flex gap-2 mb-3">
-          <input
-            placeholder="Address"
-            value={pickup.address}
-            onChange={(e) => setPickup({ ...pickup, address: e.target.value })}
-            className="flex-1 px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:border-black"
-          />
-          <button
-            onClick={useMyLocation}
-            title="Use my current location"
-            className="w-11 flex items-center justify-center rounded-lg border border-neutral-200 hover:border-black"
-          >
-            <Navigation size={16} />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-2 mb-5">
-          <input
-            placeholder="Latitude"
-            value={pickup.lat}
-            onChange={(e) => setPickup({ ...pickup, lat: e.target.value })}
-            className="px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:border-black"
-          />
-          <input
-            placeholder="Longitude"
-            value={pickup.lng}
-            onChange={(e) => setPickup({ ...pickup, lng: e.target.value })}
-            className="px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:border-black"
+        <div className="mb-5">
+          <LocationPicker
+            label="Pickup"
+            value={pickup}
+            onChange={(v) => setPickup(v)}
           />
         </div>
 
-        <label className="block text-sm font-medium mb-1.5">Drop</label>
-        <input
-          placeholder="Address"
-          value={drop.address}
-          onChange={(e) => setDrop({ ...drop, address: e.target.value })}
-          className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm mb-3 focus:outline-none focus:border-black"
-        />
-        <div className="grid grid-cols-2 gap-2 mb-6">
-          <input
-            placeholder="Latitude"
-            value={drop.lat}
-            onChange={(e) => setDrop({ ...drop, lat: e.target.value })}
-            className="px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:border-black"
-          />
-          <input
-            placeholder="Longitude"
-            value={drop.lng}
-            onChange={(e) => setDrop({ ...drop, lng: e.target.value })}
-            className="px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:border-black"
+        <div className="mb-6">
+          <LocationPicker
+            label="Drop"
+            value={drop}
+            onChange={(v) => setDrop(v)}
           />
         </div>
-
-        <p className="text-xs text-neutral-400 mb-6">
-          Address-search / map picking arrives in Phase 4 — for now, paste
-          coordinates (e.g. from Google Maps: right-click a point → click the
-          lat/lng shown).
-        </p>
 
         {estimate && (
           <div className="bg-neutral-50 rounded-xl p-4 mb-6 flex items-center justify-between">
@@ -284,4 +238,12 @@ export default function BookRidePage() {
       </div>
     </main>
   );
+}
+
+function LiveDriverMap({ driverLocation }: { driverLocation: { lat: number; lng: number } }) {
+  const Map = dynamic(
+    () => import("@/components/map/LiveTrackerMap").then((m) => m.LiveTrackerMap),
+    { ssr: false, loading: () => <div className="h-48 bg-neutral-100 rounded-lg animate-pulse" /> }
+  );
+  return <Map lat={driverLocation.lat} lng={driverLocation.lng} />;
 }
