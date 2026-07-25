@@ -125,12 +125,13 @@ export default function BecomePartnerPage() {
         : s.hasBank
           ? "current"
           : "locked";
+
     const videoKyc: StepState =
-      s.role === "driver"
+      s.kycStatus === "approved"
         ? "done"
         : s.partnerStatus === "approved"
-          ? "current"
-          : "locked";
+        ? "current"
+        : "locked";
 
    const pricing: StepState =
       s.role === "driver"

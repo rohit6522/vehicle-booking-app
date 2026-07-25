@@ -120,6 +120,27 @@ export default function VideoKycRoomPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [joined, session, roomId]);
 
+
+  // Partner side: poll status and leave automatically once admin has
+  // acted (approved/rejected), even if this tab is stuck on the pre-join
+  // screen due to a camera/mic permission issue.
+  useEffect(() => {
+    if (isAdmin || !session?.user) return;
+
+    const interval = setInterval(async () => {
+      const res = await fetch("/api/partner/status");
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (data.kycStatus === "approved" || data.kycStatus === "rejected") {
+        zpRef.current?.destroy();
+        router.push("/become-a-partner");
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isAdmin, session, router]);
+  
   function handleEndCall() {
     zpRef.current?.destroy();
     router.push(isAdmin ? "/admin/dashboard" : "/become-a-partner");
@@ -179,6 +200,7 @@ export default function VideoKycRoomPage() {
             )}
 
             <div className="flex items-center gap-3 mb-8">
+
               <button
                 onClick={() => setCamOn((v) => !v)}
                 className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${
@@ -209,6 +231,7 @@ export default function VideoKycRoomPage() {
             >
               Join Secure Call
             </button>
+
           </div>
         </div>
       </main>

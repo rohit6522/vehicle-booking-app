@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
   const [tab, setTab] = useState<Tab>("kyc");
   const [loading, setLoading] = useState(true);
 
- const fetchAll = useCallback(async () => {
+  const fetchAll = useCallback(async () => {
     const [statsRes, appsRes, kycRes, pricingRes] = await Promise.all([
       fetch("/api/admin/stats"),
       fetch("/api/admin/partners"),
@@ -127,7 +127,9 @@ export default function AdminDashboardPage() {
 
             <div className="bg-white rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-6 flex-wrap">
-               <TabButton active={tab === "pricing"} onClick={() => setTab("pricing")} icon={ImagePlus} label="Pricing & Images" count={pricingQueue.length} />
+                <TabButton active={tab === "kyc"} onClick={() => setTab("kyc")} icon={Video} label="Video KYC" count={kycQueue.length} />
+                <TabButton active={tab === "reviews"} onClick={() => setTab("reviews")} icon={UsersRound} label="Vendor Reviews" count={applications.length} />
+                <TabButton active={tab === "pricing"} onClick={() => setTab("pricing")} icon={ImagePlus} label="Pricing & Images" count={pricingQueue.length} />
               </div>
 
               {tab === "kyc" && (
@@ -136,7 +138,11 @@ export default function AdminDashboardPage() {
                     VIDEO KYC QUEUE
                   </p>
                   {kycQueue.length === 0 ? (
-                    <p className="text-neutral-400 text-sm">No drivers awaiting Video KYC.</p>
+                    <div className="text-center py-10">
+                      <Video size={28} className="mx-auto text-neutral-300 mb-3" />
+                      <p className="font-semibold text-neutral-600">All caught up!</p>
+                      <p className="text-sm text-neutral-400">No drivers awaiting Video KYC.</p>
+                    </div>
                   ) : (
                     <div className="space-y-3">
                       {kycQueue.map((d) => (
@@ -174,7 +180,11 @@ export default function AdminDashboardPage() {
                     PENDING APPLICATIONS
                   </p>
                   {applications.length === 0 ? (
-                    <p className="text-neutral-400 text-sm">No pending applications.</p>
+                    <div className="text-center py-10">
+                      <UsersRound size={28} className="mx-auto text-neutral-300 mb-3" />
+                      <p className="font-semibold text-neutral-600">All caught up!</p>
+                      <p className="text-sm text-neutral-400">No pending applications.</p>
+                    </div>
                   ) : (
                     <div className="space-y-4">
                       {applications.map((app) => (
@@ -197,7 +207,7 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-             {tab === "pricing" && (
+              {tab === "pricing" && (
                 <div>
                   <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
                     PRICING SUBMISSIONS
@@ -228,8 +238,6 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
               )}
-
-
             </div>
           </>
         )}
