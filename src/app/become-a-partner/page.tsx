@@ -10,6 +10,7 @@ import { VehicleStep } from "@/components/partner/VehicleStep";
 import { DocumentsStep } from "@/components/partner/DocumentsStep";
 import { BankStep } from "@/components/partner/BankStep";
 import { ReviewStep } from "@/components/partner/ReviewStep";
+import { PricingStep } from "@/components/partner/PricingStep";
 
 type WizardStep = "vehicle" | "documents" | "bank" | "review";
 
@@ -26,6 +27,7 @@ interface PartnerStatus {
   documents: any;
   bankDetails: any;
   kycCallStarted: boolean;
+  pricingStatus: string;
 }
 
 export default function BecomePartnerPage() {
@@ -129,7 +131,14 @@ export default function BecomePartnerPage() {
         : s.partnerStatus === "approved"
           ? "current"
           : "locked";
-    const pricing: StepState = s.role === "driver" ? "current" : "locked";
+
+   const pricing: StepState =
+      s.role === "driver"
+        ? "done"
+        : s.kycStatus === "approved"
+        ? "current"
+        : "locked";
+
     const finalReview: StepState = "locked"; // unlocks once pricing is built
     const live: StepState = "locked";
 
@@ -238,6 +247,28 @@ export default function BecomePartnerPage() {
           </div>
         </div>
       ),
+    );
+  }
+
+  // KYC approved — now show Pricing step (or its pending-review state).
+  if (status.kycStatus === "approved" && status.role !== "driver") {
+    if (status.pricingStatus === "pending") {
+      return shell(
+        <div className="bg-white rounded-2xl p-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+            <Clock size={18} />
+          </div>
+          <div>
+            <p className="font-semibold">Pricing Under Review</p>
+            <p className="text-sm text-neutral-500">Admin is reviewing your pricing.</p>
+          </div>
+        </div>
+      );
+    }
+    return shell(
+      <div className="flex justify-center">
+        <PricingStep />
+      </div>
     );
   }
 

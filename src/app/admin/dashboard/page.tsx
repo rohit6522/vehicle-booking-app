@@ -30,18 +30,21 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [applications, setApplications] = useState<any[]>([]);
   const [kycQueue, setKycQueue] = useState<any[]>([]);
+  const [pricingQueue, setPricingQueue] = useState<any[]>([]);
   const [tab, setTab] = useState<Tab>("kyc");
   const [loading, setLoading] = useState(true);
 
-  const fetchAll = useCallback(async () => {
-    const [statsRes, appsRes, kycRes] = await Promise.all([
+ const fetchAll = useCallback(async () => {
+    const [statsRes, appsRes, kycRes, pricingRes] = await Promise.all([
       fetch("/api/admin/stats"),
       fetch("/api/admin/partners"),
       fetch("/api/admin/kyc"),
+      fetch("/api/admin/pricing"),
     ]);
     if (statsRes.ok) setStats(await statsRes.json());
     if (appsRes.ok) setApplications((await appsRes.json()).applications);
     if (kycRes.ok) setKycQueue((await kycRes.json()).drivers);
+    if (pricingRes.ok) setPricingQueue((await pricingRes.json()).vendors);
     setLoading(false);
   }, []);
 
@@ -124,9 +127,7 @@ export default function AdminDashboardPage() {
 
             <div className="bg-white rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-6 flex-wrap">
-                <TabButton active={tab === "kyc"} onClick={() => setTab("kyc")} icon={Video} label="Video KYC" count={kycQueue.length} />
-                <TabButton active={tab === "reviews"} onClick={() => setTab("reviews")} icon={UsersRound} label="Vendor Reviews" count={applications.length} />
-                <TabButton active={tab === "pricing"} onClick={() => setTab("pricing")} icon={ImagePlus} label="Pricing & Images" count={0} />
+               <TabButton active={tab === "pricing"} onClick={() => setTab("pricing")} icon={ImagePlus} label="Pricing & Images" count={pricingQueue.length} />
               </div>
 
               {tab === "kyc" && (
@@ -196,15 +197,39 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-              {tab === "pricing" && (
-                <div className="text-center py-10">
-                  <ImagePlus size={28} className="mx-auto text-neutral-300 mb-3" />
-                  <p className="font-semibold text-neutral-600">Coming soon</p>
-                  <p className="text-sm text-neutral-400">
-                    Fare pricing and vehicle image management will appear here.
+             {tab === "pricing" && (
+                <div>
+                  <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
+                    PRICING SUBMISSIONS
                   </p>
+                  {pricingQueue.length === 0 ? (
+                    <div className="text-center py-10">
+                      <ImagePlus size={28} className="mx-auto text-neutral-300 mb-3" />
+                      <p className="font-semibold text-neutral-600">All caught up!</p>
+                      <p className="text-sm text-neutral-400">No pending items right now.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {pricingQueue.map((v) => (
+                        <a
+                          key={v._id}
+                          href={`/admin/vehicles/${v._id}`}
+                          className="block border border-neutral-200 rounded-2xl p-5 hover:border-black transition-colors"
+                        >
+                          <p className="font-bold">{v.name}</p>
+                          <p className="text-sm text-neutral-500">{v.email}</p>
+                          <p className="text-sm text-neutral-500 mt-2">
+                            Base ₹{v.pricing?.baseFare} · ₹{v.pricing?.perKm}/km
+                          </p>
+                          <p className="text-xs font-medium mt-3">Review pricing →</p>
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
+
+
             </div>
           </>
         )}
