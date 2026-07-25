@@ -35,8 +35,20 @@ export interface IUser extends mongoose.Document {
   };
   partnerStep?: "vehicle" | "documents" | "bank" | "submitted";
   kycStatus?: KycStatus;
+  kycCallStarted?: boolean;
+
   partnerStatus?: "not_applied" | "pending" | "approved" | "rejected";
+  pricingStatus?: "not_submitted" | "pending" | "approved" | "rejected";
+  rejectionReason?: string;
   kycVideoUrl?: string;
+
+  pricing?: {
+    baseFare?: number;
+    perKm?: number;
+    waitingCharge?: number;
+    vehicleImageUrl?: string;
+  };
+
   isOnline?: boolean;
   currentLocation?: {
     type: "Point";
@@ -90,12 +102,26 @@ const UserSchema = new Schema<IUser>(
       enum: ["not_submitted", "pending", "approved", "rejected"],
       default: "not_submitted",
     },
+    kycCallStarted: { type: Boolean, default: false },
     partnerStatus: {
       type: String,
       enum: ["not_applied", "pending", "approved", "rejected"],
       default: "not_applied",
     },
+    pricingStatus: {
+      type: String,
+      enum: ["not_submitted", "pending", "approved", "rejected"],
+      default: "not_submitted",
+    },
+    rejectionReason: String,
+    
     kycVideoUrl: String,
+    pricing: {
+      baseFare: Number,
+      perKm: Number,
+      waitingCharge: Number,
+      vehicleImageUrl: String,
+    },
     isOnline: { type: Boolean, default: false },
     currentLocation: {
       type: { type: String, enum: ["Point"], default: "Point" },

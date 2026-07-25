@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Clock, XCircle, PartyPopper } from "lucide-react";
+import { Clock, XCircle, PartyPopper, AlertTriangle, Video } from "lucide-react";
+import { PartnerNavbar } from "@/components/partner/PartnerNavbar";
+import { Footer } from "@/components/marketing/Footer";
 import { PartnerStepper, StepState } from "@/components/partner/PartnerStepper";
 import { VehicleStep } from "@/components/partner/VehicleStep";
 import { DocumentsStep } from "@/components/partner/DocumentsStep";
@@ -19,15 +21,21 @@ interface PartnerStatus {
   hasVehicle: boolean;
   hasDocuments: boolean;
   hasBank: boolean;
+  rejectionReason: string | null;
+  vehicle: any;
+  documents: any;
+  bankDetails: any;
+  kycCallStarted: boolean;
 }
 
 export default function BecomePartnerPage() {
-  const { status: sessionStatus } = useSession();
+ const { data: session, status: sessionStatus } = useSession();
   const [status, setStatus] = useState<PartnerStatus | null>(null);
   const [step, setStep] = useState<WizardStep>("vehicle");
+  const [editingAfterRejection, setEditingAfterRejection] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+ useEffect(() => {
     if (sessionStatus !== "authenticated") return;
 
     fetch("/api/partner/status")
@@ -35,8 +43,7 @@ export default function BecomePartnerPage() {
       .then((data: PartnerStatus) => {
         setStatus(data);
 
-        // Resume the wizard at the right step based on what's already saved.
-        if (data.partnerStatus === "not_applied" || data.partnerStatus === "rejected") {
+        if (data.partnerStatus === "not_applied") {
           if (!data.hasVehicle) setStep("vehicle");
           else if (!data.hasDocuments) setStep("documents");
           else if (!data.hasBank) setStep("bank");
@@ -46,6 +53,22 @@ export default function BecomePartnerPage() {
       .finally(() => setLoading(false));
   }, [sessionStatus]);
 
+  // Keep polling while we're waiting on an admin action (approval, KYC,
+  // pricing review) so the screen updates itself without a manual refresh.
+  useEffect(() => {
+    if (sessionStatus !== "authenticated") return;
+    if (!status) return;
+
+    const stillWaiting =
+      status.partnerStatus === "pending" ||
+      (status.partnerStatus === "approved" && status.kycStatus !== "approved");
+
+    if (!stillWaiting) return;
+
+    const interval = setInterval(refreshStatus, 4000);
+    return () => clearInterval(interval);
+  }, [sessionStatus, status]);
+
   function refreshStatus() {
     fetch("/api/partner/status")
       .then((res) => res.json())
@@ -54,20 +77,30 @@ export default function BecomePartnerPage() {
 
   if (sessionStatus === "unauthenticated") {
     return (
-      <main className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 text-center">
-        <div>
-          <h1 className="text-2xl font-black mb-2">Login required</h1>
-          <p className="text-neutral-500">Please log in first to apply as a partner.</p>
-        </div>
-      </main>
+      <>
+        <PartnerNavbar />
+        <main className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 text-center">
+          <div>
+            <h1 className="text-2xl font-black mb-2">Login required</h1>
+            <p className="text-neutral-500">
+              Please log in first to apply as a partner.
+            </p>
+          </div>
+        </main>
+        <Footer />
+      </>
     );
   }
 
   if (loading || !status) {
     return (
-      <main className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <p className="text-neutral-400 text-sm">Loading...</p>
-      </main>
+      <>
+        <PartnerNavbar />
+        <main className="min-h-screen bg-neutral-50 flex items-center justify-center">
+          <p className="text-neutral-400 text-sm">Loading...</p>
+        </main>
+        <Footer />
+      </>
     );
   }
 
@@ -77,136 +110,203 @@ export default function BecomePartnerPage() {
     const documents: StepState = s.hasDocuments
       ? "done"
       : s.hasVehicle
-      ? "current"
-      : "locked";
-    const bank: StepState = s.hasBank ? "done" : s.hasDocuments ? "current" : "locked";
-    const review: StepState =
-      s.partnerStatus !== "not_applied" && s.partnerStatus !== "rejected"
-        ? "done"
-        : s.hasBank
         ? "current"
         : "locked";
-    const finalReview: StepState =
-      s.role === "driver" ? "done" : s.partnerStatus === "pending" ? "current" : "locked";
-    const live: StepState = s.role === "driver" ? "done" : "locked";
+    const bank: StepState = s.hasBank
+      ? "done"
+      : s.hasDocuments
+        ? "current"
+        : "locked";
+    const review: StepState =
+      s.partnerStatus === "pending" || s.partnerStatus === "approved"
+        ? "done"
+        : s.hasBank
+          ? "current"
+          : "locked";
+    const videoKyc: StepState =
+      s.role === "driver"
+        ? "done"
+        : s.partnerStatus === "approved"
+          ? "current"
+          : "locked";
+    const pricing: StepState = s.role === "driver" ? "current" : "locked";
+    const finalReview: StepState = "locked"; // unlocks once pricing is built
+    const live: StepState = "locked";
 
-    // Video KYC and Pricing are future phases — always shown locked for now.
-    return [vehicle, documents, bank, review, "locked", "locked", finalReview, live];
+    return [
+      vehicle,
+      documents,
+      bank,
+      review,
+      videoKyc,
+      pricing,
+      finalReview,
+      live,
+    ];
   }
 
-  // Already an approved driver — nothing more to do here.
-  if (status.role === "driver") {
-    return (
-      <main className="min-h-screen bg-neutral-50 px-4 py-16">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-black mb-1">Partner status</h1>
-          <p className="text-neutral-500 mb-8">Complete all steps to activate your account</p>
-          <div className="bg-white rounded-2xl p-6 mb-6">
+  const shell = (children: React.ReactNode) => (
+    <>
+      <PartnerNavbar />
+      <main className="min-h-screen bg-neutral-50 px-4 py-10">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-2xl font-black mb-1">Partner Dashboard</h1>
+          <p className="text-neutral-500 mb-6">
+            Complete all steps to activate your account
+          </p>
+          <div className="bg-white rounded-2xl p-6 sm:p-8 mb-6">
             <PartnerStepper states={stepperStates()} />
           </div>
-          <div className="bg-white rounded-2xl p-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-              <PartyPopper size={18} />
+          {children}
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+
+  // Already an approved driver.
+  if (status.role === "driver") {
+    return shell(
+      <div className="bg-white rounded-2xl p-6 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+          <PartyPopper size={18} />
+        </div>
+        <div>
+          <p className="font-semibold">You&apos;re live!</p>
+          <p className="text-sm text-neutral-500">
+            Head to your{" "}
+            <a href="/driver/requests" className="underline">
+              ride requests
+            </a>{" "}
+            to start accepting bookings.
+          </p>
+        </div>
+      </div>,
+    );
+  }
+
+  // Submitted, waiting on admin — unless they're actively resubmitting after a rejection.
+  if (status.partnerStatus === "pending" && !editingAfterRejection) {
+    return shell(
+      <div className="bg-white rounded-2xl p-6 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+          <Clock size={18} />
+        </div>
+        <div>
+          <p className="font-semibold">Documents Under Review</p>
+          <p className="text-sm text-neutral-500">
+            Admin is verifying your documents.
+          </p>
+        </div>
+      </div>,
+    );
+  }
+
+  // Application approved, waiting for Video KYC.
+  if (status.partnerStatus === "approved" && status.kycStatus !== "approved") {
+    return shell(
+      status.kycCallStarted ? (
+        <div className="bg-white rounded-2xl p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+              <Video size={18} />
             </div>
             <div>
-              <p className="font-semibold">You&apos;re live!</p>
+              <p className="font-semibold">Admin Started Video KYC</p>
               <p className="text-sm text-neutral-500">
-                Head to your{" "}
-                <a href="/driver/requests" className="underline">
-                  ride requests
-                </a>{" "}
-                to start accepting bookings.
+                Join now to complete verification.
               </p>
             </div>
           </div>
+          <a
+           href={`/video-kyc/kyc-${(session?.user as any)?.id}`}
+            className="px-5 py-2.5 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors"
+          >
+            Join Call
+          </a>
         </div>
-      </main>
+      ) : (
+        <div className="bg-white rounded-2xl p-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+            <Clock size={18} />
+          </div>
+          <div>
+            <p className="font-semibold">Waiting for Admin</p>
+            <p className="text-sm text-neutral-500">
+              Admin will initiate Video KYC shortly.
+            </p>
+          </div>
+        </div>
+      ),
     );
   }
 
-  // Application submitted, waiting on admin.
-  if (status.partnerStatus === "pending") {
-    return (
-      <main className="min-h-screen bg-neutral-50 px-4 py-16">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-black mb-1">Partner status</h1>
-          <p className="text-neutral-500 mb-8">Complete all steps to activate your account</p>
-          <div className="bg-white rounded-2xl p-6 mb-6">
-            <PartnerStepper states={stepperStates()} />
-          </div>
-          <div className="bg-white rounded-2xl p-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              <Clock size={18} />
-            </div>
-            <div>
-              <p className="font-semibold">Documents Under Review</p>
-              <p className="text-sm text-neutral-500">Admin is verifying your documents.</p>
-            </div>
-          </div>
+  const rejectedBanner = status.partnerStatus === "rejected" &&
+    !editingAfterRejection && (
+      <div className="bg-red-50 border border-red-100 rounded-2xl p-6 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle size={18} className="text-red-500" />
+          <p className="font-semibold text-red-700">Documents Rejected</p>
         </div>
-      </main>
+        <div className="bg-white border border-red-100 rounded-xl px-4 py-3 text-sm text-neutral-700 mb-4">
+          {status.rejectionReason || "No reason provided."}
+        </div>
+        <button
+          onClick={() => {
+            setEditingAfterRejection(true);
+            setStep("documents");
+          }}
+          className="px-5 py-2.5 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors"
+        >
+          Update Documents
+        </button>
+      </div>  
     );
+
+  if (status.partnerStatus === "rejected" && !editingAfterRejection) {
+    return shell(rejectedBanner);
   }
 
-  // Rejected — let them know, allow resubmission by continuing the wizard.
-  const rejectedBanner = status.partnerStatus === "rejected" && (
-    <div className="bg-white rounded-2xl p-6 flex items-center gap-3 mb-6">
-      <div className="w-10 h-10 rounded-full bg-red-100 text-red-500 flex items-center justify-center">
-        <XCircle size={18} />
-      </div>
-      <div>
-        <p className="font-semibold">Application rejected</p>
-        <p className="text-sm text-neutral-500">
-          Please review your details and resubmit below.
-        </p>
-      </div>
-    </div>
-  );
-
-  // Still filling out the wizard.
-  return (
-    <main className="min-h-screen bg-neutral-50 px-4 py-16">
-      <div className="max-w-3xl mx-auto mb-8">
-        <h1 className="text-2xl font-black mb-1">Become a Partner</h1>
-        <p className="text-neutral-500 mb-6">Complete all steps to activate your account</p>
-        <div className="bg-white rounded-2xl p-6">
-          <PartnerStepper states={stepperStates()} />
-        </div>
-      </div>
-
-      {rejectedBanner}
-
-      <div className="flex justify-center">
-        {step === "vehicle" && (
-          <VehicleStep
-            onNext={() => {
-              refreshStatus();
-              setStep("documents");
-            }}
-          />
-        )}
-        {step === "documents" && (
-          <DocumentsStep
-            onBack={() => setStep("vehicle")}
-            onNext={() => {
-              refreshStatus();
-              setStep("bank");
-            }}
-          />
-        )}
-        {step === "bank" && (
-          <BankStep
-            onBack={() => setStep("documents")}
-            onNext={() => {
-              refreshStatus();
-              setStep("review");
-            }}
-          />
-        )}
-        {step === "review" && (
-          <ReviewStep onBack={() => setStep("bank")} onSubmitted={refreshStatus} />
-        )}
-      </div>
-    </main>
+  // Actively filling out (or resubmitting) the wizard.
+  return shell(
+    <div className="flex justify-center">
+      {step === "vehicle" && (
+        <VehicleStep
+          onNext={() => {
+            refreshStatus();
+            setStep("documents");
+          }}
+        />
+      )}
+      {step === "documents" && (
+        <DocumentsStep
+          onBack={() => setStep("vehicle")}
+          onNext={() => {
+            refreshStatus();
+            setStep("bank");
+          }}
+          existingDocuments={status.documents}
+        />
+      )}
+      {step === "bank" && (
+        <BankStep
+          onBack={() => setStep("documents")}
+          onNext={() => {
+            refreshStatus();
+            setStep("review");
+          }}
+          existingBank={status.bankDetails}
+        />
+      )}
+      {step === "review" && (
+        <ReviewStep
+          onBack={() => setStep("bank")}
+          onSubmitted={() => {
+            setEditingAfterRejection(false);
+            refreshStatus();
+          }}
+        />
+      )}
+    </div>,
   );
 }

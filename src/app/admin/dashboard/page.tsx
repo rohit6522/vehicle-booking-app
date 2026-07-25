@@ -3,9 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { PieChart, Pie, Cell } from "recharts";
-import { Users, CheckCircle2, Clock, XCircle, ShieldCheck, Check, X } from "lucide-react";
-import { Navbar } from "@/components/marketing/Navbar";
-import { Footer } from "@/components/marketing/Footer";
+import {
+  Users,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  ShieldCheck,
+  Video,
+  UsersRound,
+  ImagePlus,
+} from "lucide-react";
 
 interface Stats {
   total: number;
@@ -16,26 +23,25 @@ interface Stats {
 
 const COLORS = { approved: "#10b981", pending: "#f59e0b", rejected: "#ef4444" };
 
+type Tab = "kyc" | "reviews" | "pricing";
+
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
   const [stats, setStats] = useState<Stats | null>(null);
   const [applications, setApplications] = useState<any[]>([]);
+  const [kycQueue, setKycQueue] = useState<any[]>([]);
+  const [tab, setTab] = useState<Tab>("kyc");
   const [loading, setLoading] = useState(true);
-  const [processingId, setProcessingId] = useState<string | null>(null);
-  const [error, setError] = useState("");
 
   const fetchAll = useCallback(async () => {
-    const [statsRes, appsRes] = await Promise.all([
+    const [statsRes, appsRes, kycRes] = await Promise.all([
       fetch("/api/admin/stats"),
       fetch("/api/admin/partners"),
+      fetch("/api/admin/kyc"),
     ]);
-    const statsData = await statsRes.json();
-    const appsData = await appsRes.json();
-
-    if (statsRes.ok) setStats(statsData);
-    if (appsRes.ok) setApplications(appsData.applications);
-    else setError(appsData.error ?? "Could not load applications");
-
+    if (statsRes.ok) setStats(await statsRes.json());
+    if (appsRes.ok) setApplications((await appsRes.json()).applications);
+    if (kycRes.ok) setKycQueue((await kycRes.json()).drivers);
     setLoading(false);
   }, []);
 
@@ -43,20 +49,9 @@ export default function AdminDashboardPage() {
     fetchAll();
   }, [fetchAll]);
 
-  async function handleReview(id: string, action: "approve" | "reject") {
-    setProcessingId(id);
-    try {
-      const res = await fetch(`/api/admin/partners/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
-      });
-      if (res.ok) {
-        await fetchAll();
-      }
-    } finally {
-      setProcessingId(null);
-    }
+  async function handleStartCall(driverId: string) {
+    await fetch(`/api/admin/kyc/${driverId}/start-call`, { method: "POST" });
+    window.location.href = `/video-kyc/kyc-${driverId}`;
   }
 
   const chartData = stats
@@ -66,14 +61,10 @@ export default function AdminDashboardPage() {
         { name: "Rejected", value: stats.rejected, color: COLORS.rejected },
       ]
     : [];
-
-  const totalForChart = stats?.total || 1; // avoid divide-by-zero
+  const totalForChart = stats?.total || 1;
 
   return (
-    <>
-      <Navbar />
     <main className="min-h-screen bg-neutral-100">
-      {/* Header */}
       <header className="bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-black text-white font-bold flex items-center justify-center">
@@ -92,39 +83,13 @@ export default function AdminDashboardPage() {
           <p className="text-neutral-400 text-sm">Loading...</p>
         ) : (
           <>
-            {/* Stat cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <StatCard
-                icon={Users}
-                iconBg="bg-violet-50 text-violet-600"
-                label="TOTAL VENDORS"
-                value={stats?.total ?? 0}
-                sub="vs last month"
-              />
-              <StatCard
-                icon={CheckCircle2}
-                iconBg="bg-blue-50 text-blue-600"
-                label="APPROVED"
-                value={stats?.approved ?? 0}
-                sub="verified vendors"
-              />
-              <StatCard
-                icon={Clock}
-                iconBg="bg-amber-50 text-amber-600"
-                label="PENDING"
-                value={stats?.pending ?? 0}
-                sub="awaiting review"
-              />
-              <StatCard
-                icon={XCircle}
-                iconBg="bg-red-50 text-red-600"
-                label="REJECTED"
-                value={stats?.rejected ?? 0}
-                sub="declined"
-              />
+              <StatCard icon={Users} iconBg="bg-violet-50 text-violet-600" label="TOTAL VENDORS" value={stats?.total ?? 0} sub="vs last month" />
+              <StatCard icon={CheckCircle2} iconBg="bg-blue-50 text-blue-600" label="APPROVED" value={stats?.approved ?? 0} sub="verified vendors" />
+              <StatCard icon={Clock} iconBg="bg-amber-50 text-amber-600" label="PENDING" value={stats?.pending ?? 0} sub="awaiting review" />
+              <StatCard icon={XCircle} iconBg="bg-red-50 text-red-600" label="REJECTED" value={stats?.rejected ?? 0} sub="declined" />
             </div>
 
-            {/* Status overview + applications */}
             <div className="bg-white rounded-2xl p-6 mb-8">
               <span className="text-xs font-semibold text-violet-600 bg-violet-50 px-2.5 py-1 rounded-full">
                 APPLICATIONS
@@ -137,15 +102,7 @@ export default function AdminDashboardPage() {
               <div className="flex flex-col sm:flex-row items-center gap-8">
                 <div className="relative w-[160px] h-[160px] flex-shrink-0">
                   <PieChart width={160} height={160}>
-                    <Pie
-                      data={chartData}
-                      dataKey="value"
-                      innerRadius={55}
-                      outerRadius={75}
-                      startAngle={90}
-                      endAngle={-270}
-                      stroke="none"
-                    >
+                    <Pie data={chartData} dataKey="value" innerRadius={55} outerRadius={75} startAngle={90} endAngle={-270} stroke="none">
                       {chartData.map((entry) => (
                         <Cell key={entry.name} fill={entry.color} />
                       ))}
@@ -158,86 +115,94 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="flex-1 w-full space-y-4">
-                  <StatusRow
-                    icon={CheckCircle2}
-                    color="text-emerald-500"
-                    barColor="bg-emerald-500"
-                    label="Approved"
-                    value={stats?.approved ?? 0}
-                    pct={((stats?.approved ?? 0) / totalForChart) * 100}
-                  />
-                  <StatusRow
-                    icon={Clock}
-                    color="text-amber-500"
-                    barColor="bg-amber-500"
-                    label="Pending"
-                    value={stats?.pending ?? 0}
-                    pct={((stats?.pending ?? 0) / totalForChart) * 100}
-                  />
-                  <StatusRow
-                    icon={XCircle}
-                    color="text-red-500"
-                    barColor="bg-red-500"
-                    label="Rejected"
-                    value={stats?.rejected ?? 0}
-                    pct={((stats?.rejected ?? 0) / totalForChart) * 100}
-                  />
+                  <StatusRow icon={CheckCircle2} color="text-emerald-500" barColor="bg-emerald-500" label="Approved" value={stats?.approved ?? 0} pct={((stats?.approved ?? 0) / totalForChart) * 100} />
+                  <StatusRow icon={Clock} color="text-amber-500" barColor="bg-amber-500" label="Pending" value={stats?.pending ?? 0} pct={((stats?.pending ?? 0) / totalForChart) * 100} />
+                  <StatusRow icon={XCircle} color="text-red-500" barColor="bg-red-500" label="Rejected" value={stats?.rejected ?? 0} pct={((stats?.rejected ?? 0) / totalForChart) * 100} />
                 </div>
               </div>
             </div>
 
-            {/* Pending applications list */}
             <div className="bg-white rounded-2xl p-6">
-              <h2 className="text-xl font-black mb-1">Pending applications</h2>
-              <p className="text-sm text-neutral-400 mb-6">
-                Review vendor details and approve or reject.
-              </p>
+              <div className="flex items-center gap-2 mb-6 flex-wrap">
+                <TabButton active={tab === "kyc"} onClick={() => setTab("kyc")} icon={Video} label="Video KYC" count={kycQueue.length} />
+                <TabButton active={tab === "reviews"} onClick={() => setTab("reviews")} icon={UsersRound} label="Vendor Reviews" count={applications.length} />
+                <TabButton active={tab === "pricing"} onClick={() => setTab("pricing")} icon={ImagePlus} label="Pricing & Images" count={0} />
+              </div>
 
-              {error && (
-                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-4">
-                  {error}
-                </p>
+              {tab === "kyc" && (
+                <div>
+                  <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
+                    VIDEO KYC QUEUE
+                  </p>
+                  {kycQueue.length === 0 ? (
+                    <p className="text-neutral-400 text-sm">No drivers awaiting Video KYC.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {kycQueue.map((d) => (
+                        <div key={d._id} className="flex items-center justify-between border border-neutral-200 rounded-xl px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-sm font-bold">
+                              {d.name?.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold">{d.name}</p>
+                              <p className="text-xs text-neutral-400">{d.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full capitalize">
+                              {d.kycStatus === "pending" ? "Pending" : "Not started"}
+                            </span>
+                            <button
+                              onClick={() => handleStartCall(d._id)}
+                              className="px-4 py-2 rounded-full bg-black text-white text-xs font-semibold hover:bg-neutral-800"
+                            >
+                              {d.kycCallStarted ? "Rejoin Call" : "Start Call"}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
-              {applications.length === 0 ? (
-                <p className="text-neutral-400 text-sm">No pending applications.</p>
-              ) : (
-                <div className="space-y-4">
-                  {applications.map((app) => (
-                    <div
-                      key={app._id}
-                      className="border border-neutral-200 rounded-2xl p-5 flex items-start justify-between"
-                    >
-                      <div>
-                        <p className="font-bold">{app.name}</p>
-                        <p className="text-sm text-neutral-500">{app.email}</p>
-                        <p className="text-sm text-neutral-500 mt-2">
-                          {app.vehicle?.type} · {app.vehicle?.model}
-                        </p>
-                        <p className="text-xs text-neutral-400 mt-1">
-                          Plate: {app.vehicle?.numberPlate}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleReview(app._id, "approve")}
-                          disabled={processingId === app._id}
-                          className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-neutral-800 disabled:opacity-50"
-                          title="Approve"
+              {tab === "reviews" && (
+                <div>
+                  <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
+                    PENDING APPLICATIONS
+                  </p>
+                  {applications.length === 0 ? (
+                    <p className="text-neutral-400 text-sm">No pending applications.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {applications.map((app) => (
+                        <a
+                          key={app._id}
+                          href={`/admin/vendors/${app._id}`}
+                          className="block border border-neutral-200 rounded-2xl p-5 hover:border-black transition-colors"
                         >
-                          <Check size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleReview(app._id, "reject")}
-                          disabled={processingId === app._id}
-                          className="w-10 h-10 rounded-full border border-neutral-200 text-neutral-600 flex items-center justify-center hover:border-red-400 hover:text-red-500 disabled:opacity-50"
-                          title="Reject"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
+                          <p className="font-bold">{app.name}</p>
+                          <p className="text-sm text-neutral-500">{app.email}</p>
+                          <p className="text-sm text-neutral-500 mt-2">
+                            {app.vehicle?.type} · {app.vehicle?.model}
+                          </p>
+                          <p className="text-xs text-neutral-400 mt-1">Plate: {app.vehicle?.numberPlate}</p>
+                          <p className="text-xs font-medium mt-3">Review application →</p>
+                        </a>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                </div>
+              )}
+
+              {tab === "pricing" && (
+                <div className="text-center py-10">
+                  <ImagePlus size={28} className="mx-auto text-neutral-300 mb-3" />
+                  <p className="font-semibold text-neutral-600">Coming soon</p>
+                  <p className="text-sm text-neutral-400">
+                    Fare pricing and vehicle image management will appear here.
+                  </p>
                 </div>
               )}
             </div>
@@ -245,24 +210,43 @@ export default function AdminDashboardPage() {
         )}
       </div>
     </main>
-     <Footer />
-    </>
   );
 }
 
-function StatCard({
+function TabButton({
+  active,
+  onClick,
   icon: Icon,
-  iconBg,
   label,
-  value,
-  sub,
+  count,
 }: {
+  active: boolean;
+  onClick: () => void;
   icon: any;
-  iconBg: string;
   label: string;
-  value: number;
-  sub: string;
+  count: number;
 }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
+        active ? "bg-black text-white" : "text-neutral-500 hover:bg-neutral-100"
+      }`}
+    >
+      <Icon size={14} />
+      {label}
+      <span
+        className={`text-xs px-1.5 py-0.5 rounded-full ${
+          active ? "bg-white/20" : "bg-neutral-200 text-neutral-600"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function StatCard({ icon: Icon, iconBg, label, value, sub }: { icon: any; iconBg: string; label: string; value: number; sub: string }) {
   return (
     <div className="bg-white rounded-2xl p-5">
       <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-4 ${iconBg}`}>
@@ -275,21 +259,7 @@ function StatCard({
   );
 }
 
-function StatusRow({
-  icon: Icon,
-  color,
-  barColor,
-  label,
-  value,
-  pct,
-}: {
-  icon: any;
-  color: string;
-  barColor: string;
-  label: string;
-  value: number;
-  pct: number;
-}) {
+function StatusRow({ icon: Icon, color, barColor, label, value, pct }: { icon: any; color: string; barColor: string; label: string; value: number; pct: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
@@ -300,10 +270,7 @@ function StatusRow({
         <span className="text-sm font-semibold">{value}</span>
       </div>
       <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-        <div
-          className={`h-full ${barColor} rounded-full transition-all`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
