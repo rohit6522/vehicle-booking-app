@@ -140,8 +140,8 @@ export default function BecomePartnerPage() {
         ? "current"
         : "locked";
 
-    const finalReview: StepState = "locked"; // unlocks once pricing is built
-    const live: StepState = "locked";
+   const finalReview: StepState = s.role === "driver" ? "done" : "locked";
+    const live: StepState = s.role === "driver" ? "current" : "locked";
 
     return [
       vehicle,
