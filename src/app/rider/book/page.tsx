@@ -212,13 +212,12 @@ export default function BookRidePage() {
                 <p className="text-sm text-neutral-500">
                   Plate: {ride.driver?.vehicle?.numberPlate}
                 </p>
+
                 {ride.driver?.phone && (
                   <p className="text-sm text-neutral-500">
                     Phone: {ride.driver.phone}
                   </p>
                 )}
-              </div>
-
               {ride.status === "accepted" && ride.otpForRider && (
                 <div className="mt-3 pt-3 border-t border-neutral-200">
                   <p className="text-xs text-neutral-400 mb-1">
@@ -229,6 +228,7 @@ export default function BookRidePage() {
                   </p>
                 </div>
               )}
+              </div>
             </div>
           )}
 
