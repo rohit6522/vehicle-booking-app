@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { PieChart, Pie, Cell } from "recharts";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, ResponsiveContainer } from "recharts";
 import {
   Users,
   CheckCircle2,
@@ -33,18 +33,21 @@ export default function AdminDashboardPage() {
   const [pricingQueue, setPricingQueue] = useState<any[]>([]);
   const [tab, setTab] = useState<Tab>("kyc");
   const [loading, setLoading] = useState(true);
+  const [earnings, setEarnings] = useState<any>(null);
 
   const fetchAll = useCallback(async () => {
-    const [statsRes, appsRes, kycRes, pricingRes] = await Promise.all([
+    const [statsRes, appsRes, kycRes, pricingRes, earningsRes] = await Promise.all([
       fetch("/api/admin/stats"),
       fetch("/api/admin/partners"),
       fetch("/api/admin/kyc"),
       fetch("/api/admin/pricing"),
+      fetch("/api/admin/earnings"),
     ]);
     if (statsRes.ok) setStats(await statsRes.json());
     if (appsRes.ok) setApplications((await appsRes.json()).applications);
     if (kycRes.ok) setKycQueue((await kycRes.json()).drivers);
     if (pricingRes.ok) setPricingQueue((await pricingRes.json()).vendors);
+    if (earningsRes.ok) setEarnings(await earningsRes.json());
     setLoading(false);
   }, []);
 
@@ -92,6 +95,65 @@ export default function AdminDashboardPage() {
               <StatCard icon={Clock} iconBg="bg-amber-50 text-amber-600" label="PENDING" value={stats?.pending ?? 0} sub="awaiting review" />
               <StatCard icon={XCircle} iconBg="bg-red-50 text-red-600" label="REJECTED" value={stats?.rejected ?? 0} sub="declined" />
             </div>
+
+            {earnings && (
+              <div className="bg-white rounded-2xl p-6 mb-8">
+                <div className="flex items-center justify-between mb-1">
+                  <div>
+                    <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                      ADMIN DASHBOARD
+                    </span>
+                    <h2 className="text-xl font-black mt-3">Daily Earnings</h2>
+                    <p className="text-sm text-neutral-400">Last 7 days performance</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-neutral-400">WEEKLY TOTAL</p>
+                    <p className="text-2xl font-black">₹{earnings.weeklyTotal}</p>
+                    <p
+                      className={`text-xs font-medium ${
+                        earnings.changePct >= 0 ? "text-emerald-600" : "text-red-500"
+                      }`}
+                    >
+                      {earnings.changePct >= 0 ? "↑" : "↓"} {Math.abs(earnings.changePct)}% vs
+                      yesterday
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-56 mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={earnings.days}>
+                      <XAxis
+                        dataKey="label"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: "#a3a3a3" }}
+                      />
+                      <Bar dataKey="total" radius={[6, 6, 0, 0]} maxBarSize={40}>
+                        {earnings.days.map((d: any, i: number) => (
+                          <Cell
+                            key={i}
+                            fill={
+                              d.total === earnings.today && i === earnings.days.length - 1
+                                ? "#10b981" // today = green
+                                : d.total === earnings.bestDay && d.total > 0
+                                ? "#8b5cf6" // best day = purple
+                                : "#bfdbfe" // other days = light blue
+                            }
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="flex items-center gap-5 mt-2">
+                  <LegendDot color="#10b981" label="Today" />
+                  <LegendDot color="#8b5cf6" label="Best day" />
+                  <LegendDot color="#bfdbfe" label="Other days" />
+                </div>
+              </div>
+            )}
 
             <div className="bg-white rounded-2xl p-6 mb-8">
               <span className="text-xs font-semibold text-violet-600 bg-violet-50 px-2.5 py-1 rounded-full">
@@ -289,6 +351,17 @@ function StatCard({ icon: Icon, iconBg, label, value, sub }: { icon: any; iconBg
       <p className="text-3xl font-black mb-2">{value}</p>
       <p className="text-xs text-neutral-400">{sub}</p>
     </div>
+  );
+}
+
+
+
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5 text-xs text-neutral-500">
+      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+      {label}
+    </span>
   );
 }
 
