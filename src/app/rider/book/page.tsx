@@ -245,10 +245,12 @@ export default function BookRidePage() {
           )}
 
           {ride.status === "completed" && (
-            <div className="mt-2">
+            <div className="mt-2 space-y-4">
               <PaymentSection ride={ride} />
+              {!ride.rating?.score && <RatingSection rideId={ride._id} />}
             </div>
           )}
+          
         </div>
       </main>
     );
@@ -430,6 +432,78 @@ function PaymentSection({ ride }: { ride: any }) {
           Pay with Cash
         </button>
       </div>
+    </div>
+  );
+}
+
+function RatingSection({ rideId }: { rideId: string }) {
+  const [score, setScore] = useState(0);
+  const [hovered, setHovered] = useState(0);
+  const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit() {
+    if (score === 0) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/rides/${rideId}/rate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ score, comment: comment.trim() || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Something went wrong");
+        return;
+      }
+      setSubmitted(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (submitted) {
+    return (
+      <p className="text-sm text-neutral-500 bg-neutral-50 rounded-xl px-4 py-3">
+        Thanks for rating your driver! 🙌
+      </p>
+    );
+  }
+
+  return (
+    <div className="bg-neutral-50 rounded-xl p-4">
+      <p className="text-sm font-medium mb-3">Rate your driver</p>
+      <div className="flex items-center gap-1 mb-3">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            onClick={() => setScore(n)}
+            onMouseEnter={() => setHovered(n)}
+            onMouseLeave={() => setHovered(0)}
+            className="text-2xl leading-none"
+          >
+            {n <= (hovered || score) ? "★" : "☆"}
+          </button>
+        ))}
+      </div>
+      <textarea
+        placeholder="Leave a comment (optional)"
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        rows={2}
+        className="w-full px-3 py-2 rounded-lg border border-neutral-200 text-sm resize-none focus:outline-none focus:border-black mb-3"
+      />
+      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+      <button
+        onClick={handleSubmit}
+        disabled={score === 0 || loading}
+        className="w-full py-2.5 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+      >
+        {loading ? "Submitting..." : "Submit Rating"}
+      </button>
     </div>
   );
 }

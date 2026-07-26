@@ -29,6 +29,10 @@ export interface IRide extends mongoose.Document {
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   startOtp?: string;
+  rating?: {
+    score: number;
+    comment?: string;
+  };
   status: RideStatus;
   requestedAt: Date;
   acceptedAt?: Date;
@@ -36,7 +40,6 @@ export interface IRide extends mongoose.Document {
   cancelledAt?: Date;
   cancelledBy?: "rider" | "driver";
 }
-
 const PointSchema = new Schema<IPoint>(
   {
     address: { type: String, required: true },
@@ -66,6 +69,11 @@ const RideSchema = new Schema<IRide>({
   razorpayOrderId: String,
   razorpayPaymentId: String,
   startOtp: String,
+
+  rating: {
+    score: { type: Number, min: 1, max: 5 },
+    comment: String,
+  },
   
   status: {
     type: String,
