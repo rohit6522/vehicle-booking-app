@@ -126,6 +126,16 @@ export default function BookRidePage() {
     setRide(null);
   }
 
+  // On page load/refresh, check the server for an already-active ride
+  // instead of assuming there's none.
+  useEffect(() => {
+    fetch("/api/rides/active")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ride) setRide(data.ride);
+      });
+  }, []);
+
   useEffect(() => {
     if (!ride?._id) return;
 
@@ -148,6 +158,8 @@ export default function BookRidePage() {
       socket.off("driver:location", handleLocation);
     };
   }, [ride?._id]);
+
+
 
   if (ride) {
     return (
