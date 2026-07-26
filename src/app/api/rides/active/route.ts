@@ -14,12 +14,15 @@ export async function GET() {
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
 
-  const filter =
+ const filter =
     role === "driver"
       ? { driver: userId, status: { $in: ["accepted", "ongoing"] } }
       : {
           rider: userId,
-          status: { $in: ["requested", "accepted", "ongoing", "completed"] },
+          $or: [
+            { status: { $in: ["requested", "accepted", "ongoing"] } },
+            { status: "completed", paymentStatus: { $ne: "paid" } },
+          ],
         };
 
   const ride = await Ride.findOne(filter)

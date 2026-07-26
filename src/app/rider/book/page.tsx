@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { Bike, Car, CarFront, Bus } from "lucide-react";
 import { getSocket } from "@/lib/socketClient";
+import { useRouter } from "next/navigation";
 
 const LocationPicker = dynamic(
   () => import("@/components/map/LocationPicker").then((m) => m.LocationPicker),
@@ -41,6 +42,7 @@ interface Point {
 }
 
 export default function BookRidePage() {
+  const router = useRouter();
   const [vehicleType, setVehicleType] = useState<VehicleType>("car");
   const [pickup, setPickup] = useState<Point>({
     address: "",
@@ -248,6 +250,12 @@ export default function BookRidePage() {
             <div className="mt-2 space-y-4">
               <PaymentSection ride={ride} />
               {!ride.rating?.score && <RatingSection rideId={ride._id} />}
+              <button
+                onClick={() => setRide(null)}
+                className="w-full py-3 rounded-full border border-neutral-200 font-medium hover:border-black transition-colors"
+              >
+                Done — Book Another Ride
+              </button>
             </div>
           )}
           
