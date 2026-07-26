@@ -4,7 +4,7 @@ export type UserRole = "rider" | "driver" | "admin";
 export type KycStatus = "not_submitted" | "pending" | "approved" | "rejected";
 
 export interface IVehicle {
-  type: "bike" | "auto" | "car" | "premium";
+  type: "bike" | "car" | "suv" | "van";
   make?: string;
   model?: string;
   numberPlate?: string;
@@ -62,7 +62,7 @@ export interface IUser extends mongoose.Document {
 
 const VehicleSchema = new Schema<IVehicle>(
   {
-    type: { type: String, enum: ["bike", "auto", "car", "premium"] },
+   type: { type: String, enum: ["bike", "car", "suv", "van"] },
     make: String,
     model: String,
     numberPlate: String,

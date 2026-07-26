@@ -214,7 +214,11 @@ const [confirmingCash, setConfirmingCash] = useState(false);
             </>
          ) : activeRide.status === "completed" ? (
             <div className="space-y-3">
-              {activeRide.paymentMethod === "cash" && activeRide.paymentStatus !== "paid" ? (
+              {activeRide.paymentStatus === "paid" ? (
+                <p className="text-emerald-600 font-medium bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
+                  ✓ Ride paid
+                </p>
+              ) : activeRide.paymentMethod === "cash" ? (
                 <button
                   onClick={handleConfirmCash}
                   disabled={confirmingCash}
@@ -223,12 +227,14 @@ const [confirmingCash, setConfirmingCash] = useState(false);
                   {confirmingCash ? "Confirming..." : "Confirm Cash Received"}
                 </button>
               ) : (
-                <p className="text-emerald-600 font-medium bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
-                  ✓ Ride paid
+                <p className="text-neutral-500 bg-neutral-50 border border-neutral-100 rounded-xl px-4 py-3 text-center text-sm">
+                  Waiting for rider to choose a payment method…
                 </p>
               )}
             </div>
           ) : (
+
+
             <div className="space-y-3">
               <button
                 onClick={handleComplete}

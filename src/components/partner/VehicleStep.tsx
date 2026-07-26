@@ -1,14 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Bike, Car, CarFront, Package, Truck } from "lucide-react";
 
-const VEHICLE_TYPES = [
-  { type: "bike", label: "Bike", desc: "2 wheeler", icon: Bike },
-  { type: "auto", label: "Auto", desc: "3 wheeler ride", icon: CarFront },
-  { type: "car", label: "Car", desc: "4 wheeler ride", icon: Car },
-  { type: "premium", label: "Premium", desc: "Premium ride", icon: Truck },
-] as const;
+import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 
 export function VehicleStep({
   onNext,
@@ -61,9 +55,9 @@ export function VehicleStep({
                 : "border-neutral-200 text-neutral-600 hover:border-neutral-400"
             }`}
           >
-            <v.icon size={18} strokeWidth={1.5} />
-            <span className="font-semibold">{v.label}</span>
-            <span className="opacity-70">{v.desc}</span>
+           <v.icon size={18} strokeWidth={1.5} />
+              <span className="font-semibold">{v.label}</span>
+              <span className="opacity-70">{v.desc} · {v.seats} seat{v.seats > 1 ? "s" : ""}</span>
           </button>
         ))}
       </div>

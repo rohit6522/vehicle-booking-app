@@ -5,7 +5,7 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 
 const schema = z.object({
-  vehicleType: z.enum(["bike", "auto", "car", "premium"]),
+  vehicleType: z.enum(["bike", "car", "suv", "van"]),
   numberPlate: z.string().min(3, "Enter a valid vehicle number"),
   model: z.string().min(1, "Vehicle model is required"),
 });

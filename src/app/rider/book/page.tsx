@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { Bike, Car, CarFront, Bus } from "lucide-react";
+import { VEHICLE_TYPES, VehicleType } from "@/lib/vehicleTypes";
 import { getSocket } from "@/lib/socketClient";
 import { useRouter } from "next/navigation";
 
@@ -26,14 +26,7 @@ const LiveTrackerMap = dynamic(
   },
 );
 
-const VEHICLES = [
-  { type: "bike", label: "Bike", icon: Bike },
-  { type: "car", label: "Car", icon: CarFront },
-  { type: "suv", label: "SUV", icon: Car },
-  { type: "van", label: "Van", icon: Bus },
-] as const;
 
-type VehicleType = (typeof VEHICLES)[number]["type"];
 
 interface Point {
   address: string;
@@ -67,11 +60,25 @@ export default function BookRidePage() {
     lng: number;
   } | null>(null);
 
+  const [availability, setAvailability] = useState<Record<
+    string,
+    number
+  > | null>(null);
+
   const coordsReady =
     pickup.lat != null &&
     pickup.lng != null &&
     drop.lat != null &&
     drop.lng != null;
+
+  // Check driver availability once on load, so we can warn before booking
+  // rather than making the rider wait 10 minutes for an auto-cancel.
+  useEffect(() => {
+    fetch("/api/drivers/availability")
+      .then((res) => res.json())
+      .then((data) => setAvailability(data.counts))
+      .catch(() => {});
+  }, []);
 
   const getEstimate = useCallback(async () => {
     if (!coordsReady) return;
@@ -161,8 +168,6 @@ export default function BookRidePage() {
     };
   }, [ride?._id]);
 
-
-
   if (ride) {
     return (
       <main className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
@@ -232,16 +237,16 @@ export default function BookRidePage() {
                     Phone: {ride.driver.phone}
                   </p>
                 )}
-              {ride.status === "accepted" && ride.otpForRider && (
-                <div className="mt-3 pt-3 border-t border-neutral-200">
-                  <p className="text-xs text-neutral-400 mb-1">
-                    Share this OTP with your driver
-                  </p>
-                  <p className="text-2xl font-black tracking-[0.3em]">
-                    {ride.otpForRider}
-                  </p>
-                </div>
-              )}
+                {ride.status === "accepted" && ride.otpForRider && (
+                  <div className="mt-3 pt-3 border-t border-neutral-200">
+                    <p className="text-xs text-neutral-400 mb-1">
+                      Share this OTP with your driver
+                    </p>
+                    <p className="text-2xl font-black tracking-[0.3em]">
+                      {ride.otpForRider}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -258,7 +263,6 @@ export default function BookRidePage() {
               </button>
             </div>
           )}
-          
         </div>
       </main>
     );
@@ -270,8 +274,8 @@ export default function BookRidePage() {
         <h1 className="text-3xl font-black mb-1">Book a ride</h1>
         <p className="text-neutral-500 mb-8">Enter your trip details</p>
 
-        <div className="grid grid-cols-4 gap-2 mb-6">
-          {VEHICLES.map((v) => (
+        <div className="grid grid-cols-4 gap-2 mb-3">
+          {VEHICLE_TYPES.map((v) => (
             <button
               key={v.type}
               onClick={() => setVehicleType(v.type)}
@@ -286,6 +290,18 @@ export default function BookRidePage() {
             </button>
           ))}
         </div>
+
+        {availability && availability[vehicleType] === 0 && (
+          <p className="text-sm text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-6">
+            ⚠️ No {vehicleType} drivers available right now.{" "}
+              {VEHICLE_TYPES.find((v) => availability[v.type] > 0)
+                ? `Try ${VEHICLE_TYPES.find((v) => availability[v.type] > 0)!.label} instead.`
+              : "Please check back later."}
+          </p>
+        )}
+        {!(availability && availability[vehicleType] === 0) && (
+          <div className="mb-6" />
+        )}
 
         <div className="mb-5">
           <LocationPicker
@@ -337,7 +353,9 @@ export default function BookRidePage() {
 function PaymentSection({ ride }: { ride: any }) {
   const [loading, setLoading] = useState(false);
   const [paid, setPaid] = useState(ride.paymentStatus === "paid");
-  const [method, setMethod] = useState<"cash" | "online" | null>(ride.paymentMethod ?? null);
+  const [method, setMethod] = useState<"cash" | "online" | null>(
+    ride.paymentMethod ?? null,
+  );
   const [error, setError] = useState("");
 
   async function handlePayOnline() {
@@ -365,13 +383,19 @@ function PaymentSection({ ride }: { ride: any }) {
           description: `${ride.pickup.address} → ${ride.drop.address}`,
           order_id: orderData.orderId,
           handler: async (response: any) => {
-            const verifyRes = await fetch(`/api/rides/${ride._id}/verify-payment`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response),
-            });
+            const verifyRes = await fetch(
+              `/api/rides/${ride._id}/verify-payment`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(response),
+              },
+            );
             if (verifyRes.ok) setPaid(true);
-            else setError("Payment succeeded but verification failed. Contact support.");
+            else
+              setError(
+                "Payment succeeded but verification failed. Contact support.",
+              );
           },
           theme: { color: "#000000" },
         });
@@ -389,7 +413,9 @@ function PaymentSection({ ride }: { ride: any }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/rides/${ride._id}/pay-cash`, { method: "POST" });
+      const res = await fetch(`/api/rides/${ride._id}/pay-cash`, {
+        method: "POST",
+      });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
@@ -430,7 +456,9 @@ function PaymentSection({ ride }: { ride: any }) {
           disabled={loading}
           className="flex-1 py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
         >
-          {loading ? "Loading..." : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
+          {loading
+            ? "Loading..."
+            : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
         </button>
         <button
           onClick={handlePayCash}
