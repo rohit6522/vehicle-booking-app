@@ -21,7 +21,11 @@ export async function GET() {
           rider: userId,
           $or: [
             { status: { $in: ["requested", "accepted", "ongoing"] } },
-            { status: "completed", paymentStatus: { $ne: "paid" } },
+            {
+              status: "completed",
+              paymentStatus: { $ne: "paid" },
+              paymentMethod: { $ne: "cash" }, // cash rides free up the flow immediately
+            },
           ],
         };
 

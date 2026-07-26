@@ -85,13 +85,31 @@ export default function BookingsPage() {
                   </div>
 
                   {ride.status === "completed" && (
-                    <p className="text-xs text-neutral-400 mt-2">
-                      Payment:{" "}
-                      {ride.paymentStatus === "paid"
-                        ? `Paid (${ride.paymentMethod === "cash" ? "Cash" : "Online"})`
-                        : "Pending"}
-                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-neutral-400">
+                        Payment:{" "}
+                        {ride.paymentStatus === "paid"
+                          ? `Paid (${ride.paymentMethod === "cash" ? "Cash" : "Online"})`
+                          : "Pending"}
+                      </p>
+                      {role === "driver" &&
+                        ride.paymentMethod === "cash" &&
+                        ride.paymentStatus !== "paid" && (
+                          <ConfirmCashButton
+                            rideId={ride._id}
+                            onConfirmed={() =>
+                              setRides((prev) =>
+                                prev.map((r) =>
+                                  r._id === ride._id ? { ...r, paymentStatus: "paid" } : r
+                                )
+                              )
+                            }
+                          />
+                        )}
+                    </div>
                   )}
+
+
                 </div>
               ))}
             </div>
@@ -100,5 +118,36 @@ export default function BookingsPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+
+function ConfirmCashButton({
+  rideId,
+  onConfirmed,
+}: {
+  rideId: string;
+  onConfirmed: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleClick() {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/rides/${rideId}/confirm-cash`, { method: "POST" });
+      if (res.ok) onConfirmed();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={loading}
+      className="text-xs font-semibold px-3 py-1.5 rounded-full bg-black text-white hover:bg-neutral-800 disabled:opacity-50"
+    >
+      {loading ? "Confirming..." : "Confirm Cash Received"}
+    </button>
   );
 }
