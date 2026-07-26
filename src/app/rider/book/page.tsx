@@ -7,12 +7,22 @@ import { getSocket } from "@/lib/socketClient";
 
 const LocationPicker = dynamic(
   () => import("@/components/map/LocationPicker").then((m) => m.LocationPicker),
-  { ssr: false, loading: () => <div className="h-56 bg-neutral-100 rounded-xl animate-pulse" /> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-56 bg-neutral-100 rounded-xl animate-pulse" />
+    ),
+  },
 );
 
 const LiveTrackerMap = dynamic(
   () => import("@/components/map/LiveTrackerMap").then((m) => m.LiveTrackerMap),
-  { ssr: false, loading: () => <div className="h-48 bg-neutral-100 rounded-lg animate-pulse" /> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-48 bg-neutral-100 rounded-lg animate-pulse" />
+    ),
+  },
 );
 
 const VEHICLES = [
@@ -32,21 +42,34 @@ interface Point {
 
 export default function BookRidePage() {
   const [vehicleType, setVehicleType] = useState<VehicleType>("car");
-  const [pickup, setPickup] = useState<Point>({ address: "", lat: null, lng: null });
-  const [drop, setDrop] = useState<Point>({ address: "", lat: null, lng: null });
-  const [estimate, setEstimate] = useState<{ distanceKm: number; fare: number } | null>(
-    null
-  );
+  const [pickup, setPickup] = useState<Point>({
+    address: "",
+    lat: null,
+    lng: null,
+  });
+  const [drop, setDrop] = useState<Point>({
+    address: "",
+    lat: null,
+    lng: null,
+  });
+  const [estimate, setEstimate] = useState<{
+    distanceKm: number;
+    fare: number;
+  } | null>(null);
   const [estimating, setEstimating] = useState(false);
   const [booking, setBooking] = useState(false);
   const [error, setError] = useState("");
   const [ride, setRide] = useState<any>(null);
-  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(
-    null
-  );
+  const [driverLocation, setDriverLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const coordsReady =
-    pickup.lat != null && pickup.lng != null && drop.lat != null && drop.lng != null;
+    pickup.lat != null &&
+    pickup.lng != null &&
+    drop.lat != null &&
+    drop.lng != null;
 
   const getEstimate = useCallback(async () => {
     if (!coordsReady) return;
@@ -161,7 +184,10 @@ export default function BookRidePage() {
               {/* Live map */}
               <div className="rounded-xl overflow-hidden border border-neutral-200">
                 {driverLocation ? (
-                  <LiveTrackerMap lat={driverLocation.lat} lng={driverLocation.lng} />
+                  <LiveTrackerMap
+                    lat={driverLocation.lat}
+                    lng={driverLocation.lng}
+                  />
                 ) : (
                   <div className="h-48 bg-neutral-50 flex items-center justify-center text-sm text-neutral-400">
                     Waiting for driver&apos;s live location…
@@ -179,15 +205,30 @@ export default function BookRidePage() {
                 </div>
                 <p className="text-sm text-neutral-500">
                   {ride.driver?.vehicle?.make} {ride.driver?.vehicle?.model}
-                  {ride.driver?.vehicle?.color ? ` · ${ride.driver.vehicle.color}` : ""}
+                  {ride.driver?.vehicle?.color
+                    ? ` · ${ride.driver.vehicle.color}`
+                    : ""}
                 </p>
                 <p className="text-sm text-neutral-500">
                   Plate: {ride.driver?.vehicle?.numberPlate}
                 </p>
                 {ride.driver?.phone && (
-                  <p className="text-sm text-neutral-500">Phone: {ride.driver.phone}</p>
+                  <p className="text-sm text-neutral-500">
+                    Phone: {ride.driver.phone}
+                  </p>
                 )}
               </div>
+
+              {ride.status === "accepted" && ride.otpForRider && (
+                <div className="mt-3 pt-3 border-t border-neutral-200">
+                  <p className="text-xs text-neutral-400 mb-1">
+                    Share this OTP with your driver
+                  </p>
+                  <p className="text-2xl font-black tracking-[0.3em]">
+                    {ride.otpForRider}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -225,11 +266,19 @@ export default function BookRidePage() {
         </div>
 
         <div className="mb-5">
-          <LocationPicker label="Pickup" value={pickup} onChange={(v) => setPickup(v)} />
+          <LocationPicker
+            label="Pickup"
+            value={pickup}
+            onChange={(v) => setPickup(v)}
+          />
         </div>
 
         <div className="mb-6">
-          <LocationPicker label="Drop" value={drop} onChange={(v) => setDrop(v)} />
+          <LocationPicker
+            label="Drop"
+            value={drop}
+            onChange={(v) => setDrop(v)}
+          />
         </div>
 
         {estimate && (
@@ -293,13 +342,19 @@ function PaymentSection({ ride }: { ride: any }) {
           description: `${ride.pickup.address} → ${ride.drop.address}`,
           order_id: orderData.orderId,
           handler: async (response: any) => {
-            const verifyRes = await fetch(`/api/rides/${ride._id}/verify-payment`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response),
-            });
+            const verifyRes = await fetch(
+              `/api/rides/${ride._id}/verify-payment`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(response),
+              },
+            );
             if (verifyRes.ok) setPaid(true);
-            else setError("Payment succeeded but verification failed. Contact support.");
+            else
+              setError(
+                "Payment succeeded but verification failed. Contact support.",
+              );
           },
           theme: { color: "#000000" },
         });
@@ -333,7 +388,9 @@ function PaymentSection({ ride }: { ride: any }) {
         disabled={loading}
         className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
       >
-        {loading ? "Loading..." : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
+        {loading
+          ? "Loading..."
+          : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
       </button>
     </div>
   );

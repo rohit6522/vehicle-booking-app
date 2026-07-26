@@ -12,6 +12,8 @@ export default function DriverRequestsPage() {
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
   const watchIdRef = useRef<number | null>(null);
+  const [otp, setOtp] = useState("");
+  const [startingRide, setStartingRide] = useState(false);
 
   const fetchRides = useCallback(async () => {
     const res = await fetch("/api/rides/available");
@@ -56,6 +58,27 @@ export default function DriverRequestsPage() {
       setRides([]);
     } finally {
       setAcceptingId(null);
+    }
+  }
+
+  async function handleStartRide() {
+    if (!activeRide || otp.length !== 4) return;
+    setStartingRide(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/rides/${activeRide._id}/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otp }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Could not start ride");
+        return;
+      }
+      setActiveRide(data.ride);
+    } finally {
+      setStartingRide(false);
     }
   }
 
@@ -105,7 +128,7 @@ export default function DriverRequestsPage() {
           });
         },
         (err) => console.error("Geolocation error:", err),
-        { enableHighAccuracy: true, maximumAge: 5000 }
+        { enableHighAccuracy: true, maximumAge: 5000 },
       );
     }
 
@@ -144,23 +167,53 @@ export default function DriverRequestsPage() {
             </p>
           )}
 
-          <div className="space-y-3">
-            <button
-              onClick={handleComplete}
-              disabled={completing}
-              className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
-            >
-              {completing ? "Completing..." : "Mark Ride Completed"}
-            </button>
-            <button
-              onClick={handleCancel}
-              disabled={completing}
-              className="w-full py-3 rounded-full border border-neutral-200 text-red-500 font-medium hover:border-red-300 transition-colors disabled:opacity-40"
-            >
-              Cancel Ride
-            </button>
-          </div>
-
+          {activeRide.status === "accepted" ? (
+            <>
+              <label className="block text-sm font-medium mb-2">
+                Ask the rider for their 4-digit OTP to start the ride
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={4}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                placeholder="0000"
+                className="w-full px-4 py-3 rounded-full border border-neutral-200 text-center text-xl tracking-[0.4em] font-semibold mb-4 focus:outline-none focus:border-black"
+              />
+              <button
+                onClick={handleStartRide}
+                disabled={otp.length !== 4 || startingRide}
+                className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40 mb-3"
+              >
+                {startingRide ? "Verifying..." : "Start Ride"}
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={completing}
+                className="w-full py-3 rounded-full border border-neutral-200 text-red-500 font-medium hover:border-red-300 transition-colors disabled:opacity-40"
+              >
+                Cancel Ride
+              </button>
+            </>
+          ) : (
+            <div className="space-y-3">
+              <button
+                onClick={handleComplete}
+                disabled={completing}
+                className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+              >
+                {completing ? "Completing..." : "Mark Ride Completed"}
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={completing}
+                className="w-full py-3 rounded-full border border-neutral-200 text-red-500 font-medium hover:border-red-300 transition-colors disabled:opacity-40"
+              >
+                Cancel Ride
+              </button>
+            </div>
+          )}
         </div>
       </main>
     );
@@ -200,7 +253,10 @@ export default function DriverRequestsPage() {
                       <p className="text-sm">{ride.pickup.address}</p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <Navigation2 size={14} className="mt-0.5 text-neutral-400" />
+                      <Navigation2
+                        size={14}
+                        className="mt-0.5 text-neutral-400"
+                      />
                       <p className="text-sm">{ride.drop.address}</p>
                     </div>
                   </div>

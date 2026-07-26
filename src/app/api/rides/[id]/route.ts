@@ -23,14 +23,23 @@ export async function GET(
 
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
-  const isOwner =
-    ride.rider.toString() === userId ||
-    ride.driver?.toString() === userId ||
-    role === "admin";
+  const isRider = ride.rider.toString() === userId;
+  const isDriver = ride.driver?._id?.toString() === userId;
 
-  if (!isOwner) {
+  if (!isRider && !isDriver && role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  return NextResponse.json({ ride });
+  // Only the rider ever sees the start OTP — never expose it to the
+  // driver or anyone else, or the "driver confirms with rider" check
+  // becomes meaningless.
+  const rideObj = ride.toObject();
+  const { startOtp, ...safeRide } = rideObj;
+
+  return NextResponse.json({
+    ride: {
+      ...safeRide,
+      otpForRider: isRider ? startOtp : undefined,
+    },
+  });
 }

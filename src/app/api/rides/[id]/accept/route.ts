@@ -27,9 +27,11 @@ export async function POST(
     );
   }
 
+  const startOtp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit
+
   const ride = await Ride.findOneAndUpdate(
     { _id: id, status: "requested", driver: { $exists: false } },
-    { driver: driverId, status: "accepted", acceptedAt: new Date() },
+    { driver: driverId, status: "accepted", acceptedAt: new Date(), startOtp },
     { new: true }
   ).populate("driver", "name phone vehicle rating");
 

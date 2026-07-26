@@ -27,6 +27,7 @@ export interface IRide extends mongoose.Document {
   paymentStatus: "pending" | "paid" | "failed";
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
+  startOtp?: string;
   status: RideStatus;
   requestedAt: Date;
   acceptedAt?: Date;
@@ -62,7 +63,7 @@ const RideSchema = new Schema<IRide>({
   },
   razorpayOrderId: String,
   razorpayPaymentId: String,
-  
+  startOtp: String,
   
   status: {
     type: String,
