@@ -4,7 +4,7 @@ import { useRef } from "react";
 
 import { Car, ChevronLeft, ChevronRight } from "lucide-react";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
-
+import { motion } from "framer-motion";
 const CATEGORIES = [
   {
     badge: "POPULAR",
@@ -79,15 +79,21 @@ export function FleetSection() {
           </div>
         </div>
 
-        <div
+       <div
           ref={scrollerRef}
           className="flex gap-5 overflow-x-auto pb-4 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {CATEGORIES.map((cat) => (
-            <div
+          {CATEGORIES.map((cat, i) => (
+            <motion.div
               key={cat.title}
-              className="min-w-[220px] flex-shrink-0 bg-white border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 hover:shadow-sm transition-all"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ y: -4 }}
+              className="min-w-[220px] flex-shrink-0 bg-white border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 hover:shadow-sm transition-colors"
             >
+
               <div className="flex items-center justify-between mb-6">
                 <span className="text-[10px] tracking-wide font-semibold text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full">
                   {cat.badge}
@@ -107,21 +113,33 @@ export function FleetSection() {
                   {cat.seats} seat{cat.seats > 1 ? "s" : ""}
                 </p>
               )}
-
-
-            </div>
-
+            </motion.div>
           ))}
         </div>
 
-        <div className="flex items-center gap-10 mt-8 pt-6 border-t border-neutral-100">
-          {STATS.map((stat) => (
-            <div key={stat.label} className="flex items-baseline gap-2">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center gap-10 mt-8 pt-6 border-t border-neutral-100"
+        >
+          {STATS.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.1, ease: "backOut" }}
+              className="flex items-baseline gap-2"
+            >
               <span className="text-lg font-black text-black">{stat.value}</span>
               <span className="text-sm text-neutral-500">{stat.label}</span>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
+
+
       </div>
     </section>
   );
