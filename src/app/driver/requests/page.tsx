@@ -32,6 +32,16 @@ export default function DriverRequestsPage() {
     return () => clearInterval(interval);
   }, [fetchRides, activeRide]);
 
+  // On page load/refresh, check the server for an already-active ride
+  // (e.g. accepted in a previous session) instead of assuming there's none.
+  useEffect(() => {
+    fetch("/api/rides/active")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ride) setActiveRide(data.ride);
+      });
+  }, []);
+
   async function handleAccept(id: string) {
     setAcceptingId(id);
     try {

@@ -59,7 +59,8 @@ app.prepare().then(() => {
   // --- Auto-expire stale ride requests (Rapido/Uber-style) ---
   mongoose.connect(process.env.MONGODB_URI).then(() => {
     const RideSchema = new mongoose.Schema({}, { strict: false });
-    const Ride = mongoose.models.Ride || mongoose.model("Ride", RideSchema);
+
+   const Ride = mongoose.models.RideAutoExpire || mongoose.model("RideAutoExpire", RideSchema, "rides");
 
     const EXPIRY_MINUTES = 10;
 
