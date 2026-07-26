@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { Car, Bike, CarFront, Bus, ChevronLeft, ChevronRight } from "lucide-react";
+
+import { Car, ChevronLeft, ChevronRight } from "lucide-react";
+import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 
 const CATEGORIES = [
   {
@@ -10,35 +12,16 @@ const CATEGORIES = [
     title: "All Vehicles",
     desc: "Browse the full fleet",
     num: "01",
+    seats: null,
   },
-  {
-    badge: "QUICK",
-    icon: Bike,
-    title: "Bikes",
-    desc: "Fast & affordable rides",
-    num: "02",
-  },
-  {
-    badge: "COMFORT",
-    icon: CarFront,
-    title: "Cars",
-    desc: "Comfortable city travel",
-    num: "03",
-  },
-  {
-    badge: "PREMIUM",
-    icon: CarFront,
-    title: "SUVs",
-    desc: "Premium & spacious",
-    num: "04",
-  },
-  {
-    badge: "FAMILY",
-    icon: Bus,
-    title: "Vans",
-    desc: "Family & group transport",
-    num: "05",
-  },
+  ...VEHICLE_TYPES.map((v, i) => ({
+    badge: ["QUICK", "COMFORT", "PREMIUM", "FAMILY"][i],
+    icon: v.icon,
+    title: v.label + (v.label.endsWith("s") ? "" : "s"),
+    desc: v.desc,
+    num: String(i + 2).padStart(2, "0"),
+    seats: v.seats,
+  })),
 ];
 
 const STATS = [
@@ -116,9 +99,18 @@ export function FleetSection() {
               <div className="w-11 h-11 rounded-xl bg-neutral-100 flex items-center justify-center mb-4">
                 <cat.icon size={20} className="text-black" strokeWidth={1.5} />
               </div>
+
               <h3 className="font-bold text-black">{cat.title}</h3>
               <p className="text-sm text-neutral-500 mt-1">{cat.desc}</p>
+              {cat.seats && (
+                <p className="text-xs text-neutral-400 mt-1">
+                  {cat.seats} seat{cat.seats > 1 ? "s" : ""}
+                </p>
+              )}
+
+
             </div>
+
           ))}
         </div>
 
