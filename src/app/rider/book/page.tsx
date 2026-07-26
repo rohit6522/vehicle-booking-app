@@ -315,9 +315,10 @@ export default function BookRidePage() {
 function PaymentSection({ ride }: { ride: any }) {
   const [loading, setLoading] = useState(false);
   const [paid, setPaid] = useState(ride.paymentStatus === "paid");
+  const [method, setMethod] = useState<"cash" | "online" | null>(ride.paymentMethod ?? null);
   const [error, setError] = useState("");
 
-  async function handlePay() {
+  async function handlePayOnline() {
     setLoading(true);
     setError("");
     try {
@@ -342,19 +343,13 @@ function PaymentSection({ ride }: { ride: any }) {
           description: `${ride.pickup.address} → ${ride.drop.address}`,
           order_id: orderData.orderId,
           handler: async (response: any) => {
-            const verifyRes = await fetch(
-              `/api/rides/${ride._id}/verify-payment`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(response),
-              },
-            );
+            const verifyRes = await fetch(`/api/rides/${ride._id}/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
             if (verifyRes.ok) setPaid(true);
-            else
-              setError(
-                "Payment succeeded but verification failed. Contact support.",
-              );
+            else setError("Payment succeeded but verification failed. Contact support.");
           },
           theme: { color: "#000000" },
         });
@@ -368,10 +363,34 @@ function PaymentSection({ ride }: { ride: any }) {
     }
   }
 
+  async function handlePayCash() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/rides/${ride._id}/pay-cash`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Something went wrong");
+        return;
+      }
+      setMethod("cash");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (paid) {
     return (
       <p className="text-emerald-600 font-medium bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3">
         ✓ Payment successful
+      </p>
+    );
+  }
+
+  if (method === "cash") {
+    return (
+      <p className="text-amber-600 font-medium bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+        💵 Pay ₹{ride.fare.final ?? ride.fare.estimated} in cash to your driver
       </p>
     );
   }
@@ -383,15 +402,22 @@ function PaymentSection({ ride }: { ride: any }) {
           {error}
         </p>
       )}
-      <button
-        onClick={handlePay}
-        disabled={loading}
-        className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
-      >
-        {loading
-          ? "Loading..."
-          : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
-      </button>
+      <div className="flex gap-3">
+        <button
+          onClick={handlePayOnline}
+          disabled={loading}
+          className="flex-1 py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+        >
+          {loading ? "Loading..." : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
+        </button>
+        <button
+          onClick={handlePayCash}
+          disabled={loading}
+          className="flex-1 py-3.5 rounded-full border border-neutral-200 font-semibold hover:border-black transition-colors disabled:opacity-40"
+        >
+          Pay with Cash
+        </button>
+      </div>
     </div>
   );
 }

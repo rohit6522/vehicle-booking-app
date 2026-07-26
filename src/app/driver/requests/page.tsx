@@ -14,6 +14,7 @@ export default function DriverRequestsPage() {
   const watchIdRef = useRef<number | null>(null);
   const [otp, setOtp] = useState("");
   const [startingRide, setStartingRide] = useState(false);
+const [confirmingCash, setConfirmingCash] = useState(false);
 
   const fetchRides = useCallback(async () => {
     const res = await fetch("/api/rides/available");
@@ -80,7 +81,22 @@ export default function DriverRequestsPage() {
     } finally {
       setStartingRide(false);
     }
-  }
+  } 
+
+  async function handleConfirmCash() {
+    if (!activeRide) return;
+    setConfirmingCash(true);
+    try {
+      const res = await fetch(`/api/rides/${activeRide._id}/confirm-cash`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        setActiveRide(null); // ride fully done now
+      }
+    } finally {
+      setConfirmingCash(false);
+    }
+  } 
 
   async function handleComplete() {
     if (!activeRide) return;
@@ -94,7 +110,7 @@ export default function DriverRequestsPage() {
         setError(data.error ?? "Could not complete ride");
         return;
       }
-      setActiveRide(null);
+      setActiveRide(data.ride); // stay on screen if cash payment still pending
     } finally {
       setCompleting(false);
     }
@@ -196,6 +212,22 @@ export default function DriverRequestsPage() {
                 Cancel Ride
               </button>
             </>
+         ) : activeRide.status === "completed" ? (
+            <div className="space-y-3">
+              {activeRide.paymentMethod === "cash" && activeRide.paymentStatus !== "paid" ? (
+                <button
+                  onClick={handleConfirmCash}
+                  disabled={confirmingCash}
+                  className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+                >
+                  {confirmingCash ? "Confirming..." : "Confirm Cash Received"}
+                </button>
+              ) : (
+                <p className="text-emerald-600 font-medium bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
+                  ✓ Ride paid
+                </p>
+              )}
+            </div>
           ) : (
             <div className="space-y-3">
               <button
@@ -214,6 +246,7 @@ export default function DriverRequestsPage() {
               </button>
             </div>
           )}
+          
         </div>
       </main>
     );
