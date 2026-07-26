@@ -7,17 +7,16 @@ import { UserMenu } from "./UserMenu";
 
 const RIDER_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Bookings", href: "/rider/book" },
+  { label: "Book a Ride", href: "/rider/book" },
+  { label: "My Bookings", href: "/bookings" },
   { label: "Fleet", href: "#fleet" },
-  { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
 ];
 
 const DRIVER_LINKS = [
   { label: "Dashboard", href: "/driver/dashboard" },
-  { label: "Active Ride", href: "/driver/requests" },
-  { label: "Pending Requests", href: "/driver/requests" },
-  { label: "My Bookings", href: "/driver/dashboard" },
+  { label: "Ride Requests", href: "/driver/requests" },
+  { label: "My Bookings", href: "/bookings" },
 ];
 
 const ADMIN_LINKS = [{ label: "Dashboard", href: "/admin/dashboard" }];
