@@ -85,7 +85,7 @@ export default function VideoKycRoomPage() {
       );
 
       const appID = Number(process.env.NEXT_PUBLIC_ZEGO_APP_ID);
-      const serverSecret = process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET_TEST_ONLY;
+      const serverSecret = process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET_TEST_ONLY!;
       const userId = (session!.user as any).id;
       const userName = session!.user!.name ?? "User";
 
