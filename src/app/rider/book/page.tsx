@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { VEHICLE_TYPES, VehicleType } from "@/lib/vehicleTypes";
 import { getSocket } from "@/lib/socketClient";
 
-const LocationPicker = dynamic(
-  () => import("@/components/map/LocationPicker").then((m) => m.LocationPicker),
-  { ssr: false, loading: () => <div className="h-56 bg-neutral-100 rounded-xl animate-pulse" /> }
+const TripLocationPicker = dynamic(
+  () => import("@/components/map/TripLocationPicker").then((m) => m.TripLocationPicker),
+  { ssr: false, loading: () => <div className="h-72 bg-neutral-100 rounded-xl animate-pulse" /> }
 );
 
 const LiveTrackerMap = dynamic(
@@ -301,12 +301,13 @@ export default function BookRidePage() {
             </AnimatePresence>
             <div className="mb-6" />
 
-            <div className="mb-5">
-              <LocationPicker label="Pickup" value={pickup} onChange={(v) => setPickup(v)} />
-            </div>
-
-            <div className="mb-6">
-              <LocationPicker label="Drop" value={drop} onChange={(v) => setDrop(v)} />
+          <div className="mb-6">
+              <TripLocationPicker
+                pickup={pickup}
+                drop={drop}
+                onPickupChange={setPickup}
+                onDropChange={setDrop}
+              />
             </div>
 
             <AnimatePresence>
