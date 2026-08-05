@@ -50,19 +50,19 @@ export default function BookingsPage() {
                   key={ride._id}
                   className="border border-neutral-200 rounded-2xl p-5"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
+                 <div className="flex flex-col sm:flex-row items-start justify-between gap-2 mb-3">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-start gap-2 mb-1.5">
-                        <MapPin size={14} className="mt-0.5 text-neutral-400" />
-                        <p className="text-sm">{ride.pickup?.address}</p>
+                        <MapPin size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
+                        <p className="text-sm break-words">{ride.pickup?.address}</p>
                       </div>
                       <div className="flex items-start gap-2">
-                        <Navigation2 size={14} className="mt-0.5 text-neutral-400" />
-                        <p className="text-sm">{ride.drop?.address}</p>
+                        <Navigation2 size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
+                        <p className="text-sm break-words">{ride.drop?.address}</p>
                       </div>
                     </div>
                     <span
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize flex-shrink-0 ${
                         STATUS_STYLES[ride.status] ?? "bg-neutral-100 text-neutral-600"
                       }`}
                     >
@@ -70,7 +70,7 @@ export default function BookingsPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-sm text-neutral-400">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm text-neutral-400">
                     <span>
                       {new Date(ride.requestedAt).toLocaleDateString("en-IN", {
                         day: "numeric",

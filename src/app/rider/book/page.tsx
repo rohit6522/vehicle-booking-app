@@ -262,7 +262,7 @@ export default function BookRidePage() {
             <h1 className="text-3xl font-black mb-1">Book a ride</h1>
             <p className="text-neutral-500 mb-8">Enter your trip details</p>
 
-            <div className="grid grid-cols-4 gap-2 mb-3">
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
               {VEHICLE_TYPES.map((v) => (
                 <motion.button
                   key={v.type}
@@ -460,13 +460,14 @@ function PaymentSection({ ride }: { ride: any }) {
           {error}
         </p>
       )}
-      <div className="flex gap-3">
+
+      <div className="flex flex-col sm:flex-row gap-3">
         <motion.button
           onClick={handlePayOnline}
           disabled={loading}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex-1 py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+          className="flex-1 py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40 text-sm sm:text-base"
         >
           {loading ? "Loading..." : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
         </motion.button>
@@ -475,11 +476,13 @@ function PaymentSection({ ride }: { ride: any }) {
           disabled={loading}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex-1 py-3.5 rounded-full border border-neutral-200 font-semibold hover:border-black transition-colors disabled:opacity-40"
+          className="flex-1 py-3.5 rounded-full border border-neutral-200 font-semibold hover:border-black transition-colors disabled:opacity-40 text-sm sm:text-base"
         >
           Pay with Cash
         </motion.button>
       </div>
+
+
     </div>
   );
 }
