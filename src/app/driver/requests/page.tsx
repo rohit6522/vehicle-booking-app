@@ -281,40 +281,39 @@ const [confirmingCash, setConfirmingCash] = useState(false);
         ) : (
           <div className="space-y-4">
             {rides.map((ride) => (
-              <div
+             <div
                 key={ride._id}
-                className="border border-neutral-200 rounded-2xl p-5"
+                className="border border-neutral-200 rounded-2xl p-4 sm:p-5"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-start gap-2 mb-1.5">
-                      <MapPin size={14} className="mt-0.5 text-neutral-400" />
-                      <p className="text-sm">{ride.pickup.address}</p>
+                      <MapPin size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
+                      <p className="text-sm break-words">{ride.pickup.address}</p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <Navigation2
-                        size={14}
-                        className="mt-0.5 text-neutral-400"
-                      />
-                      <p className="text-sm">{ride.drop.address}</p>
+                      <Navigation2 size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
+                      <p className="text-sm break-words">{ride.drop.address}</p>
                     </div>
                   </div>
-                  <p className="font-black text-lg">₹{ride.fare.estimated}</p>
+                  <p className="font-black text-lg flex-shrink-0">₹{ride.fare.estimated}</p>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <p className="text-xs text-neutral-400">
                     {ride.distanceKm} km · {ride.rider?.name ?? "Rider"}
                   </p>
                   <button
                     onClick={() => handleAccept(ride._id)}
                     disabled={acceptingId === ride._id}
-                    className="px-5 py-2 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                    className="w-full sm:w-auto px-5 py-2.5 sm:py-2 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
                   >
                     {acceptingId === ride._id ? "Accepting..." : "Accept"}
                   </button>
                 </div>
               </div>
+
+
             ))}
           </div>
         )}
