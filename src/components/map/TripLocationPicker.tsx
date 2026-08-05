@@ -196,9 +196,11 @@ export function TripLocationPicker({
       )}
 
       <div className="h-64 rounded-xl overflow-hidden border border-neutral-200">
-        <MapContainer
+
+      <MapContainer
           center={[defaultCenter.lat, defaultCenter.lng]}
           zoom={5}
+          scrollWheelZoom={false}
           style={{ height: "100%", width: "100%" }}
         >
           <TileLayer
