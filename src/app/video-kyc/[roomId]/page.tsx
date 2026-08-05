@@ -241,7 +241,7 @@ export default function VideoKycRoomPage() {
   // In-call view: Zego widget + our branded header/controls overlaid
   return (
     <div className="fixed inset-0 bg-black flex flex-col">
-      <div className="flex items-center justify-between px-6 py-4 bg-black z-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-black z-10">
         <div>
           <h1 className="text-white font-black text-sm tracking-tight">RYDEX</h1>
           <p className="text-xs text-neutral-400">
@@ -249,21 +249,25 @@ export default function VideoKycRoomPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {error && <span className="text-xs text-red-400 mr-2">{error}</span>}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+          {error && (
+            <span className="text-xs text-red-400 whitespace-nowrap flex-shrink-0">
+              {error}
+            </span>
+          )}
           {isAdmin && (
             <>
               <button
                 onClick={() => handleDecision("approve")}
                 disabled={processing}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full bg-emerald-500 text-white text-xs sm:text-sm font-semibold hover:bg-emerald-600 disabled:opacity-50 flex-shrink-0"
               >
                 <Check size={14} /> Approve
               </button>
               <button
                 onClick={() => handleDecision("reject")}
                 disabled={processing}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-red-500 text-white text-sm font-semibold hover:bg-red-600 disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full bg-red-500 text-white text-xs sm:text-sm font-semibold hover:bg-red-600 disabled:opacity-50 flex-shrink-0"
               >
                 <X size={14} /> Reject
               </button>
@@ -271,7 +275,7 @@ export default function VideoKycRoomPage() {
           )}
           <button
             onClick={handleEndCall}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-neutral-700 text-white text-sm font-semibold hover:bg-neutral-600"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full bg-neutral-700 text-white text-xs sm:text-sm font-semibold hover:bg-neutral-600 flex-shrink-0"
           >
             <PhoneOff size={14} /> End Call
           </button>

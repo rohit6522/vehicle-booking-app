@@ -65,12 +65,12 @@ export default function VehiclePricingReviewPage() {
             <p className="text-red-500 text-sm">{error}</p>
           ) : (
             <>
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h1 className="text-2xl font-black">{vendor.name}</h1>
-                  <p className="text-neutral-500 text-sm">{vendor.email}</p>
+             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-black truncate">{vendor.name}</h1>
+                  <p className="text-neutral-500 text-sm truncate">{vendor.email}</p>
                 </div>
-                <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700">
+                <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 self-start sm:self-auto">
                   Pending
                 </span>
               </div>

@@ -71,20 +71,20 @@ export default function AdminDashboardPage() {
 
   return (
     <main className="min-h-screen bg-neutral-100">
-      <header className="bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-black text-white font-bold flex items-center justify-center">
+      <header className="bg-white border-b border-neutral-200 px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-full bg-black text-white font-bold flex items-center justify-center flex-shrink-0">
             {session?.user?.name?.charAt(0).toUpperCase() ?? "A"}
           </div>
-          <span className="font-black tracking-tight">RYDEX ADMIN</span>
+          <span className="font-black tracking-tight truncate">RYDEX ADMIN</span>
         </div>
-        <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
+        <span className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full flex-shrink-0">
           <ShieldCheck size={13} />
           Secure Mode
         </span>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {loading ? (
           <p className="text-neutral-400 text-sm">Loading...</p>
         ) : (
@@ -188,7 +188,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="bg-white rounded-2xl p-6">
-              <div className="flex items-center gap-2 mb-6 flex-wrap">
+             <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
                 <TabButton active={tab === "kyc"} onClick={() => setTab("kyc")} icon={Video} label="Video KYC" count={kycQueue.length} />
                 <TabButton active={tab === "reviews"} onClick={() => setTab("reviews")} icon={UsersRound} label="Vendor Reviews" count={applications.length} />
                 <TabButton active={tab === "pricing"} onClick={() => setTab("pricing")} icon={ImagePlus} label="Pricing & Images" count={pricingQueue.length} />
@@ -324,7 +324,7 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
         active ? "bg-black text-white" : "text-neutral-500 hover:bg-neutral-100"
       }`}
     >
