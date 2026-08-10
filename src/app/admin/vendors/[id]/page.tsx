@@ -113,7 +113,10 @@ export default function VendorDetailPage() {
                   <div className="flex items-center gap-2 mb-4">
                     <FileText size={16} />
                     <h2 className="font-bold">Documents</h2>
+                  
                   </div>
+
+
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <DocPreview label="Aadhaar" url={vendor.documents?.aadhaarUrl} />
                     <DocPreview label="License" url={vendor.documents?.licenseUrl} />

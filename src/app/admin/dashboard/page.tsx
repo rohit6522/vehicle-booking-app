@@ -14,6 +14,9 @@ import {
   ImagePlus,
 } from "lucide-react";
 
+import { signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
+
 interface Stats {
   total: number;
   approved: number;
@@ -78,10 +81,19 @@ export default function AdminDashboardPage() {
           </div>
           <span className="font-black tracking-tight truncate">RYDEX ADMIN</span>
         </div>
-        <span className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full flex-shrink-0">
-          <ShieldCheck size={13} />
-          Secure Mode
-        </span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <span className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
+            <ShieldCheck size={13} />
+            Secure Mode
+          </span>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-black transition-colors"
+          >
+            <LogOut size={15} />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
