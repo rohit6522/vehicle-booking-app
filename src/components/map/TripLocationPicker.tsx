@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
-import { Search, Navigation, MapPin } from "lucide-react";
+import { Search, Navigation, MapPin, Home, Briefcase, Star, Plus, X } from "lucide-react";
 
 const pickupIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -11,7 +11,6 @@ const pickupIcon = L.icon({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
-  className: "hue-rotate-[90deg]", // rough green tint for pickup
 });
 
 const dropIcon = L.icon({
@@ -29,6 +28,14 @@ interface Point {
 }
 
 interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+interface SavedAddress {
+  _id: string;
+  label: string;
+  address: string;
   lat: number;
   lng: number;
 }
@@ -63,6 +70,13 @@ function FitBounds({ pickup, drop }: { pickup: Point; drop: Point }) {
   return null;
 }
 
+function addressIconFor(label: string) {
+  const l = label.toLowerCase();
+  if (l === "home") return Home;
+  if (l === "work") return Briefcase;
+  return Star;
+}
+
 export function TripLocationPicker({
   pickup,
   drop,
@@ -80,7 +94,20 @@ export function TripLocationPicker({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [saved, setSaved] = useState<SavedAddress[]>([]);
+  const [showSaveForm, setShowSaveForm] = useState(false);
+  const [saveLabel, setSaveLabel] = useState("");
+  const [saving, setSaving] = useState(false);
+
   const setValue = active === "pickup" ? onPickupChange : onDropChange;
+  const currentPoint = active === "pickup" ? pickup : drop;
+
+  useEffect(() => {
+    fetch("/api/saved-addresses")
+      .then((res) => res.json())
+      .then((data) => setSaved(data.addresses ?? []))
+      .catch(() => {});
+  }, []);
 
   const searchAddress = useCallback(async (q: string) => {
     if (q.trim().length < 3) {
@@ -109,6 +136,13 @@ export function TripLocationPicker({
     if (active === "pickup") setActive("drop");
   }
 
+  function selectSaved(a: SavedAddress) {
+    setQueries((q) => ({ ...q, [active]: a.address }));
+    setShowSuggestions(false);
+    setValue({ address: a.address, lat: a.lat, lng: a.lng });
+    if (active === "pickup") setActive("drop");
+  }
+
   async function reverseGeocode(p: LatLng) {
     try {
       const res = await fetch(
@@ -132,12 +166,73 @@ export function TripLocationPicker({
     });
   }
 
-  const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // India
+  async function handleSaveAddress() {
+    if (!currentPoint.lat || !currentPoint.lng || !saveLabel.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/saved-addresses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          label: saveLabel.trim(),
+          address: currentPoint.address,
+          lat: currentPoint.lat,
+          lng: currentPoint.lng,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSaved(data.addresses);
+        setShowSaveForm(false);
+        setSaveLabel("");
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteSaved(id: string) {
+    const res = await fetch(`/api/saved-addresses/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      const data = await res.json();
+      setSaved(data.addresses);
+    }
+  }
+
+  const defaultCenter = { lat: 20.5937, lng: 78.9629 };
 
   return (
     <div>
-      {/* Pickup / Drop tabs, each with its own search field */}
-      <div className="border border-neutral-200 rounded-xl overflow-hidden mb-3">
+      {/* Saved address quick-select chips */}
+      {saved.length > 0 && (
+        <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
+          {saved.map((a) => {
+            const Icon = addressIconFor(a.label);
+            return (
+              <div key={a._id} className="relative flex-shrink-0 group">
+                <button
+                  type="button"
+                  onClick={() => selectSaved(a)}
+                  className="flex items-center gap-1.5 pl-3 pr-7 py-2 rounded-full border border-neutral-200 text-xs font-medium text-neutral-700 hover:border-black whitespace-nowrap"
+                >
+                  <Icon size={12} />
+                  {a.label}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteSaved(a._id)}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-red-500"
+                  title="Remove"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="border border-neutral-200 rounded-xl overflow-hidden mb-1">
         {(["pickup", "drop"] as const).map((key) => (
           <div
             key={key}
@@ -179,6 +274,47 @@ export function TripLocationPicker({
         ))}
       </div>
 
+      {/* Save current location */}
+      <div className="mb-3">
+        {showSaveForm ? (
+          <div className="flex items-center gap-2 mt-2">
+            <input
+              value={saveLabel}
+              onChange={(e) => setSaveLabel(e.target.value)}
+              placeholder="Label (e.g. Home, Work)"
+              maxLength={30}
+              className="flex-1 px-3 py-1.5 rounded-lg border border-neutral-200 text-xs focus:outline-none focus:border-black"
+            />
+            <button
+              type="button"
+              onClick={handleSaveAddress}
+              disabled={!saveLabel.trim() || saving}
+              className="px-3 py-1.5 rounded-lg bg-black text-white text-xs font-semibold disabled:opacity-40"
+            >
+              {saving ? "..." : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowSaveForm(false)}
+              className="text-xs text-neutral-400"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          currentPoint.lat != null && (
+            <button
+              type="button"
+              onClick={() => setShowSaveForm(true)}
+              className="flex items-center gap-1 text-xs text-neutral-500 hover:text-black mt-1"
+            >
+              <Plus size={12} />
+              Save {active} as a favorite
+            </button>
+          )
+        )}
+      </div>
+
       {showSuggestions && suggestions.length > 0 && (
         <div className="relative z-[1000] -mt-2 mb-3 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-44 overflow-y-auto">
           {suggestions.map((s) => (
@@ -196,8 +332,7 @@ export function TripLocationPicker({
       )}
 
       <div className="h-64 rounded-xl overflow-hidden border border-neutral-200">
-
-      <MapContainer
+        <MapContainer
           center={[defaultCenter.lat, defaultCenter.lng]}
           zoom={5}
           scrollWheelZoom={false}

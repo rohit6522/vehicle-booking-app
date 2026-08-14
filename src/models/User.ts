@@ -56,6 +56,14 @@ export interface IUser extends mongoose.Document {
   };
   rating?: number;
 
+  savedAddresses?: {
+    _id?: string;
+    label: string;
+    address: string;
+    lat: number;
+    lng: number;
+  }[];
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -128,6 +136,15 @@ const UserSchema = new Schema<IUser>(
       coordinates: { type: [Number], default: [0, 0] },
     },
     rating: { type: Number, default: 5 },
+
+    savedAddresses: [
+      {
+        label: { type: String, required: true },
+        address: { type: String, required: true },
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );
