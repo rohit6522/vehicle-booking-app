@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { VEHICLE_TYPES, VehicleType } from "@/lib/vehicleTypes";
 import { getSocket } from "@/lib/socketClient";
+import { generateReceipt } from "@/lib/generateReceipt";
+import { Download } from "lucide-react";
 
 const TripLocationPicker = dynamic(
   () => import("@/components/map/TripLocationPicker").then((m) => m.TripLocationPicker),
@@ -237,10 +239,17 @@ export default function BookRidePage() {
               </div>
             )}
 
-            {ride.status === "completed" && (
+           {ride.status === "completed" && (
               <div className="mt-2 space-y-4">
                 <PaymentSection ride={ride} />
                 {!ride.rating?.score && <RatingSection rideId={ride._id} />}
+                <button
+                  onClick={() => generateReceipt(ride)}
+                  className="w-full py-3 rounded-full border border-neutral-200 font-medium hover:border-black transition-colors flex items-center justify-center gap-2"
+                >
+                  <Download size={15} />
+                  Download Receipt
+                </button>
                 <button
                   onClick={() => setRide(null)}
                   className="w-full py-3 rounded-full border border-neutral-200 font-medium hover:border-black transition-colors"
@@ -249,6 +258,8 @@ export default function BookRidePage() {
                 </button>
               </div>
             )}
+
+
           </motion.div>
         ) : (
           <motion.div

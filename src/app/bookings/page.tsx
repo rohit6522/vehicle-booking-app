@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { MapPin, Navigation2 } from "lucide-react";
+import { generateReceipt } from "@/lib/generateReceipt";
+import { Download } from "lucide-react";
 
 const STATUS_STYLES: Record<string, string> = {
   requested: "bg-amber-50 text-amber-600",
@@ -85,27 +87,38 @@ export default function BookingsPage() {
                   </div>
 
                   {ride.status === "completed" && (
-                    <div className="flex items-center justify-between mt-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
                       <p className="text-xs text-neutral-400">
                         Payment:{" "}
                         {ride.paymentStatus === "paid"
                           ? `Paid (${ride.paymentMethod === "cash" ? "Cash" : "Online"})`
                           : "Pending"}
                       </p>
-                      {role === "driver" &&
-                        ride.paymentMethod === "cash" &&
-                        ride.paymentStatus !== "paid" && (
-                          <ConfirmCashButton
-                            rideId={ride._id}
-                            onConfirmed={() =>
-                              setRides((prev) =>
-                                prev.map((r) =>
-                                  r._id === ride._id ? { ...r, paymentStatus: "paid" } : r
-                                )
-                              )
-                            }
-                          />
+                      <div className="flex items-center gap-2">
+                        {role !== "driver" && (
+                          <button
+                            onClick={() => generateReceipt(ride)}
+                            className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-black"
+                          >
+                            <Download size={12} />
+                            Receipt
+                          </button>
                         )}
+                        {role === "driver" &&
+                          ride.paymentMethod === "cash" &&
+                          ride.paymentStatus !== "paid" && (
+                            <ConfirmCashButton
+                              rideId={ride._id}
+                              onConfirmed={() =>
+                                setRides((prev) =>
+                                  prev.map((r) =>
+                                    r._id === ride._id ? { ...r, paymentStatus: "paid" } : r
+                                  )
+                                )
+                              }
+                            />
+                          )}
+                      </div>
                     </div>
                   )}
 
