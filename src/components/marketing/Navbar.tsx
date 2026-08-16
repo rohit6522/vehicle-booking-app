@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { Menu, X } from "lucide-react";
 import { AuthModal } from "./AuthModal";
 import { UserMenu } from "./UserMenu";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const RIDER_LINKS = [
   { label: "Home", href: "/" },
@@ -56,7 +57,8 @@ function NavContent({
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+<div className="flex items-center gap-3">
+          <ThemeToggle dark />
           {status === "authenticated" && session?.user ? (
             <UserMenu name={session.user.name ?? "User"} role={role ?? "rider"} />
           ) : (
