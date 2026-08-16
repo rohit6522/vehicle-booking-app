@@ -7,6 +7,7 @@ import { VEHICLE_TYPES, VehicleType } from "@/lib/vehicleTypes";
 import { getSocket } from "@/lib/socketClient";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { Download } from "lucide-react";
+import { toast } from "sonner";
 
 const TripLocationPicker = dynamic(
   () => import("@/components/map/TripLocationPicker").then((m) => m.TripLocationPicker),
@@ -83,7 +84,7 @@ export default function BookRidePage() {
     if (coordsReady) getEstimate();
   }, [getEstimate, coordsReady]);
 
-  async function handleBook() {
+ async function handleBook() {
     setBooking(true);
     setError("");
     try {
@@ -99,17 +100,20 @@ export default function BookRidePage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Could not book ride");
+        toast.error(data.error ?? "Could not book ride");
         return;
       }
+      toast.success("Ride requested — looking for a driver...");
       setRide(data.ride);
     } finally {
       setBooking(false);
     }
   }
 
-  async function handleCancel() {
+ async function handleCancel() {
     if (!ride?._id) return;
     await fetch(`/api/rides/${ride._id}/cancel`, { method: "POST" });
+    toast.info("Ride cancelled");
     setRide(null);
   }
 
@@ -126,12 +130,23 @@ export default function BookRidePage() {
       setDriverLocation({ lat, lng });
     }
 
+   function toastOnStatusChange({ ride: updatedRide }: { ride: any }) {
+      if (updatedRide.status === "accepted" && ride?.status === "requested") {
+        toast.success("A driver accepted your ride!");
+      }
+      if (updatedRide.status === "completed" && ride?.status !== "completed") {
+        toast.success("Ride completed!");
+      }
+    }
+
     socket.on("ride:update", handleUpdate);
+    socket.on("ride:update", toastOnStatusChange);
     socket.on("driver:location", handleLocation);
 
     return () => {
       socket.emit("ride:leave", ride._id);
       socket.off("ride:update", handleUpdate);
+      socket.off("ride:update", toastOnStatusChange);
       socket.off("driver:location", handleLocation);
     };
   }, [ride?._id]);
@@ -401,14 +416,19 @@ function PaymentSection({ ride }: { ride: any }) {
           name: "RYDEX",
           description: `${ride.pickup.address} → ${ride.drop.address}`,
           order_id: orderData.orderId,
-          handler: async (response: any) => {
+         handler: async (response: any) => {
             const verifyRes = await fetch(`/api/rides/${ride._id}/verify-payment`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(response),
             });
-            if (verifyRes.ok) setPaid(true);
-            else setError("Payment succeeded but verification failed. Contact support.");
+            if (verifyRes.ok) {
+              toast.success("Payment successful!");
+              setPaid(true);
+            } else {
+              setError("Payment succeeded but verification failed. Contact support.");
+              toast.error("Payment verification failed. Contact support.");
+            }
           },
           theme: { color: "#000000" },
         });
@@ -422,7 +442,7 @@ function PaymentSection({ ride }: { ride: any }) {
     }
   }
 
-  async function handlePayCash() {
+ async function handlePayCash() {
     setLoading(true);
     setError("");
     try {
@@ -430,8 +450,10 @@ function PaymentSection({ ride }: { ride: any }) {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
+        toast.error(data.error ?? "Something went wrong");
         return;
       }
+      toast.success("Cash payment selected");
       setMethod("cash");
     } finally {
       setLoading(false);
@@ -506,7 +528,7 @@ function RatingSection({ rideId }: { rideId: string }) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSubmit() {
+ async function handleSubmit() {
     if (score === 0) return;
     setLoading(true);
     setError("");
@@ -519,8 +541,10 @@ function RatingSection({ rideId }: { rideId: string }) {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
+        toast.error(data.error ?? "Something went wrong");
         return;
       }
+      toast.success("Thanks for your feedback!");
       setSubmitted(true);
     } finally {
       setLoading(false);

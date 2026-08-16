@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Mail, Lock, User, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 
 type Mode = "login" | "register" | "verify-otp";
 
@@ -52,7 +53,7 @@ export function AuthModal({
     await signIn("google", { callbackUrl: "/" });
   }
 
-  async function handleLogin(e: React.FormEvent) {
+async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -67,14 +68,16 @@ export function AuthModal({
 
     if (res?.error) {
       setError("Invalid email or password");
+      toast.error("Invalid email or password");
       return;
     }
 
+    toast.success("Welcome back!");
     onClose();
     router.refresh();
   }
 
-  async function handleSendOtp(e: React.FormEvent) {
+ async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -89,18 +92,21 @@ export function AuthModal({
 
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
+        toast.error(data.error ?? "Something went wrong");
         return;
       }
 
+      toast.success("OTP sent to your email");
       setMode("verify-otp");
     } catch {
       setError("Network error. Please try again.");
+      toast.error("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleVerifyOtp(e: React.FormEvent) {
+async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -115,6 +121,7 @@ export function AuthModal({
 
       if (!res.ok) {
         setError(data.error ?? "Invalid OTP");
+        toast.error(data.error ?? "Invalid OTP");
         return;
       }
 
@@ -130,10 +137,12 @@ export function AuthModal({
         return;
       }
 
+      toast.success("Account created successfully!");
       onClose();
       router.refresh();
     } catch {
       setError("Network error. Please try again.");
+      toast.error("Network error. Please try again.");
     } finally {
       setLoading(false);
     }

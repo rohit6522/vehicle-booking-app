@@ -3,6 +3,8 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { LenisProvider } from "@/components/LenisProvider";
+import { Toaster } from "sonner";
+
 export const metadata: Metadata = {
   title: "RideFlow — Book a ride in seconds",
   description: "Real-time vehicle booking platform",
@@ -22,6 +24,13 @@ export default function RootLayout({
         <Providers>
           <LenisProvider>{children}</LenisProvider>
         </Providers>
+        <Toaster
+          position="top-center"
+          richColors
+          toastOptions={{
+            style: { fontFamily: "inherit" },
+          }}
+        />
       </body>
     </html>
   );
