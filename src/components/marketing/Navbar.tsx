@@ -139,34 +139,30 @@ export function Navbar() {
     onMobileToggle: () => setMobileOpen((o) => !o),
   };
 
-  return (
+ return (
     <>
-      <header className="sticky top-0 z-40">
-        {/* Rectangle state (top of page) — full width, sharp corners */}
+      <header className="sticky top-0 z-40 h-[76px]">
+        {/* Rectangle state (top of page) — full width, sharp corners.
+            Always absolutely positioned inside the fixed-height header,
+            so toggling never shifts the page's layout — only opacity fades. */}
         <div
-          className="bg-black/90 backdrop-blur-md border border-white/10 px-5 sm:px-8 py-[18px] transition-opacity duration-300 ease-out"
+          className="absolute inset-x-0 top-0 flex items-center bg-black/90 backdrop-blur-md border border-white/10 px-5 sm:px-8 py-[18px] transition-opacity duration-300 ease-out"
           style={{
             opacity: scrolled ? 0 : 1,
             pointerEvents: scrolled ? "none" : "auto",
-            position: scrolled ? "absolute" : "relative",
-            top: 0,
-            left: 0,
-            right: 0,
           }}
         >
-          <NavContent {...shared} />
+          <div className="w-full">
+            <NavContent {...shared} />
+          </div>
         </div>
 
         {/* Pill state (scrolled) — centered, rounded, margin from edges */}
         <div
-          className="px-4 pt-6 transition-opacity duration-300 ease-out"
+          className="absolute inset-x-0 top-0 px-4 pt-4 transition-opacity duration-300 ease-out"
           style={{
             opacity: scrolled ? 1 : 0,
             pointerEvents: scrolled ? "auto" : "none",
-            position: scrolled ? "relative" : "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
           }}
         >
           <div className="mx-auto max-w-6xl rounded-3xl bg-black/90 backdrop-blur-md border border-white/10 px-6 py-3">
