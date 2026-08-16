@@ -16,6 +16,7 @@ import {
 
 import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface Stats {
   total: number;
@@ -97,8 +98,37 @@ export default function AdminDashboardPage() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        {loading ? (
-          <p className="text-neutral-400 text-sm">Loading...</p>
+       {loading ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white rounded-2xl p-5">
+                  <Skeleton className="w-9 h-9 rounded-lg mb-4" />
+                  <Skeleton className="h-3 w-20 mb-2" />
+                  <Skeleton className="h-8 w-16 mb-2" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              ))}
+            </div>
+            <div className="bg-white rounded-2xl p-6 mb-8">
+              <Skeleton className="h-4 w-24 mb-3 rounded-full" />
+              <Skeleton className="h-6 w-40 mb-2" />
+              <Skeleton className="h-3 w-32 mb-6" />
+              <Skeleton className="h-56 w-full rounded-xl" />
+            </div>
+            <div className="bg-white rounded-2xl p-6">
+              <div className="flex gap-2 mb-6">
+                <Skeleton className="h-9 w-28 rounded-full" />
+                <Skeleton className="h-9 w-32 rounded-full" />
+                <Skeleton className="h-9 w-36 rounded-full" />
+              </div>
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                ))}
+              </div>
+            </div>
+          </>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

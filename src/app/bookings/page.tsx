@@ -7,6 +7,7 @@ import { Footer } from "@/components/marketing/Footer";
 import { MapPin, Navigation2 } from "lucide-react";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { Download } from "lucide-react";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 const STATUS_STYLES: Record<string, string> = {
   requested: "bg-amber-50 text-amber-600",
@@ -41,8 +42,24 @@ export default function BookingsPage() {
             {role === "driver" ? "Your ride history as a driver" : "Your past and current rides"}
           </p>
 
-          {loading ? (
-            <p className="text-neutral-400 text-sm">Loading...</p>
+         {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="border border-neutral-200 rounded-2xl p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : rides.length === 0 ? (
             <p className="text-neutral-400 text-sm">No bookings yet.</p>
           ) : (

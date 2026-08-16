@@ -11,7 +11,7 @@ import { DocumentsStep } from "@/components/partner/DocumentsStep";
 import { BankStep } from "@/components/partner/BankStep";
 import { ReviewStep } from "@/components/partner/ReviewStep";
 import { PricingStep } from "@/components/partner/PricingStep";
-
+import { Skeleton } from "@/components/ui/Skeleton";
 type WizardStep = "vehicle" | "documents" | "bank" | "review";
 
 interface PartnerStatus {
@@ -94,12 +94,30 @@ export default function BecomePartnerPage() {
     );
   }
 
-  if (loading || !status) {
+ if (loading || !status) {
     return (
       <>
         <PartnerNavbar />
-        <main className="min-h-screen bg-neutral-50 flex items-center justify-center">
-          <p className="text-neutral-400 text-sm">Loading...</p>
+        <main className="min-h-screen bg-neutral-50 px-4 py-10">
+          <div className="max-w-5xl mx-auto">
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-80 mb-6" />
+            <div className="bg-white rounded-2xl p-6 sm:p-8 mb-6">
+              <div className="flex items-center gap-4 overflow-x-auto">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <Skeleton key={i} className="w-11 h-11 rounded-full flex-shrink-0" />
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <div className="bg-white rounded-3xl p-8 max-w-md w-full">
+                <Skeleton className="h-4 w-16 mx-auto mb-2" />
+                <Skeleton className="h-7 w-48 mx-auto mb-6" />
+                <Skeleton className="h-32 w-full mb-4 rounded-xl" />
+                <Skeleton className="h-12 w-full rounded-full" />
+              </div>
+            </div>
+          </div>
         </main>
         <Footer />
       </>

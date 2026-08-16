@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { MapPin, Navigation2 } from "lucide-react";
 import { getSocket } from "@/lib/socketClient";
 import { toast } from "sonner";
-
+import { Skeleton } from "@/components/ui/Skeleton";
 export default function DriverRequestsPage() {
   const [rides, setRides] = useState<any[]>([]);
   const [activeRide, setActiveRide] = useState<any>(null);
@@ -285,8 +285,24 @@ async function handleAccept(id: string) {
           </p>
         )}
 
-        {loading ? (
-          <p className="text-neutral-400 text-sm">Loading...</p>
+       {loading ? (
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="border border-neutral-200 rounded-2xl p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                  <Skeleton className="h-6 w-16" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-9 w-24 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : rides.length === 0 ? (
           <p className="text-neutral-400 text-sm">
             No ride requests right now. This list refreshes every few seconds.
