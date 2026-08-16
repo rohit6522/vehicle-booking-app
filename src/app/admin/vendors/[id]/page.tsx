@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { Car, Landmark, FileText, ShieldCheck, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 export default function VendorDetailPage() {
   const params = useParams();
@@ -40,8 +41,10 @@ export default function VendorDetailPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
+        toast.error(data.error ?? "Something went wrong");
         return;
       }
+      toast.success("Vendor approved");
       router.push("/admin/dashboard");
     } finally {
       setProcessing(false);
@@ -61,8 +64,10 @@ export default function VendorDetailPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
+        toast.error(data.error ?? "Something went wrong");
         return;
       }
+      toast.success("Vendor rejected");
       router.push("/admin/dashboard");
     } finally {
       setProcessing(false);

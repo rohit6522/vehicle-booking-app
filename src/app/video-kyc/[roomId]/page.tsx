@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Video, VideoOff, Mic, MicOff, Check, X, PhoneOff } from "lucide-react";
+import { toast } from "sonner";
 
 export default function VideoKycRoomPage() {
   const params = useParams();
@@ -146,7 +147,7 @@ export default function VideoKycRoomPage() {
     router.push(isAdmin ? "/admin/dashboard" : "/become-a-partner");
   }
 
-  async function handleDecision(action: "approve" | "reject") {
+async function handleDecision(action: "approve" | "reject") {
     setProcessing(true);
     setError("");
     try {
@@ -158,8 +159,10 @@ export default function VideoKycRoomPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
+        toast.error(data.error ?? "Something went wrong");
         return;
       }
+      toast.success(action === "approve" ? "KYC approved" : "KYC rejected");
       zpRef.current?.destroy();
       router.push("/admin/dashboard");
     } finally {

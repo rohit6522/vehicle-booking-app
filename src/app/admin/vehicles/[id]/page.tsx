@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { Car, IndianRupee, ShieldCheck, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 export default function VehiclePricingReviewPage() {
   const params = useParams();
@@ -38,8 +39,10 @@ export default function VehiclePricingReviewPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
+        toast.error(data.error ?? "Something went wrong");
         return;
       }
+      toast.success(action === "approve" ? "Pricing approved — driver is live!" : "Pricing rejected");
       router.push("/admin/dashboard");
     } finally {
       setProcessing(false);

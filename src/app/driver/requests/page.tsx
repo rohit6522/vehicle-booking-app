@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MapPin, Navigation2 } from "lucide-react";
 import { getSocket } from "@/lib/socketClient";
+import { toast } from "sonner";
 
 export default function DriverRequestsPage() {
   const [rides, setRides] = useState<any[]>([]);
@@ -45,16 +46,18 @@ const [confirmingCash, setConfirmingCash] = useState(false);
       });
   }, []);
 
-  async function handleAccept(id: string) {
+async function handleAccept(id: string) {
     setAcceptingId(id);
     try {
       const res = await fetch(`/api/rides/${id}/accept`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Could not accept ride");
+        toast.error(data.error ?? "Could not accept ride");
         await fetchRides();
         return;
       }
+      toast.success("Ride accepted!");
       setActiveRide(data.ride);
       setRides([]);
     } finally {
@@ -62,7 +65,7 @@ const [confirmingCash, setConfirmingCash] = useState(false);
     }
   }
 
-  async function handleStartRide() {
+ async function handleStartRide() {
     if (!activeRide || otp.length !== 4) return;
     setStartingRide(true);
     setError("");
@@ -75,28 +78,17 @@ const [confirmingCash, setConfirmingCash] = useState(false);
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Could not start ride");
+        toast.error(data.error ?? "Could not start ride");
         return;
       }
+      toast.success("Ride started!");
       setActiveRide(data.ride);
     } finally {
       setStartingRide(false);
     }
-  } 
+  }
 
-  async function handleConfirmCash() {
-    if (!activeRide) return;
-    setConfirmingCash(true);
-    try {
-      const res = await fetch(`/api/rides/${activeRide._id}/confirm-cash`, {
-        method: "POST",
-      });
-      if (res.ok) {
-        setActiveRide(null); // ride fully done now
-      }
-    } finally {
-      setConfirmingCash(false);
-    }
-  } 
+ 
 
   async function handleComplete() {
     if (!activeRide) return;
@@ -108,11 +100,32 @@ const [confirmingCash, setConfirmingCash] = useState(false);
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Could not complete ride");
+        toast.error(data.error ?? "Could not complete ride");
         return;
       }
-      setActiveRide(data.ride); // stay on screen if cash payment still pending
+      toast.success("Ride marked as completed");
+      setActiveRide(data.ride);
     } finally {
       setCompleting(false);
+    }
+  }
+
+
+ async function handleConfirmCash() {
+    if (!activeRide) return;
+    setConfirmingCash(true);
+    try {
+      const res = await fetch(`/api/rides/${activeRide._id}/confirm-cash`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        toast.success("Cash payment confirmed");
+        setActiveRide(null);
+      } else {
+        toast.error("Could not confirm cash payment");
+      }
+    } finally {
+      setConfirmingCash(false);
     }
   }
 
