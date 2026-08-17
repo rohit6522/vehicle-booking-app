@@ -10,11 +10,11 @@ import { Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 const STATUS_STYLES: Record<string, string> = {
-  requested: "bg-amber-50 text-amber-600",
-  accepted: "bg-blue-50 text-blue-600",
-  ongoing: "bg-blue-50 text-blue-600",
-  completed: "bg-emerald-50 text-emerald-600",
-  cancelled: "bg-red-50 text-red-500",
+  requested: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400",
+  accepted: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+  ongoing: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+  completed: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400",
+  cancelled: "bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400",
 };
 
 export default function BookingsPage() {
