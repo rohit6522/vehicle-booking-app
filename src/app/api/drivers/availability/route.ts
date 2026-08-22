@@ -17,5 +17,11 @@ export async function GET() {
     if (type && type in counts) counts[type]++;
   }
 
-  return NextResponse.json({ counts });
+  const activeCategories = Object.values(counts).filter((c) => c > 0).length;
+
+  return NextResponse.json({
+    counts,
+    totalDrivers: drivers.length,
+    activeCategories,
+  });
 }

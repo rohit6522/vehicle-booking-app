@@ -1,37 +1,47 @@
 "use client";
 
-import { useRef } from "react";
-
-import { Car, ChevronLeft, ChevronRight } from "lucide-react";
-import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-const CATEGORIES = [
-  {
-    badge: "POPULAR",
-    icon: Car,
-    title: "All Vehicles",
-    desc: "Browse the full fleet",
-    num: "01",
-    seats: null,
-  },
-  ...VEHICLE_TYPES.map((v, i) => ({
-    badge: ["QUICK", "COMFORT", "PREMIUM", "FAMILY"][i],
-    icon: v.icon,
-    title: v.label + (v.label.endsWith("s") ? "" : "s"),
-    desc: v.desc,
-    num: String(i + 2).padStart(2, "0"),
-    seats: v.seats,
-  })),
-];
-
-const STATS = [
-  { value: "6+", label: "Categories" },
-  { value: "50+", label: "Vehicle types" },
-  { value: "24/7", label: "Availability" },
-];
+import { Car, CarFront, Bus, ChevronLeft, ChevronRight } from "lucide-react";
+import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 
 export function FleetSection() {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [counts, setCounts] = useState<Record<string, number> | null>(null);
+  const [totalDrivers, setTotalDrivers] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/drivers/availability")
+      .then((res) => res.json())
+      .then((data) => {
+        setCounts(data.counts);
+        setTotalDrivers(data.totalDrivers ?? 0);
+      })
+      .catch(() => {});
+  }, []);
+
+  const categories = [
+    {
+      badge: "POPULAR",
+      icon: Car,
+      title: "All Vehicles",
+      desc: "Browse the full fleet",
+      num: "01",
+      count: totalDrivers,
+    },
+    ...VEHICLE_TYPES.map((v, i) => ({
+      badge: ["QUICK", "COMFORT", "PREMIUM", "FAMILY"][i],
+      icon: v.icon,
+      title: v.label + (v.label.endsWith("s") ? "" : "s"),
+      desc: v.desc,
+      num: String(i + 2).padStart(2, "0"),
+      count: counts?.[v.type] ?? 0,
+    })),
+  ];
+
+  const activeCategories = counts
+    ? Object.values(counts).filter((c) => c > 0).length
+    : 0;
 
   function scroll(dir: "left" | "right") {
     scrollerRef.current?.scrollBy({
@@ -79,11 +89,11 @@ export function FleetSection() {
           </div>
         </div>
 
-       <div
+        <div
           ref={scrollerRef}
           className="flex gap-5 overflow-x-auto pb-4 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {CATEGORIES.map((cat, i) => (
+          {categories.map((cat, i) => (
             <motion.div
               key={cat.title}
               initial={{ opacity: 0, y: 24 }}
@@ -93,7 +103,6 @@ export function FleetSection() {
               whileHover={{ y: -4 }}
               className="min-w-[220px] flex-shrink-0 bg-white border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 hover:shadow-sm transition-colors"
             >
-
               <div className="flex items-center justify-between mb-6">
                 <span className="text-[10px] tracking-wide font-semibold text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full">
                   {cat.badge}
@@ -105,14 +114,19 @@ export function FleetSection() {
               <div className="w-11 h-11 rounded-xl bg-neutral-100 flex items-center justify-center mb-4">
                 <cat.icon size={20} className="text-black" strokeWidth={1.5} />
               </div>
-
               <h3 className="font-bold text-black">{cat.title}</h3>
               <p className="text-sm text-neutral-500 mt-1">{cat.desc}</p>
-              {cat.seats && (
-                <p className="text-xs text-neutral-400 mt-1">
-                  {cat.seats} seat{cat.seats > 1 ? "s" : ""}
-                </p>
-              )}
+              <p className="text-xs text-neutral-400 mt-2">
+                {counts === null ? (
+                  <span className="inline-block h-3 w-16 bg-neutral-100 rounded animate-pulse" />
+                ) : cat.count > 0 ? (
+                  <span className="text-emerald-600 font-medium">
+                    {cat.count} driver{cat.count > 1 ? "s" : ""} online
+                  </span>
+                ) : (
+                  "No drivers yet"
+                )}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -124,23 +138,26 @@ export function FleetSection() {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-10 mt-8 pt-6 border-t border-neutral-100"
         >
-          {STATS.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.1, ease: "backOut" }}
-              className="flex items-baseline gap-2"
-            >
-              <span className="text-lg font-black text-black">{stat.value}</span>
-              <span className="text-sm text-neutral-500">{stat.label}</span>
-            </motion.div>
-          ))}
+          <StatItem value={`${activeCategories}+`} label="Categories" delay={0} />
+          <StatItem value={`${totalDrivers}+`} label="Total drivers" delay={0.1} />
+          <StatItem value="24/7" label="Availability" delay={0.2} />
         </motion.div>
-
-
       </div>
     </section>
+  );
+}
+
+function StatItem({ value, label, delay }: { value: string; label: string; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay, ease: "backOut" }}
+      className="flex items-baseline gap-2"
+    >
+      <span className="text-lg font-black text-black">{value}</span>
+      <span className="text-sm text-neutral-500">{label}</span>
+    </motion.div>
   );
 }
