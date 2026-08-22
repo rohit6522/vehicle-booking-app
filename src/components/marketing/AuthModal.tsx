@@ -53,7 +53,7 @@ export function AuthModal({
     await signIn("google", { callbackUrl: "/" });
   }
 
-async function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -123,7 +123,7 @@ async function handleLogin(e: React.FormEvent) {
     }
   }
 
-async function handleVerifyOtp(e: React.FormEvent) {
+  async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -200,8 +200,12 @@ async function handleVerifyOtp(e: React.FormEvent) {
             </button>
 
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-black tracking-tight text-black">RYDEX</h2>
-              <p className="text-sm text-neutral-500 mt-1">Premium Vehicle Booking</p>
+              <h2 className="text-2xl font-black tracking-tight text-black">
+                RYDEX
+              </h2>
+              <p className="text-sm text-neutral-500 mt-1">
+                Premium Vehicle Booking
+              </p>
             </div>
 
             {mode !== "verify-otp" && (
@@ -233,28 +237,40 @@ async function handleVerifyOtp(e: React.FormEvent) {
                   exit={{ opacity: 0, x: -12 }}
                   transition={{ duration: 0.22, ease: "easeOut" }}
                 >
-                  <h3 className="text-lg font-bold text-black mb-4">Welcome back</h3>
+                  <h3 className="text-lg font-bold text-black mb-4">
+                    Welcome back
+                  </h3>
                   <form onSubmit={handleLogin} className="space-y-3">
                     <div className="relative">
-                      <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                      <Mail
+                        size={16}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                      />
                       <input
                         type="email"
                         required
                         placeholder="Email"
                         value={form.email}
-                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, email: e.target.value })
+                        }
                         className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
                     </div>
                     <div className="relative">
-                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                      <Lock
+                        size={16}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                      />
                       <input
                         type={showPassword ? "text" : "password"}
                         required
                         minLength={6}
                         placeholder="Password"
                         value={form.password}
-                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, password: e.target.value })
+                        }
                         className="w-full pl-11 pr-11 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
                       <button
@@ -262,7 +278,11 @@ async function handleVerifyOtp(e: React.FormEvent) {
                         onClick={() => setShowPassword((s) => !s)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
                       >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {showPassword ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
                       </button>
                     </div>
 
@@ -291,7 +311,10 @@ async function handleVerifyOtp(e: React.FormEvent) {
                   </form>
                   <p className="text-center text-sm text-neutral-500 mt-5">
                     Don&apos;t have an account?{" "}
-                    <button onClick={() => switchMode("register")} className="font-semibold text-black">
+                    <button
+                      onClick={() => switchMode("register")}
+                      className="font-semibold text-black"
+                    >
                       Sign up
                     </button>
                   </p>
@@ -306,38 +329,57 @@ async function handleVerifyOtp(e: React.FormEvent) {
                   exit={{ opacity: 0, x: -12 }}
                   transition={{ duration: 0.22, ease: "easeOut" }}
                 >
-                  <h3 className="text-lg font-bold text-black mb-4">Create account</h3>
-                  <form onSubmit={handleRegisterDirect} className="space-y-3">                    <div className="relative">
-                      <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                  <h3 className="text-lg font-bold text-black mb-4">
+                    Create account
+                  </h3>
+                  <form onSubmit={handleRegisterDirect} className="space-y-3">
+                    {" "}
+                    <div className="relative">
+                      <User
+                        size={16}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                      />
                       <input
                         type="text"
                         required
                         placeholder="Full name"
                         value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
                         className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
                     </div>
                     <div className="relative">
-                      <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                      <Mail
+                        size={16}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                      />
                       <input
                         type="email"
                         required
                         placeholder="Email address"
                         value={form.email}
-                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, email: e.target.value })
+                        }
                         className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
                     </div>
                     <div className="relative">
-                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                      <Lock
+                        size={16}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                      />
                       <input
                         type={showPassword ? "text" : "password"}
                         required
                         minLength={6}
                         placeholder="Password"
                         value={form.password}
-                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, password: e.target.value })
+                        }
                         className="w-full pl-11 pr-11 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
                       <button
@@ -345,10 +387,13 @@ async function handleVerifyOtp(e: React.FormEvent) {
                         onClick={() => setShowPassword((s) => !s)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
                       >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {showPassword ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
                       </button>
                     </div>
-
                     <AnimatePresence>
                       {error && (
                         <motion.p
@@ -361,8 +406,7 @@ async function handleVerifyOtp(e: React.FormEvent) {
                         </motion.p>
                       )}
                     </AnimatePresence>
-
-                                       <motion.button
+                    <motion.button
                       type="submit"
                       disabled={loading}
                       whileHover={{ scale: 1.02 }}
@@ -374,7 +418,10 @@ async function handleVerifyOtp(e: React.FormEvent) {
                   </form>
                   <p className="text-center text-sm text-neutral-500 mt-5">
                     Already have an account?{" "}
-                    <button onClick={() => switchMode("login")} className="font-semibold text-black">
+                    <button
+                      onClick={() => switchMode("login")}
+                      className="font-semibold text-black"
+                    >
                       Login
                     </button>
                   </p>
@@ -391,10 +438,13 @@ async function handleVerifyOtp(e: React.FormEvent) {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <ShieldCheck size={18} className="text-black" />
-                    <h3 className="text-lg font-bold text-black">Verify your email</h3>
+                    <h3 className="text-lg font-bold text-black">
+                      Verify your email
+                    </h3>
                   </div>
                   <p className="text-sm text-neutral-500 mb-5">
-                    We sent a 6-digit code to <span className="font-medium text-black">{form.email}</span>
+                    We sent a 6-digit code to{" "}
+                    <span className="font-medium text-black">{form.email}</span>
                   </p>
                   <form onSubmit={handleVerifyOtp} className="space-y-3">
                     <motion.input
@@ -408,7 +458,9 @@ async function handleVerifyOtp(e: React.FormEvent) {
                       maxLength={6}
                       placeholder="Enter 6-digit OTP"
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, ""))
+                      }
                       className="w-full px-4 py-3 rounded-full border border-neutral-200 text-sm text-center tracking-[0.4em] font-semibold placeholder:text-neutral-400 placeholder:tracking-normal placeholder:font-normal focus:outline-none focus:border-black"
                     />
 

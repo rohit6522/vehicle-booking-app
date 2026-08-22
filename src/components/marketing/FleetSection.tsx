@@ -57,7 +57,7 @@ export function FleetSection() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-4 h-px bg-black" />
-              <span className="text-xs tracking-[0.2em] text-neutral-500 font-medium">
+                            <span className="text-xs tracking-[0.2em] text-neutral-700 font-semibold">
                 FLEET
               </span>
             </div>
@@ -105,7 +105,7 @@ export function FleetSection() {
               className="min-w-[220px] flex-shrink-0 bg-white border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 hover:shadow-sm transition-colors"
             >
               <div className="flex items-center justify-between mb-6">
-                <span className="text-[10px] tracking-wide font-semibold text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full">
+                                <span className="text-[10px] tracking-wide font-semibold text-neutral-700 bg-neutral-200 px-2.5 py-1 rounded-full">
                   {cat.badge}
                 </span>
                 <span className="text-[10px] text-neutral-300 font-medium">
