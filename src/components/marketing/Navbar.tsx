@@ -11,8 +11,8 @@ const RIDER_LINKS = [
   { label: "Home", href: "/", authRequired: false },
   { label: "Book a Ride", href: "/rider/book", authRequired: true },
   { label: "My Bookings", href: "/bookings", authRequired: true },
-  { label: "Fleet", href: "#fleet", authRequired: false },
-  { label: "Contact", href: "#contact", authRequired: false },
+  { label: "Fleet", href: "/#fleet", authRequired: false },
+  { label: "Contact", href: "/contact", authRequired: false },
 ];
 
 const DRIVER_LINKS = [
