@@ -77,16 +77,20 @@ async function handleLogin(e: React.FormEvent) {
     router.refresh();
   }
 
- async function handleSendOtp(e: React.FormEvent) {
+  // OTP email verification is disabled for now — Render blocks outbound
+  // SMTP, and Resend's free tier needs a verified domain to email real
+  // users. This creates the account directly instead. To re-enable OTP:
+  // change the register form's onSubmit back to handleSendOtp.
+  async function handleRegisterDirect(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/send-otp", {
+      const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, role: "rider" }),
       });
       const data = await res.json();
 
@@ -96,8 +100,21 @@ async function handleLogin(e: React.FormEvent) {
         return;
       }
 
-      toast.success("OTP sent to your email");
-      setMode("verify-otp");
+      const signInRes = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
+
+      if (signInRes?.error) {
+        toast.success("Account created — please log in.");
+        setMode("login");
+        return;
+      }
+
+      toast.success("Account created successfully!");
+      onClose();
+      router.refresh();
     } catch {
       setError("Network error. Please try again.");
       toast.error("Network error. Please try again.");
@@ -290,8 +307,7 @@ async function handleVerifyOtp(e: React.FormEvent) {
                   transition={{ duration: 0.22, ease: "easeOut" }}
                 >
                   <h3 className="text-lg font-bold text-black mb-4">Create account</h3>
-                  <form onSubmit={handleSendOtp} className="space-y-3">
-                    <div className="relative">
+                  <form onSubmit={handleRegisterDirect} className="space-y-3">                    <div className="relative">
                       <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
                       <input
                         type="text"
@@ -346,14 +362,14 @@ async function handleVerifyOtp(e: React.FormEvent) {
                       )}
                     </AnimatePresence>
 
-                    <motion.button
+                                       <motion.button
                       type="submit"
                       disabled={loading}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="w-full py-3 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
                     >
-                      {loading ? "Sending OTP..." : "Send OTP"}
+                      {loading ? "Creating account..." : "Create Account"}
                     </motion.button>
                   </form>
                   <p className="text-center text-sm text-neutral-500 mt-5">

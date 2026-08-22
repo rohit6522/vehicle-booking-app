@@ -26,6 +26,7 @@
     "react-dom": "19.2.4",
     "react-leaflet": "^5.0.0",
     "recharts": "^3.10.0",
+    "resend": "^6.22.0",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "sonner": "^2.0.8",

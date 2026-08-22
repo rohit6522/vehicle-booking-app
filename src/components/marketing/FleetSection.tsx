@@ -76,12 +76,13 @@ export function FleetSection() {
           <div className="hidden sm:flex items-center gap-3">
             <button
               onClick={() => scroll("left")}
-              className="w-10 h-10 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-black hover:text-black transition-colors"
+              className="w-10 h-10 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-black hover:text-black active:bg-black active:text-white active:border-black transition-colors"
             >
               <ChevronLeft size={16} />
             </button>
                         <button
               onClick={() => scroll("right")}
+
               className="w-10 h-10 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-black hover:text-black active:bg-black active:text-white active:border-black transition-colors"
             >
               <ChevronRight size={16} />
