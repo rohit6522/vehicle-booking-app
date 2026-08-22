@@ -8,20 +8,20 @@ import { UserMenu } from "./UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const RIDER_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Book a Ride", href: "/rider/book" },
-  { label: "My Bookings", href: "/bookings" },
-  { label: "Fleet", href: "#fleet" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/", authRequired: false },
+  { label: "Book a Ride", href: "/rider/book", authRequired: true },
+  { label: "My Bookings", href: "/bookings", authRequired: true },
+  { label: "Fleet", href: "#fleet", authRequired: false },
+  { label: "Contact", href: "#contact", authRequired: false },
 ];
 
 const DRIVER_LINKS = [
-  { label: "Dashboard", href: "/driver/dashboard" },
-  { label: "Ride Requests", href: "/driver/requests" },
-  { label: "My Bookings", href: "/bookings" },
+  { label: "Dashboard", href: "/driver/dashboard", authRequired: false },
+  { label: "Ride Requests", href: "/driver/requests", authRequired: false },
+  { label: "My Bookings", href: "/bookings", authRequired: false },
 ];
 
-const ADMIN_LINKS = [{ label: "Dashboard", href: "/admin/dashboard" }];
+const ADMIN_LINKS = [{ label: "Dashboard", href: "/admin/dashboard", authRequired: false }];
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -75,17 +75,24 @@ export function Navbar() {
               RYDEX
             </span>
 
-            <nav className="hidden md:flex items-center gap-8">
-              {links.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-sm text-neutral-300 hover:text-white transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
+                    <nav className="hidden md:flex items-center gap-8">
+          {links.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+                           onClick={(e) => {
+                if (link.authRequired && status !== "authenticated") {
+                  e.preventDefault();
+                  setModalOpen(true);
+                }
+              }}
+
+              className="text-sm text-neutral-300 hover:text-white transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
 
             <div className="flex items-center gap-3">
               <ThemeToggle dark />
@@ -115,18 +122,26 @@ export function Navbar() {
               mobileOpen ? "max-h-64 opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
             }`}
           >
-            <nav className="flex flex-col gap-1 pb-2 border-t border-white/10 pt-3">
-              {links.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-sm text-neutral-300 hover:text-white transition-colors py-2.5"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
+                    <nav className="flex flex-col gap-1 pb-2 border-t border-white/10 pt-3">
+          {links.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+                           onClick={(e) => {
+                setMobileOpen(false);
+                if (link.authRequired && status !== "authenticated") {
+                  e.preventDefault();
+                  setModalOpen(true);
+                }
+              }}
+              className="text-sm text-neutral-300 hover:text-white transition-colors py-2.5"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+
+
           </div>
         </div>
       </header>
