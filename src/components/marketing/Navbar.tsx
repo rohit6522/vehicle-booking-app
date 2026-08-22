@@ -43,7 +43,9 @@ function NavContent({
   return (
     <>
       <div className="flex items-center justify-between">
-        <span className="text-white font-black text-lg tracking-tight">RYDEX</span>
+        <span className="text-white font-black text-lg tracking-tight">
+          RYDEX
+        </span>
 
         <nav className="hidden md:flex items-center gap-8">
           {links.map((link) => (
@@ -57,10 +59,13 @@ function NavContent({
           ))}
         </nav>
 
-<div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <ThemeToggle dark />
           {status === "authenticated" && session?.user ? (
-            <UserMenu name={session.user.name ?? "User"} role={role ?? "rider"} />
+            <UserMenu
+              name={session.user.name ?? "User"}
+              role={role ?? "rider"}
+            />
           ) : (
             <button
               onClick={onLoginClick}
@@ -109,12 +114,20 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const tickingRef = useRef(false);
 
-  useEffect(() => {
+   useEffect(() => {
     function onScroll() {
       if (tickingRef.current) return;
       tickingRef.current = true;
       requestAnimationFrame(() => {
-        setScrolled(window.scrollY > 40);
+        // Hysteresis: switch to pill only after 80px down, switch back to
+        // rectangle only below 30px. This gap stops the shape flickering
+        // when the scroll position hovers near a single threshold.
+        setScrolled((prev) => {
+          const y = window.scrollY;
+          if (!prev && y > 80) return true;
+          if (prev && y < 30) return false;
+          return prev;
+        });
         tickingRef.current = false;
       });
     }
@@ -129,7 +142,11 @@ export function Navbar() {
 
   const role = (session?.user as any)?.role;
   const links =
-    role === "driver" ? DRIVER_LINKS : role === "admin" ? ADMIN_LINKS : RIDER_LINKS;
+    role === "driver"
+      ? DRIVER_LINKS
+      : role === "admin"
+        ? ADMIN_LINKS
+        : RIDER_LINKS;
 
   const shared = {
     links,
@@ -141,7 +158,7 @@ export function Navbar() {
     onMobileToggle: () => setMobileOpen((o) => !o),
   };
 
- return (
+  return (
     <>
       <header className="sticky top-0 z-40 h-[76px]">
         {/* Rectangle state (top of page) — full width, sharp corners.
