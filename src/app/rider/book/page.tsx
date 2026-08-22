@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { VEHICLE_TYPES, VehicleType } from "@/lib/vehicleTypes";
@@ -26,7 +26,7 @@ interface Point {
   lng: number | null;
 }
 
-export default function BookRidePage() {
+function BookRidePageInner() {
     const searchParams = useSearchParams();
   const initialVehicle = searchParams.get("vehicle");
   const validVehicle = VEHICLE_TYPES.some((v) => v.type === initialVehicle)
@@ -606,5 +606,13 @@ function RatingSection({ rideId }: { rideId: string }) {
         {loading ? "Submitting..." : "Submit Rating"}
       </motion.button>
     </div>
+  );
+}
+
+export default function BookRidePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <BookRidePageInner />
+    </Suspense>
   );
 }
