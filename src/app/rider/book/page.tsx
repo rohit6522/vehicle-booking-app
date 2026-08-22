@@ -8,6 +8,7 @@ import { getSocket } from "@/lib/socketClient";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 const TripLocationPicker = dynamic(
   () => import("@/components/map/TripLocationPicker").then((m) => m.TripLocationPicker),
@@ -26,7 +27,13 @@ interface Point {
 }
 
 export default function BookRidePage() {
-  const [vehicleType, setVehicleType] = useState<VehicleType>("car");
+    const searchParams = useSearchParams();
+  const initialVehicle = searchParams.get("vehicle");
+  const validVehicle = VEHICLE_TYPES.some((v) => v.type === initialVehicle)
+    ? (initialVehicle as VehicleType)
+    : "car";
+
+  const [vehicleType, setVehicleType] = useState<VehicleType>(validVehicle);
   const [pickup, setPickup] = useState<Point>({ address: "", lat: null, lng: null });
   const [drop, setDrop] = useState<Point>({ address: "", lat: null, lng: null });
   const [estimate, setEstimate] = useState<{ distanceKm: number; fare: number } | null>(
