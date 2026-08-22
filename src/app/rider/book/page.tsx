@@ -6,18 +6,31 @@ import { motion, AnimatePresence } from "framer-motion";
 import { VEHICLE_TYPES, VehicleType } from "@/lib/vehicleTypes";
 import { getSocket } from "@/lib/socketClient";
 import { generateReceipt } from "@/lib/generateReceipt";
-import { Download } from "lucide-react";
+import { Download, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const TripLocationPicker = dynamic(
-  () => import("@/components/map/TripLocationPicker").then((m) => m.TripLocationPicker),
-  { ssr: false, loading: () => <div className="h-72 bg-neutral-100 rounded-xl animate-pulse" /> }
+  () =>
+    import("@/components/map/TripLocationPicker").then(
+      (m) => m.TripLocationPicker,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-72 bg-neutral-100 rounded-xl animate-pulse" />
+    ),
+  },
 );
 
 const LiveTrackerMap = dynamic(
   () => import("@/components/map/LiveTrackerMap").then((m) => m.LiveTrackerMap),
-  { ssr: false, loading: () => <div className="h-48 bg-neutral-100 rounded-lg animate-pulse" /> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-48 bg-neutral-100 rounded-lg animate-pulse" />
+    ),
+  },
 );
 
 interface Point {
@@ -27,29 +40,46 @@ interface Point {
 }
 
 function BookRidePageInner() {
-    const searchParams = useSearchParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const initialVehicle = searchParams.get("vehicle");
   const validVehicle = VEHICLE_TYPES.some((v) => v.type === initialVehicle)
     ? (initialVehicle as VehicleType)
     : "car";
 
   const [vehicleType, setVehicleType] = useState<VehicleType>(validVehicle);
-  const [pickup, setPickup] = useState<Point>({ address: "", lat: null, lng: null });
-  const [drop, setDrop] = useState<Point>({ address: "", lat: null, lng: null });
-  const [estimate, setEstimate] = useState<{ distanceKm: number; fare: number } | null>(
-    null
-  );
+  const [pickup, setPickup] = useState<Point>({
+    address: "",
+    lat: null,
+    lng: null,
+  });
+  const [drop, setDrop] = useState<Point>({
+    address: "",
+    lat: null,
+    lng: null,
+  });
+  const [estimate, setEstimate] = useState<{
+    distanceKm: number;
+    fare: number;
+  } | null>(null);
   const [estimating, setEstimating] = useState(false);
   const [booking, setBooking] = useState(false);
   const [error, setError] = useState("");
   const [ride, setRide] = useState<any>(null);
-  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(
-    null
-  );
-  const [availability, setAvailability] = useState<Record<string, number> | null>(null);
+  const [driverLocation, setDriverLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [availability, setAvailability] = useState<Record<
+    string,
+    number
+  > | null>(null);
 
   const coordsReady =
-    pickup.lat != null && pickup.lng != null && drop.lat != null && drop.lng != null;
+    pickup.lat != null &&
+    pickup.lng != null &&
+    drop.lat != null &&
+    drop.lng != null;
 
   useEffect(() => {
     fetch("/api/drivers/availability")
@@ -91,7 +121,7 @@ function BookRidePageInner() {
     if (coordsReady) getEstimate();
   }, [getEstimate, coordsReady]);
 
- async function handleBook() {
+  async function handleBook() {
     setBooking(true);
     setError("");
     try {
@@ -117,7 +147,7 @@ function BookRidePageInner() {
     }
   }
 
- async function handleCancel() {
+  async function handleCancel() {
     if (!ride?._id) return;
     await fetch(`/api/rides/${ride._id}/cancel`, { method: "POST" });
     toast.info("Ride cancelled");
@@ -137,7 +167,7 @@ function BookRidePageInner() {
       setDriverLocation({ lat, lng });
     }
 
-   function toastOnStatusChange({ ride: updatedRide }: { ride: any }) {
+    function toastOnStatusChange({ ride: updatedRide }: { ride: any }) {
       if (updatedRide.status === "accepted" && ride?.status === "requested") {
         toast.success("A driver accepted your ride!");
       }
@@ -170,6 +200,15 @@ function BookRidePageInner() {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-md mx-auto text-center"
           >
+            {ride.status === "requested" && (
+              <button
+                onClick={() => router.push("/")}
+                className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-4 transition-colors mx-auto"
+              >
+                <ArrowLeft size={16} />
+                Back to Home
+              </button>
+            )}
             <h1 className="text-2xl font-black mb-2">
               {ride.status === "requested" && "Looking for a driver..."}
               {ride.status === "accepted" && "Driver on the way!"}
@@ -193,7 +232,11 @@ function BookRidePageInner() {
               <>
                 <motion.div
                   animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                   className="text-neutral-400 text-sm mb-4"
                 >
                   Waiting for a nearby {vehicleType} driver to accept…
@@ -211,7 +254,10 @@ function BookRidePageInner() {
               <div className="text-left space-y-4">
                 <div className="rounded-xl overflow-hidden border border-neutral-200">
                   {driverLocation ? (
-                    <LiveTrackerMap lat={driverLocation.lat} lng={driverLocation.lng} />
+                    <LiveTrackerMap
+                      lat={driverLocation.lat}
+                      lng={driverLocation.lng}
+                    />
                   ) : (
                     <div className="h-48 bg-neutral-50 flex items-center justify-center text-sm text-neutral-400">
                       Waiting for driver&apos;s live location…
@@ -226,27 +272,37 @@ function BookRidePageInner() {
                   className="bg-neutral-50 rounded-xl p-4"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <p className="font-semibold text-base">{ride.driver?.name}</p>
+                    <p className="font-semibold text-base">
+                      {ride.driver?.name}
+                    </p>
                     <span className="text-sm text-amber-500 font-medium">
                       ★ {ride.driver?.rating ?? 5}
                     </span>
                   </div>
                   <p className="text-sm text-neutral-500">
                     {ride.driver?.vehicle?.make} {ride.driver?.vehicle?.model}
-                    {ride.driver?.vehicle?.color ? ` · ${ride.driver.vehicle.color}` : ""}
+                    {ride.driver?.vehicle?.color
+                      ? ` · ${ride.driver.vehicle.color}`
+                      : ""}
                   </p>
                   <p className="text-sm text-neutral-500">
                     Plate: {ride.driver?.vehicle?.numberPlate}
                   </p>
                   {ride.driver?.phone && (
-                    <p className="text-sm text-neutral-500">Phone: {ride.driver.phone}</p>
+                    <p className="text-sm text-neutral-500">
+                      Phone: {ride.driver.phone}
+                    </p>
                   )}
 
                   {ride.status === "accepted" && ride.otpForRider && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3, duration: 0.3, ease: "backOut" }}
+                      transition={{
+                        delay: 0.3,
+                        duration: 0.3,
+                        ease: "backOut",
+                      }}
                       className="mt-3 pt-3 border-t border-neutral-200"
                     >
                       <p className="text-xs text-neutral-400 mb-1">
@@ -261,7 +317,7 @@ function BookRidePageInner() {
               </div>
             )}
 
-           {ride.status === "completed" && (
+            {ride.status === "completed" && (
               <div className="mt-2 space-y-4">
                 <PaymentSection ride={ride} />
                 {!ride.rating?.score && <RatingSection rideId={ride._id} />}
@@ -280,8 +336,6 @@ function BookRidePageInner() {
                 </button>
               </div>
             )}
-
-
           </motion.div>
         ) : (
           <motion.div
@@ -292,10 +346,17 @@ function BookRidePageInner() {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-md mx-auto"
           >
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-6 transition-colors"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
             <h1 className="text-3xl font-black mb-1">Book a ride</h1>
             <p className="text-neutral-500 mb-8">Enter your trip details</p>
 
-           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
               {VEHICLE_TYPES.map((v) => (
                 <motion.button
                   key={v.type}
@@ -334,7 +395,7 @@ function BookRidePageInner() {
             </AnimatePresence>
             <div className="mb-6" />
 
-          <div className="mb-6">
+            <div className="mb-6">
               <TripLocationPicker
                 pickup={pickup}
                 drop={drop}
@@ -353,7 +414,9 @@ function BookRidePageInner() {
                   className="bg-neutral-50 rounded-xl p-4 mb-6 flex items-center justify-between overflow-hidden"
                 >
                   <div>
-                    <p className="text-xs text-neutral-500">Estimated distance</p>
+                    <p className="text-xs text-neutral-500">
+                      Estimated distance
+                    </p>
                     <p className="font-semibold">{estimate.distanceKm} km</p>
                   </div>
                   <div className="text-right">
@@ -396,7 +459,9 @@ function BookRidePageInner() {
 function PaymentSection({ ride }: { ride: any }) {
   const [loading, setLoading] = useState(false);
   const [paid, setPaid] = useState(ride.paymentStatus === "paid");
-  const [method, setMethod] = useState<"cash" | "online" | null>(ride.paymentMethod ?? null);
+  const [method, setMethod] = useState<"cash" | "online" | null>(
+    ride.paymentMethod ?? null,
+  );
   const [error, setError] = useState("");
 
   async function handlePayOnline() {
@@ -423,17 +488,22 @@ function PaymentSection({ ride }: { ride: any }) {
           name: "RYDEX",
           description: `${ride.pickup.address} → ${ride.drop.address}`,
           order_id: orderData.orderId,
-         handler: async (response: any) => {
-            const verifyRes = await fetch(`/api/rides/${ride._id}/verify-payment`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response),
-            });
+          handler: async (response: any) => {
+            const verifyRes = await fetch(
+              `/api/rides/${ride._id}/verify-payment`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(response),
+              },
+            );
             if (verifyRes.ok) {
               toast.success("Payment successful!");
               setPaid(true);
             } else {
-              setError("Payment succeeded but verification failed. Contact support.");
+              setError(
+                "Payment succeeded but verification failed. Contact support.",
+              );
               toast.error("Payment verification failed. Contact support.");
             }
           },
@@ -449,11 +519,13 @@ function PaymentSection({ ride }: { ride: any }) {
     }
   }
 
- async function handlePayCash() {
+  async function handlePayCash() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/rides/${ride._id}/pay-cash`, { method: "POST" });
+      const res = await fetch(`/api/rides/${ride._id}/pay-cash`, {
+        method: "POST",
+      });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
@@ -509,7 +581,9 @@ function PaymentSection({ ride }: { ride: any }) {
           whileTap={{ scale: 0.98 }}
           className="flex-1 py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40 text-sm sm:text-base"
         >
-          {loading ? "Loading..." : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
+          {loading
+            ? "Loading..."
+            : `Pay ₹${ride.fare.final ?? ride.fare.estimated}`}
         </motion.button>
         <motion.button
           onClick={handlePayCash}
@@ -521,8 +595,6 @@ function PaymentSection({ ride }: { ride: any }) {
           Pay with Cash
         </motion.button>
       </div>
-
-
     </div>
   );
 }
@@ -535,7 +607,7 @@ function RatingSection({ rideId }: { rideId: string }) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
- async function handleSubmit() {
+  async function handleSubmit() {
     if (score === 0) return;
     setLoading(true);
     setError("");
