@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
-import { MapPin, Navigation2 } from "lucide-react";
+import { MapPin, Navigation2, ArrowLeft } from "lucide-react";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useRouter } from "next/navigation";
+
 
 const STATUS_STYLES: Record<string, string> = {
   requested: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400",
@@ -19,6 +21,7 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function BookingsPage() {
   const { data: session, status: sessionStatus } = useSession();
+    const router = useRouter();
   const [rides, setRides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +39,14 @@ export default function BookingsPage() {
     <>
       <Navbar />
       <main className="min-h-screen bg-white px-4 py-16">
-        <div className="max-w-2xl mx-auto">
+                <div className="max-w-2xl mx-auto">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-6 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </button>
           <h1 className="text-3xl font-black mb-1">My Bookings</h1>
           <p className="text-neutral-500 mb-8">
             {role === "driver" ? "Your ride history as a driver" : "Your past and current rides"}
