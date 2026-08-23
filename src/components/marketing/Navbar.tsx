@@ -55,7 +55,13 @@ export function Navbar() {
 
   const role = (session?.user as any)?.role;
   const links =
-    role === "driver" ? DRIVER_LINKS : role === "admin" ? ADMIN_LINKS : RIDER_LINKS;
+    status === "loading"
+      ? []
+      : role === "driver"
+      ? DRIVER_LINKS
+      : role === "admin"
+      ? ADMIN_LINKS
+      : RIDER_LINKS;
 
   return (
     <>
