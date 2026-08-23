@@ -6,6 +6,7 @@ import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { Car, IndianRupee, ShieldCheck, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export default function VehiclePricingReviewPage() {
   const params = useParams();
@@ -42,7 +43,11 @@ export default function VehiclePricingReviewPage() {
         toast.error(data.error ?? "Something went wrong");
         return;
       }
-      toast.success(action === "approve" ? "Pricing approved — driver is live!" : "Pricing rejected");
+      toast.success(
+        action === "approve"
+          ? "Pricing approved — driver is live!"
+          : "Pricing rejected",
+      );
       router.push("/admin/dashboard");
     } finally {
       setProcessing(false);
@@ -67,11 +72,19 @@ export default function VehiclePricingReviewPage() {
           ) : !vendor ? (
             <p className="text-red-500 text-sm">{error}</p>
           ) : (
-            <>
-             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <div className="min-w-0">
-                  <h1 className="text-2xl font-black truncate">{vendor.name}</h1>
-                  <p className="text-neutral-500 text-sm truncate">{vendor.email}</p>
+                  <h1 className="text-2xl font-black truncate">
+                    {vendor.name}
+                  </h1>
+                  <p className="text-neutral-500 text-sm truncate">
+                    {vendor.email}
+                  </p>
                 </div>
                 <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 self-start sm:self-auto">
                   Pending
@@ -100,7 +113,10 @@ export default function VehiclePricingReviewPage() {
                       <h2 className="font-bold">Vehicle Details</h2>
                     </div>
                     <Row label="Vehicle Type" value={vendor.vehicle?.type} />
-                    <Row label="Registration Number" value={vendor.vehicle?.numberPlate} />
+                    <Row
+                      label="Registration Number"
+                      value={vendor.vehicle?.numberPlate}
+                    />
                     <Row label="Model" value={vendor.vehicle?.model} />
                   </div>
 
@@ -109,9 +125,18 @@ export default function VehiclePricingReviewPage() {
                       <IndianRupee size={16} />
                       <h2 className="font-bold">Pricing Configuration</h2>
                     </div>
-                    <Row label="Base Fare" value={`₹${vendor.pricing?.baseFare ?? "—"}`} />
-                    <Row label="Price per KM" value={`₹${vendor.pricing?.perKm ?? "—"}`} />
-                    <Row label="Waiting Charge" value={`₹${vendor.pricing?.waitingCharge ?? "—"}`} />
+                    <Row
+                      label="Base Fare"
+                      value={`₹${vendor.pricing?.baseFare ?? "—"}`}
+                    />
+                    <Row
+                      label="Price per KM"
+                      value={`₹${vendor.pricing?.perKm ?? "—"}`}
+                    />
+                    <Row
+                      label="Waiting Charge"
+                      value={`₹${vendor.pricing?.waitingCharge ?? "—"}`}
+                    />
                   </div>
                 </div>
 
@@ -145,7 +170,7 @@ export default function VehiclePricingReviewPage() {
                   </div>
                 </div>
               </div>
-            </>
+            </motion.div>
           )}
         </div>
       </main>

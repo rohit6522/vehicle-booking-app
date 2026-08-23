@@ -1,12 +1,17 @@
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
-
+import { motion } from "framer-motion";
 export default function TermsPage() {
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-white px-4 py-24">
-        <div className="max-w-2xl mx-auto">
+            <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-2xl mx-auto"
+        >
           <span className="text-xs tracking-[0.2em] text-neutral-500 font-medium">
             LEGAL
           </span>
@@ -46,7 +51,7 @@ export default function TermsPage() {
               </p>
             </section>
           </div>
-        </div>
+        </motion.div>
       </main>
       <Footer />
     </>

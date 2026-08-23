@@ -6,7 +6,7 @@ import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { Car, Landmark, FileText, ShieldCheck, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-
+import { motion } from "framer-motion";
 export default function VendorDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -87,12 +87,16 @@ export default function VendorDetailPage() {
             Back
           </button>
 
-          {loading ? (
+                    {loading ? (
             <p className="text-neutral-400 text-sm">Loading...</p>
           ) : !vendor ? (
             <p className="text-red-500 text-sm">{error}</p>
           ) : (
-            <>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <div className="min-w-0">
                   <h1 className="text-2xl font-black truncate">{vendor.name}</h1>
@@ -174,8 +178,8 @@ export default function VendorDetailPage() {
                     </div>
                   )}
                 </div>
-              </div>
-            </>
+                            </div>
+            </motion.div>
           )}
         </div>
       </main>
