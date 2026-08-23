@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { MapPin, Navigation2 } from "lucide-react";
+import { MapPin, Navigation2, ArrowLeft } from "lucide-react";
 import { getSocket } from "@/lib/socketClient";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+
 
 export default function DriverRequestsPage() {
   const [rides, setRides] = useState<any[]>([]);
@@ -18,7 +20,7 @@ export default function DriverRequestsPage() {
   const [otp, setOtp] = useState("");
   const [startingRide, setStartingRide] = useState(false);
 const [confirmingCash, setConfirmingCash] = useState(false);
-
+  const router = useRouter();
   const fetchRides = useCallback(async () => {
     const res = await fetch("/api/rides/available");
     const data = await res.json();
@@ -174,7 +176,14 @@ async function handleAccept(id: string) {
   if (activeRide) {
     return (
       <main className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full">
+               <div className="max-w-md w-full">
+          <button
+            onClick={() => router.push("/driver/dashboard")}
+            className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-4 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </button>
           <h1 className="text-2xl font-black mb-1">Active ride</h1>
           <p className="text-neutral-500 mb-6">
             Sharing your live location with the rider.
@@ -275,7 +284,14 @@ async function handleAccept(id: string) {
 
   return (
     <main className="min-h-screen bg-white px-4 py-16">
-      <div className="max-w-lg mx-auto">
+           <div className="max-w-lg mx-auto">
+        <button
+          onClick={() => router.push("/driver/dashboard")}
+          className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-6 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Back
+        </button>
         <h1 className="text-3xl font-black mb-1">Ride requests</h1>
         <p className="text-neutral-500 mb-8">
           New requests matching your vehicle type appear here automatically.
