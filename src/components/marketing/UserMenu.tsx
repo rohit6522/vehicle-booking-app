@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { Bike, Car, ChevronRight, LogOut, ShieldCheck } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function UserMenu({
   name,
@@ -35,8 +36,15 @@ export function UserMenu({
         {initial}
       </button>
 
+           <AnimatePresence>
       {open && (
-        <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-neutral-100 p-5 text-left">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: -8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -8 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-neutral-100 p-5 text-left"
+        >
           <p className="font-bold text-black">{name}</p>
           <p className="text-xs tracking-wide text-neutral-400 uppercase mt-0.5">
             {role}
@@ -86,15 +94,16 @@ export function UserMenu({
             </a>
           )}
 
-          <button
+                   <button
             onClick={() => signOut({ callbackUrl: "/" })}
             className="flex items-center gap-3 mt-4 text-sm font-medium text-neutral-700 hover:text-black"
           >
             <LogOut size={16} />
             Logout
           </button>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 }
