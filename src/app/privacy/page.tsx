@@ -1,3 +1,5 @@
+"use client";
+
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { motion } from "framer-motion";
