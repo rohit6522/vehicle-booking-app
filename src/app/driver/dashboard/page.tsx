@@ -60,9 +60,13 @@ export default function DriverDashboardPage() {
           {loading ? (
             <p className="text-neutral-400 text-sm">Loading...</p>
           ) : (
-            <>
-              {/* Active ride banner */}
-              {activeRide ? (
+                         <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* Active ride banner */}
+                {activeRide ? (
                 <a
                   href="/driver/requests"
                   className="block bg-black text-white rounded-2xl p-5 sm:p-6 mb-8 hover:bg-neutral-900 transition-colors"
@@ -116,9 +120,9 @@ export default function DriverDashboardPage() {
              <div className="grid grid-cols-3 gap-2 sm:gap-4">
               <EarningsCard label="Best Day" value={earnings?.bestDay ?? 0} />
               <EarningsCard label="Daily Avg" value={earnings?.dailyAvg ?? 0} />
-              <EarningsCard label="Today" value={earnings?.today ?? 0} />
-            </div>
-            </>
+                              <EarningsCard label="Today" value={earnings?.today ?? 0} />
+              </div>
+              </motion.div>
           )}
         </motion.div>
       </main>

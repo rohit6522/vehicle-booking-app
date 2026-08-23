@@ -5,6 +5,8 @@ import { MapPin, Navigation2 } from "lucide-react";
 import { getSocket } from "@/lib/socketClient";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { motion, AnimatePresence } from "framer-motion";
+
 export default function DriverRequestsPage() {
   const [rides, setRides] = useState<any[]>([]);
   const [activeRide, setActiveRide] = useState<any>(null);
@@ -308,10 +310,15 @@ async function handleAccept(id: string) {
             No ride requests right now. This list refreshes every few seconds.
           </p>
         ) : (
-          <div className="space-y-4">
-            {rides.map((ride) => (
-             <div
+                   <div className="space-y-4">
+            <AnimatePresence>
+            {rides.map((ride, i) => (
+              <motion.div
                 key={ride._id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.35, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
                 className="border border-neutral-200 rounded-2xl p-4 sm:p-5"
               >
                 <div className="flex items-start justify-between gap-3 mb-4">
@@ -339,11 +346,10 @@ async function handleAccept(id: string) {
                   >
                     {acceptingId === ride._id ? "Accepting..." : "Accept"}
                   </button>
-                </div>
-              </div>
-
-
+                               </div>
+              </motion.div>
             ))}
+            </AnimatePresence>
           </div>
         )}
       </div>
