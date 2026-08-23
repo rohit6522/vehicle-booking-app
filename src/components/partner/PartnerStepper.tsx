@@ -1,5 +1,5 @@
 import { Check, Lock } from "lucide-react";
-
+import { motion } from "framer-motion";
 const STEPS = [
   "Vehicle",
   "Documents",
@@ -21,23 +21,37 @@ export function PartnerStepper({ states }: { states: StepState[] }) {
         return (
           <div key={label} className="flex items-center flex-1 min-w-[80px]">
             <div className="flex flex-col items-center flex-1">
-              <div
+
+                           <motion.div
+                animate={{
+                  backgroundColor: state === "done" ? "#000000" : "#ffffff",
+                  borderColor: state === "done" || state === "current" ? "#000000" : "#e5e5e5",
+                  scale: state === "done" ? [0.8, 1.1, 1] : 1,
+                }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className={`w-11 h-11 rounded-full flex items-center justify-center border-2 ${
                   state === "done"
-                    ? "bg-black border-black text-white"
+                    ? "text-white"
                     : state === "current"
-                    ? "border-black text-black bg-white"
-                    : "border-neutral-200 text-neutral-300 bg-white"
+                    ? "text-black"
+                    : "text-neutral-300"
                 }`}
               >
                 {state === "done" ? (
-                  <Check size={16} />
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.15, duration: 0.25, ease: "backOut" }}
+                  >
+                    <Check size={16} />
+                  </motion.div>
                 ) : state === "locked" ? (
                   <Lock size={14} />
                 ) : (
                   <span className="text-sm font-bold">{i + 1}</span>
                 )}
-              </div>
+              </motion.div>
+
               <span
                 className={`text-xs mt-2 text-center ${
                   state === "locked" ? "text-neutral-300" : "text-neutral-700"
@@ -46,11 +60,11 @@ export function PartnerStepper({ states }: { states: StepState[] }) {
                 {label}
               </span>
             </div>
-            {i < STEPS.length - 1 && (
-              <div
-                className={`h-px flex-1 mt-[-20px] ${
-                  state === "done" ? "bg-black" : "bg-neutral-200"
-                }`}
+                       {i < STEPS.length - 1 && (
+              <motion.div
+                animate={{ backgroundColor: state === "done" ? "#000000" : "#e5e5e5" }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="h-px flex-1 mt-[-20px]"
               />
             )}
           </div>

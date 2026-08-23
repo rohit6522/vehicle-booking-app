@@ -13,6 +13,7 @@ import { ReviewStep } from "@/components/partner/ReviewStep";
 import { PricingStep } from "@/components/partner/PricingStep";
 import { Skeleton } from "@/components/ui/Skeleton";
 type WizardStep = "vehicle" | "documents" | "bank" | "review";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PartnerStatus {
   role: string;
@@ -173,20 +174,23 @@ export default function BecomePartnerPage() {
     ];
   }
 
-  const shell = (children: React.ReactNode) => (
+   const shell = (children: React.ReactNode) => (
     <>
       <PartnerNavbar />
       <main className="min-h-screen bg-neutral-50 px-4 py-10">
-        <div className="max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-5xl mx-auto"
+        >
           <h1 className="text-2xl font-black mb-1">Partner Dashboard</h1>
-          <p className="text-neutral-500 mb-6">
-            Complete all steps to activate your account
-          </p>
+          <p className="text-neutral-500 mb-6">Complete all steps to activate your account</p>
           <div className="bg-white rounded-2xl p-6 sm:p-8 mb-6">
             <PartnerStepper states={stepperStates()} />
           </div>
           {children}
-        </div>
+        </motion.div>
       </main>
       <Footer />
     </>
@@ -310,45 +314,57 @@ if (status.role === "driver") {
   }
 
   // Actively filling out (or resubmitting) the wizard.
-  return shell(
+    return shell(
     <div className="flex justify-center">
-      {step === "vehicle" && (
-        <VehicleStep
-          onNext={() => {
-            refreshStatus();
-            setStep("documents");
-          }}
-        />
-      )}
-      {step === "documents" && (
-        <DocumentsStep
-          onBack={() => setStep("vehicle")}
-          onNext={() => {
-            refreshStatus();
-            setStep("bank");
-          }}
-          existingDocuments={status.documents}
-        />
-      )}
-      {step === "bank" && (
-        <BankStep
-          onBack={() => setStep("documents")}
-          onNext={() => {
-            refreshStatus();
-            setStep("review");
-          }}
-          existingBank={status.bankDetails}
-        />
-      )}
-      {step === "review" && (
-        <ReviewStep
-          onBack={() => setStep("bank")}
-          onSubmitted={() => {
-            setEditingAfterRejection(false);
-            refreshStatus();
-          }}
-        />
-      )}
-    </div>,
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {step === "vehicle" && (
+            <VehicleStep
+              onNext={() => {
+                refreshStatus();
+                setStep("documents");
+              }}
+            />
+          )}
+          {step === "documents" && (
+            <DocumentsStep
+              onBack={() => setStep("vehicle")}
+              onNext={() => {
+                refreshStatus();
+                setStep("bank");
+              }}
+              existingDocuments={status.documents}
+            />
+          )}
+          {step === "bank" && (
+            <BankStep
+              onBack={() => setStep("documents")}
+              onNext={() => {
+                refreshStatus();
+                setStep("review");
+              }}
+              existingBank={status.bankDetails}
+            />
+          )}
+          {step === "review" && (
+            <ReviewStep
+              onBack={() => setStep("bank")}
+              onSubmitted={() => {
+                setEditingAfterRejection(false);
+                refreshStatus();
+              }}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
+
+
 }
