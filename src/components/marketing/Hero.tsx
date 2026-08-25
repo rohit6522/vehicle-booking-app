@@ -66,15 +66,15 @@ export function Hero() {
           ))}
         </motion.div>
 
-                <motion.a
+                 <motion.a
           variants={item}
           href="#fleet"
           whileHover={{
-            scale: 1.06,
-            boxShadow: "0 0 40px 8px rgba(255,255,255,0.25)",
+            scale: 1.05,
+            boxShadow: "0 8px 30px -4px rgba(255,255,255,0.35)",
             transition: { delay: 0, duration: 0.3, ease: "easeOut" },
           }}
-          whileTap={{ scale: 0.95, transition: { delay: 0, duration: 0.1 } }}
+          whileTap={{ scale: 0.96, transition: { delay: 0, duration: 0.1 } }}
           className="inline-block mt-8 px-10 py-4 rounded-full bg-white text-black font-semibold"
         >
           Book Now
