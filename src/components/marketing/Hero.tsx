@@ -54,12 +54,11 @@ export function Hero() {
 
                <motion.div variants={item} className="flex items-center justify-center gap-6 mt-8">
           {VEHICLE_ICONS.map((Icon, i) => (
-            <motion.div
+                        <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.3, y: -4, color: "#ffffff" }}
-              transition={{ delay: 0.6 + i * 0.08, duration: 0.4, ease: "backOut" }}
+              animate={{ opacity: 1, scale: 1, transition: { delay: 0.6 + i * 0.08, duration: 0.4, ease: "backOut" } }}
+              whileHover={{ scale: 1.3, y: -4, transition: { delay: 0, duration: 0.2, ease: "easeOut" } }}
               className="cursor-pointer"
             >
               <Icon size={22} className="text-neutral-400 transition-colors" strokeWidth={1.5} />
