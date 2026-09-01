@@ -43,9 +43,21 @@ app.prepare().then(() => {
       socket.leave(`ride:${rideId}`);
     });
 
-    // Driver periodically emits their live coordinates while on a ride.
-    socket.on("driver:location", ({ rideId, lat, lng }) => {
+       // Driver periodically emits their live coordinates while on a ride.
+    socket.on("driver:location", async ({ rideId, lat, lng }) => {
       socket.to(`ride:${rideId}`).emit("driver:location", { lat, lng });
+
+      // Also append to the ride's tracked path so we can compute the
+      // actual distance travelled once the ride completes — but only
+      // while the ride is "ongoing" (started via OTP), not just accepted.
+      try {
+        await Ride.updateOne(
+          { _id: rideId, status: "ongoing" },
+          { $push: { trackedPath: { lat, lng } } }
+        );
+      } catch (err) {
+        console.error("Failed to append tracked path:", err);
+      }
     });
 
     socket.on("disconnect", () => {
