@@ -10,15 +10,29 @@ export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSending(true);
-    // No backend inbox wired up yet — acknowledge receipt to the user.
-    setTimeout(() => {
-      toast.success("Message received! We'll get back to you soon.");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error ?? "Something went wrong");
+        return;
+      }
+
+      toast.success("Message sent! We'll get back to you soon.");
       setForm({ name: "", email: "", message: "" });
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
       setSending(false);
-    }, 600);
+    }
   }
 
   return (
