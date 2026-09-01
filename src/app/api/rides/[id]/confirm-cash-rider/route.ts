@@ -9,18 +9,18 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== "driver") {
+  if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
-  const driverId = (session.user as any).id;
+  const userId = (session.user as any).id;
 
   await connectDB();
 
   const ride = await Ride.findOne({
     _id: id,
-    driver: driverId,
+    rider: userId,
     status: "completed",
     paymentMethod: "cash",
   });
@@ -32,10 +32,16 @@ export async function POST(
     );
   }
 
-  ride.cashConfirmedByDriver = true;
+  ride.cashConfirmedByRider = true;
 
-  // Both sides confirmed → payment is settled.
-  if (ride.cashConfirmedByRider) {
+  // Both sides confirmed → mark as paid. Only one side confirmed and the
+  // other side is explicitly false (not just "not yet") would be a
+  // mismatch, but we can't know that until both have acted — so we only
+  // flag a dispute if the driver already said "received" and this
+  // confirmation contradicts nothing (there's no explicit "I didn't pay"
+  // button, so disputes here would come from a future "I didn't pay"
+  // action if added).
+  if (ride.cashConfirmedByDriver) {
     ride.paymentStatus = "paid";
   }
 

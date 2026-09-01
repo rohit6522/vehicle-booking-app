@@ -552,16 +552,9 @@ function PaymentSection({ ride }: { ride: any }) {
     );
   }
 
-  if (method === "cash") {
+   if (method === "cash") {
     return (
-      <motion.p
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, ease: "backOut" }}
-        className="text-amber-600 font-medium bg-amber-50 border border-amber-100 rounded-xl px-4 py-3"
-      >
-        💵 Pay ₹{ride.fare.final ?? ride.fare.estimated} in cash to your driver
-      </motion.p>
+      <RiderCashConfirm ride={ride} onPaid={() => setPaid(true)} />
     );
   }
 
@@ -595,6 +588,49 @@ function PaymentSection({ ride }: { ride: any }) {
           Pay with Cash
         </motion.button>
       </div>
+    </div>
+  );
+}
+function RiderCashConfirm({ ride, onPaid }: { ride: any; onPaid: () => void }) {
+  const [confirmed, setConfirmed] = useState(ride.cashConfirmedByRider ?? false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleConfirm() {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/rides/${ride._id}/confirm-cash-rider`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setConfirmed(true);
+        if (data.ride?.paymentStatus === "paid") onPaid();
+      } else {
+        toast.error(data.error ?? "Something went wrong");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+      <p className="text-amber-700 font-medium mb-3">
+        💵 Pay ₹{ride.fare.final ?? ride.fare.estimated} in cash to your driver
+      </p>
+      {confirmed ? (
+        <p className="text-sm text-amber-600">
+          ✓ You confirmed payment — waiting for driver to confirm receipt.
+        </p>
+      ) : (
+        <button
+          onClick={handleConfirm}
+          disabled={loading}
+          className="w-full py-2.5 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+        >
+          {loading ? "Confirming..." : "I've paid the driver in cash"}
+        </button>
+      )}
     </div>
   );
 }

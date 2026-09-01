@@ -236,20 +236,33 @@ async function handleAccept(id: string) {
                 Cancel Ride
               </button>
             </>
-         ) : activeRide.status === "completed" ? (
+                 ) : activeRide.status === "completed" ? (
             <div className="space-y-3">
               {activeRide.paymentStatus === "paid" ? (
                 <p className="text-emerald-600 font-medium bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
                   ✓ Ride paid
                 </p>
               ) : activeRide.paymentMethod === "cash" ? (
-                <button
-                  onClick={handleConfirmCash}
-                  disabled={confirmingCash}
-                  className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
-                >
-                  {confirmingCash ? "Confirming..." : "Confirm Cash Received"}
-                </button>
+                activeRide.cashConfirmedByDriver ? (
+                  <p className="text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-center text-sm">
+                    You confirmed receipt — waiting for rider to confirm payment.
+                  </p>
+                ) : (
+                  <>
+                    {!activeRide.cashConfirmedByRider && (
+                      <p className="text-xs text-neutral-400 text-center mb-1">
+                        Rider hasn&apos;t confirmed payment yet
+                      </p>
+                    )}
+                    <button
+                      onClick={handleConfirmCash}
+                      disabled={confirmingCash}
+                      className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+                    >
+                      {confirmingCash ? "Confirming..." : "Confirm Cash Received"}
+                    </button>
+                  </>
+                )
               ) : (
                 <p className="text-neutral-500 bg-neutral-50 border border-neutral-100 rounded-xl px-4 py-3 text-center text-sm">
                   Waiting for rider to choose a payment method…
