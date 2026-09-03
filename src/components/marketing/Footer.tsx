@@ -46,22 +46,24 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-black px-4 pt-16 pb-8">
+    <footer className="bg-black px-4 pt-20 pb-10">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div>
-            <h3 className="text-white font-black text-xl tracking-tight">RYDEX</h3>
-            <p className="text-neutral-400 text-sm mt-3 max-w-[220px]">
+            <h3 className="text-white font-black text-2xl tracking-tight">
+              RYDEX
+            </h3>
+            <p className="text-neutral-400 text-sm mt-4 max-w-[240px] leading-relaxed">
               Book any vehicle — from bikes to trucks. Trusted owners.
               Transparent pricing.
             </p>
           </div>
 
           <div>
-            <h4 className="text-neutral-300 text-xs tracking-wide font-semibold mb-4">
+            <h4 className="text-neutral-300 text-xs tracking-[0.15em] font-semibold mb-5">
               COMPANY
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-3.5">
               {COMPANY_LINKS.map((link) => (
                 <li key={link.label}>
                   {link.soon ? (
@@ -82,7 +84,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-neutral-300 text-xs tracking-wide font-semibold mb-4">
+            <h4 className="text-neutral-300 text-xs tracking-[0.15em] font-semibold mb-5">
               SERVICES
             </h4>
             <ul className="space-y-3">
@@ -100,10 +102,12 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-neutral-300 text-xs tracking-wide font-semibold mb-4">
+            <h4 className="text-neutral-300 text-xs tracking-[0.15em] font-semibold mb-5">
               STAY UPDATED
             </h4>
-            <p className="text-sm text-neutral-400 mb-3">Subscribe for updates</p>
+            <p className="text-sm text-neutral-400 mb-3">
+              Subscribe for updates
+            </p>
             <form onSubmit={handleSubscribe} className="flex">
               <input
                 type="email"
@@ -124,15 +128,21 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-14 pt-6 border-t border-white/10">
+               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-16 pt-8 border-t border-white/10">
           <p className="text-xs text-neutral-500">
             © {new Date().getFullYear()} RYDEX. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <a href="/privacy" className="text-xs text-neutral-500 hover:text-white">
+            <a
+              href="/privacy"
+              className="text-xs text-neutral-500 hover:text-white"
+            >
               Privacy Policy
             </a>
-            <a href="/terms" className="text-xs text-neutral-500 hover:text-white">
+            <a
+              href="/terms"
+              className="text-xs text-neutral-500 hover:text-white"
+            >
               Terms
             </a>
           </div>
