@@ -51,17 +51,17 @@ export function FleetSection() {
   }
 
   return (
-    <section id="fleet" className="bg-white py-24 px-4">
+    <section id="fleet" className="bg-white py-28 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-end justify-between mb-12">
+        <div className="flex items-end justify-between mb-16">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-4 h-px bg-black" />
-                            <span className="text-xs tracking-[0.2em] text-neutral-700 font-semibold">
+              <span className="text-xs tracking-[0.2em] text-neutral-700 font-semibold">
                 FLEET
               </span>
             </div>
-            <h2 className="text-4xl font-black text-black leading-tight">
+            <h2 className="text-4xl sm:text-5xl font-black text-black leading-[1.1] tracking-tight">
               Vehicle
               <br />
               <span className="underline decoration-2 underline-offset-4">
@@ -80,9 +80,8 @@ export function FleetSection() {
             >
               <ChevronLeft size={16} />
             </button>
-                        <button
+            <button
               onClick={() => scroll("right")}
-
               className="w-10 h-10 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-black hover:text-black active:bg-black active:text-white active:border-black transition-colors"
             >
               <ChevronRight size={16} />
@@ -100,19 +99,23 @@ export function FleetSection() {
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              transition={{
+                duration: 0.5,
+                delay: i * 0.08,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               whileHover={{ y: -4 }}
-              className="min-w-[220px] flex-shrink-0 bg-white border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 hover:shadow-sm transition-colors"
+              className="min-w-[230px] flex-shrink-0 bg-white border border-neutral-200 rounded-2xl p-6 hover:border-neutral-300 hover:shadow-lg hover:shadow-neutral-100 transition-all"
             >
               <div className="flex items-center justify-between mb-6">
-                                <span className="text-[10px] tracking-wide font-semibold text-neutral-700 bg-neutral-200 px-2.5 py-1 rounded-full">
+                <span className="text-[10px] tracking-wide font-semibold text-neutral-700 bg-neutral-200 px-2.5 py-1 rounded-full">
                   {cat.badge}
                 </span>
                 <span className="text-[10px] text-neutral-300 font-medium">
                   {cat.num}
                 </span>
               </div>
-              <div className="w-11 h-11 rounded-xl bg-neutral-100 flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-neutral-100 flex items-center justify-center mb-5">
                 <cat.icon size={20} className="text-black" strokeWidth={1.5} />
               </div>
               <h3 className="font-bold text-black">{cat.title}</h3>
@@ -137,10 +140,18 @@ export function FleetSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="flex items-center gap-10 mt-8 pt-6 border-t border-neutral-100"
+          className="flex items-center gap-12 mt-10 pt-8 border-t border-neutral-100"
         >
-          <StatItem value={`${activeCategories}+`} label="Categories" delay={0} />
-          <StatItem value={`${totalDrivers}+`} label="Total drivers" delay={0.1} />
+          <StatItem
+            value={`${activeCategories}+`}
+            label="Categories"
+            delay={0}
+          />
+          <StatItem
+            value={`${totalDrivers}+`}
+            label="Total drivers"
+            delay={0.1}
+          />
           <StatItem value="24/7" label="Availability" delay={0.2} />
         </motion.div>
       </div>
@@ -148,7 +159,15 @@ export function FleetSection() {
   );
 }
 
-function StatItem({ value, label, delay }: { value: string; label: string; delay: number }) {
+function StatItem({
+  value,
+  label,
+  delay,
+}: {
+  value: string;
+  label: string;
+  delay: number;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}

@@ -42,17 +42,17 @@ export function Hero() {
         animate="show"
         className="relative z-10 text-center max-w-3xl mx-auto pt-20"
       >
-        <motion.h1
+              <motion.h1
           variants={item}
-          className="text-5xl sm:text-7xl font-black tracking-tight text-white leading-[1.05]"
+          className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.05] max-w-3xl mx-auto"
         >
           Book Any Vehicle
         </motion.h1>
-        <motion.p variants={item} className="mt-5 text-neutral-400 text-base sm:text-lg">
+               <motion.p variants={item} className="mt-6 text-neutral-400 text-base sm:text-lg max-w-xl mx-auto">
           From daily rides to heavy transport — all in one platform.
         </motion.p>
 
-               <motion.div variants={item} className="flex items-center justify-center gap-6 mt-8">
+                      <motion.div variants={item} className="flex items-center justify-center gap-8 mt-10">
           {VEHICLE_ICONS.map((Icon, i) => (
                         <motion.div
               key={i}
@@ -75,7 +75,7 @@ export function Hero() {
             transition: { delay: 0, duration: 0.3, ease: "easeOut" },
           }}
           whileTap={{ scale: 0.96, transition: { delay: 0, duration: 0.1 } }}
-          className="inline-block mt-8 px-10 py-4 rounded-full bg-white text-black font-semibold"
+                   className="inline-block mt-10 px-11 py-4 rounded-full bg-white text-black font-semibold text-[15px]"
         >
           Book Now
         </motion.a>

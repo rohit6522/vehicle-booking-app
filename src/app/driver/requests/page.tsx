@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
-
 export default function DriverRequestsPage() {
   const [rides, setRides] = useState<any[]>([]);
   const [activeRide, setActiveRide] = useState<any>(null);
@@ -19,7 +18,7 @@ export default function DriverRequestsPage() {
   const watchIdRef = useRef<number | null>(null);
   const [otp, setOtp] = useState("");
   const [startingRide, setStartingRide] = useState(false);
-const [confirmingCash, setConfirmingCash] = useState(false);
+  const [confirmingCash, setConfirmingCash] = useState(false);
   const router = useRouter();
   const fetchRides = useCallback(async () => {
     const res = await fetch("/api/rides/available");
@@ -50,7 +49,7 @@ const [confirmingCash, setConfirmingCash] = useState(false);
       });
   }, []);
 
-async function handleAccept(id: string) {
+  async function handleAccept(id: string) {
     setAcceptingId(id);
     try {
       const res = await fetch(`/api/rides/${id}/accept`, { method: "POST" });
@@ -69,7 +68,7 @@ async function handleAccept(id: string) {
     }
   }
 
- async function handleStartRide() {
+  async function handleStartRide() {
     if (!activeRide || otp.length !== 4) return;
     setStartingRide(true);
     setError("");
@@ -92,8 +91,6 @@ async function handleAccept(id: string) {
     }
   }
 
- 
-
   async function handleComplete() {
     if (!activeRide) return;
     setCompleting(true);
@@ -114,8 +111,7 @@ async function handleAccept(id: string) {
     }
   }
 
-
- async function handleConfirmCash() {
+  async function handleConfirmCash() {
     if (!activeRide) return;
     setConfirmingCash(true);
     try {
@@ -176,7 +172,7 @@ async function handleAccept(id: string) {
   if (activeRide) {
     return (
       <main className="min-h-screen bg-white flex items-center justify-center px-4">
-               <div className="max-w-md w-full">
+        <div className="max-w-md w-full">
           <button
             onClick={() => router.push("/driver/dashboard")}
             className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-4 transition-colors"
@@ -236,7 +232,7 @@ async function handleAccept(id: string) {
                 Cancel Ride
               </button>
             </>
-                 ) : activeRide.status === "completed" ? (
+          ) : activeRide.status === "completed" ? (
             <div className="space-y-3">
               {activeRide.paymentStatus === "paid" ? (
                 <p className="text-emerald-600 font-medium bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
@@ -245,7 +241,8 @@ async function handleAccept(id: string) {
               ) : activeRide.paymentMethod === "cash" ? (
                 activeRide.cashConfirmedByDriver ? (
                   <p className="text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-center text-sm">
-                    You confirmed receipt — waiting for rider to confirm payment.
+                    You confirmed receipt — waiting for rider to confirm
+                    payment.
                   </p>
                 ) : (
                   <>
@@ -259,7 +256,9 @@ async function handleAccept(id: string) {
                       disabled={confirmingCash}
                       className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
                     >
-                      {confirmingCash ? "Confirming..." : "Confirm Cash Received"}
+                      {confirmingCash
+                        ? "Confirming..."
+                        : "Confirm Cash Received"}
                     </button>
                   </>
                 )
@@ -270,8 +269,6 @@ async function handleAccept(id: string) {
               )}
             </div>
           ) : (
-
-
             <div className="space-y-3">
               <button
                 onClick={handleComplete}
@@ -289,7 +286,6 @@ async function handleAccept(id: string) {
               </button>
             </div>
           )}
-          
         </div>
       </main>
     );
@@ -297,7 +293,7 @@ async function handleAccept(id: string) {
 
   return (
     <main className="min-h-screen bg-white px-4 py-16">
-           <div className="max-w-lg mx-auto">
+      <div className="max-w-lg mx-auto">
         <button
           onClick={() => router.push("/driver/dashboard")}
           className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-6 transition-colors"
@@ -316,10 +312,13 @@ async function handleAccept(id: string) {
           </p>
         )}
 
-       {loading ? (
+        {loading ? (
           <div className="space-y-4">
             {[1, 2].map((i) => (
-              <div key={i} className="border border-neutral-200 rounded-2xl p-5">
+              <div
+                key={i}
+                className="border border-neutral-200 rounded-2xl p-5"
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-3/4" />
@@ -339,45 +338,61 @@ async function handleAccept(id: string) {
             No ride requests right now. This list refreshes every few seconds.
           </p>
         ) : (
-                   <div className="space-y-4">
+          <div className="space-y-4">
             <AnimatePresence>
-            {rides.map((ride, i) => (
-              <motion.div
-                key={ride._id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.35, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-                className="border border-neutral-200 rounded-2xl p-4 sm:p-5"
-              >
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start gap-2 mb-1.5">
-                      <MapPin size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
-                      <p className="text-sm break-words">{ride.pickup.address}</p>
+              {rides.map((ride, i) => (
+                <motion.div
+                  key={ride._id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{
+                    duration: 0.35,
+                    delay: i * 0.05,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="border border-neutral-200 rounded-2xl p-4 sm:p-5"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2 mb-1.5">
+                        <MapPin
+                          size={14}
+                          className="mt-0.5 text-neutral-400 flex-shrink-0"
+                        />
+                        <p className="text-sm break-words">
+                          {ride.pickup.address}
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Navigation2
+                          size={14}
+                          className="mt-0.5 text-neutral-400 flex-shrink-0"
+                        />
+                        <p className="text-sm break-words">
+                          {ride.drop.address}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <Navigation2 size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
-                      <p className="text-sm break-words">{ride.drop.address}</p>
-                    </div>
+                    <p className="font-black text-lg flex-shrink-0">
+                      ₹{ride.fare.estimated}
+                    </p>
                   </div>
-                  <p className="font-black text-lg flex-shrink-0">₹{ride.fare.estimated}</p>
-                </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <p className="text-xs text-neutral-400">
-                    {ride.distanceKm} km · {ride.rider?.name ?? "Rider"}
-                  </p>
-                  <button
-                    onClick={() => handleAccept(ride._id)}
-                    disabled={acceptingId === ride._id}
-                    className="w-full sm:w-auto px-5 py-2.5 sm:py-2 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
-                  >
-                    {acceptingId === ride._id ? "Accepting..." : "Accept"}
-                  </button>
-                               </div>
-              </motion.div>
-            ))}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p className="text-xs text-neutral-400">
+                      {ride.distanceKm} km · {ride.rider?.name ?? "Rider"}
+                    </p>
+                    <button
+                      onClick={() => handleAccept(ride._id)}
+                      disabled={acceptingId === ride._id}
+                      className="w-full sm:w-auto px-5 py-2.5 sm:py-2 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                    >
+                      {acceptingId === ride._id ? "Accepting..." : "Accept"}
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
             </AnimatePresence>
           </div>
         )}
