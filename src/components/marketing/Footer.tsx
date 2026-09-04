@@ -128,7 +128,7 @@ export function Footer() {
           </div>
         </div>
 
-               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-16 pt-8 border-t border-white/10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-16 pt-8 border-t border-white/10">
           <p className="text-xs text-neutral-500">
             © {new Date().getFullYear()} RYDEX. All rights reserved.
           </p>

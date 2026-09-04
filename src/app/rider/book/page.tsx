@@ -189,7 +189,7 @@ function BookRidePageInner() {
   }, [ride?._id]);
 
   return (
-    <main className="min-h-screen bg-white px-4 py-16">
+    <main className="min-h-screen bg-white px-4 py-20">
       <AnimatePresence mode="wait">
         {ride ? (
           <motion.div
@@ -353,8 +353,10 @@ function BookRidePageInner() {
               <ArrowLeft size={16} />
               Back
             </button>
-            <h1 className="text-3xl font-black mb-1">Book a ride</h1>
-            <p className="text-neutral-500 mb-8">Enter your trip details</p>
+            <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tight">
+              Book a ride
+            </h1>
+            <p className="text-neutral-500 mb-10">Enter your trip details</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
               {VEHICLE_TYPES.map((v) => (
@@ -363,10 +365,10 @@ function BookRidePageInner() {
                   onClick={() => setVehicleType(v.type)}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.96 }}
-                  className={`flex flex-col items-center gap-1.5 py-3 rounded-xl border text-xs font-medium transition-colors ${
+                  className={`flex flex-col items-center gap-2 py-4 rounded-2xl border text-xs font-medium transition-all ${
                     vehicleType === v.type
-                      ? "border-black bg-black text-white"
-                      : "border-neutral-200 text-neutral-600 hover:border-neutral-400"
+                      ? "border-black bg-black text-white shadow-lg shadow-black/10"
+                      : "border-neutral-200 text-neutral-600 hover:border-neutral-400 hover:shadow-sm"
                   }`}
                 >
                   <v.icon size={18} strokeWidth={1.5} />
@@ -411,7 +413,7 @@ function BookRidePageInner() {
                   animate={{ opacity: 1, y: 0, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="bg-neutral-50 rounded-xl p-4 mb-6 flex items-center justify-between overflow-hidden"
+                  className="bg-neutral-50 rounded-2xl p-5 mb-6 flex items-center justify-between overflow-hidden border border-neutral-100"
                 >
                   <div>
                     <p className="text-xs text-neutral-500">
@@ -445,7 +447,7 @@ function BookRidePageInner() {
               disabled={!coordsReady || booking || estimating}
               whileHover={coordsReady ? { scale: 1.02 } : {}}
               whileTap={coordsReady ? { scale: 0.98 } : {}}
-              className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40"
+              className="w-full py-4 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40 text-[15px]"
             >
               {booking ? "Booking..." : "Confirm Booking"}
             </motion.button>
@@ -552,10 +554,8 @@ function PaymentSection({ ride }: { ride: any }) {
     );
   }
 
-   if (method === "cash") {
-    return (
-      <RiderCashConfirm ride={ride} onPaid={() => setPaid(true)} />
-    );
+  if (method === "cash") {
+    return <RiderCashConfirm ride={ride} onPaid={() => setPaid(true)} />;
   }
 
   return (
@@ -592,7 +592,9 @@ function PaymentSection({ ride }: { ride: any }) {
   );
 }
 function RiderCashConfirm({ ride, onPaid }: { ride: any; onPaid: () => void }) {
-  const [confirmed, setConfirmed] = useState(ride.cashConfirmedByRider ?? false);
+  const [confirmed, setConfirmed] = useState(
+    ride.cashConfirmedByRider ?? false,
+  );
   const [loading, setLoading] = useState(false);
 
   async function handleConfirm() {
