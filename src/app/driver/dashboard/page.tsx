@@ -45,49 +45,63 @@ export default function DriverDashboardPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-neutral-50 px-4 py-10">
+      <main className="min-h-screen bg-neutral-50 px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="max-w-4xl mx-auto"
         >
-          <h1 className="text-2xl font-black mb-1">
+          <h1 className="text-2xl sm:text-3xl font-black mb-2 tracking-tight">
             Welcome back, {session?.user?.name?.split(" ")[0]}
           </h1>
-          <p className="text-neutral-500 mb-8">Here&apos;s how you&apos;re doing today.</p>
+          <p className="text-neutral-500 mb-10">
+            Here&apos;s how you&apos;re doing today.
+          </p>
 
           {loading ? (
             <p className="text-neutral-400 text-sm">Loading...</p>
           ) : (
-                         <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {/* Active ride banner */}
-                {activeRide ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {/* Active ride banner */}
+              {activeRide ? (
                 <a
                   href="/driver/requests"
-                  className="block bg-black text-white rounded-2xl p-5 sm:p-6 mb-8 hover:bg-neutral-900 transition-colors"
+                  className="block bg-black text-white rounded-3xl p-6 sm:p-7 mb-10 hover:bg-neutral-900 transition-colors shadow-xl shadow-black/5"
                 >
                   <p className="text-xs uppercase tracking-wide text-neutral-400 mb-2">
                     Active ride
                   </p>
                   <div className="flex items-start gap-2 mb-1.5">
-                    <MapPin size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
-                    <p className="text-sm break-words">{activeRide.pickup.address}</p>
+                    <MapPin
+                      size={14}
+                      className="mt-0.5 text-neutral-400 flex-shrink-0"
+                    />
+                    <p className="text-sm break-words">
+                      {activeRide.pickup.address}
+                    </p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Navigation2 size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
-                    <p className="text-sm break-words">{activeRide.drop.address}</p>
+                    <Navigation2
+                      size={14}
+                      className="mt-0.5 text-neutral-400 flex-shrink-0"
+                    />
+                    <p className="text-sm break-words">
+                      {activeRide.drop.address}
+                    </p>
                   </div>
-                  <p className="text-xs text-neutral-400 mt-3">Tap to manage →</p>
+                  <p className="text-xs text-neutral-400 mt-3">
+                    Tap to manage →
+                  </p>
                 </a>
               ) : (
                 <a
                   href="/driver/requests"
-                  className="flex items-center justify-between gap-3 bg-white border border-neutral-200 rounded-2xl p-5 sm:p-6 mb-8 hover:border-black hover:shadow-sm transition-all"
+                  className="flex items-center justify-between gap-3 bg-white border border-neutral-200 rounded-3xl p-6 sm:p-7 mb-10 hover:border-black hover:shadow-md transition-all"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
@@ -106,23 +120,30 @@ export default function DriverDashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <span className="text-sm font-medium flex-shrink-0">View →</span>
+                  <span className="text-sm font-medium flex-shrink-0">
+                    View →
+                  </span>
                 </a>
               )}
 
               {/* Earnings */}
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-5">
                 <TrendingUp size={16} />
-                <h2 className="font-bold">Daily Earnings</h2>
-                <span className="text-sm text-neutral-400">· Last 7 days performance</span>
+                <h2 className="font-bold text-lg">Daily Earnings</h2>
+                <span className="text-sm text-neutral-400">
+                  · Last 7 days performance
+                </span>
               </div>
 
-             <div className="grid grid-cols-3 gap-2 sm:gap-4">
-              <EarningsCard label="Best Day" value={earnings?.bestDay ?? 0} />
-              <EarningsCard label="Daily Avg" value={earnings?.dailyAvg ?? 0} />
-                              <EarningsCard label="Today" value={earnings?.today ?? 0} />
+              <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                <EarningsCard label="Best Day" value={earnings?.bestDay ?? 0} />
+                <EarningsCard
+                  label="Daily Avg"
+                  value={earnings?.dailyAvg ?? 0}
+                />
+                <EarningsCard label="Today" value={earnings?.today ?? 0} />
               </div>
-              </motion.div>
+            </motion.div>
           )}
         </motion.div>
       </main>
