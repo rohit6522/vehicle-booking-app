@@ -108,10 +108,10 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {loading ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="bg-white rounded-2xl p-5">
                   <Skeleton className="w-9 h-9 rounded-lg mb-4" />
@@ -121,13 +121,13 @@ export default function AdminDashboardPage() {
                 </div>
               ))}
             </div>
-            <div className="bg-white rounded-2xl p-6 mb-8">
+            <div className="bg-white rounded-3xl p-7 mb-10 border border-neutral-100">
               <Skeleton className="h-4 w-24 mb-3 rounded-full" />
               <Skeleton className="h-6 w-40 mb-2" />
               <Skeleton className="h-3 w-32 mb-6" />
               <Skeleton className="h-56 w-full rounded-xl" />
             </div>
-            <div className="bg-white rounded-2xl p-6">
+            <div className="bg-white rounded-2xl p-6 border border-neutral-100 hover:shadow-md transition-shadow">
               <div className="flex gap-2 mb-6">
                 <Skeleton className="h-9 w-28 rounded-full" />
                 <Skeleton className="h-9 w-32 rounded-full" />
@@ -323,7 +323,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6">
+            <div className="bg-white rounded-3xl p-7 border border-neutral-100">
               <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
                 <TabButton
                   active={tab === "kyc"}
@@ -415,14 +415,14 @@ export default function AdminDashboardPage() {
                   </motion.div>
                 )}
 
-                              {tab === "reviews" && (
-                <motion.div
-                  key="reviews"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                {tab === "reviews" && (
+                  <motion.div
+                    key="reviews"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
                       PENDING APPLICATIONS
                     </p>
@@ -467,14 +467,14 @@ export default function AdminDashboardPage() {
                   </motion.div>
                 )}
 
-                              {tab === "pricing" && (
-                <motion.div
-                  key="pricing"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                {tab === "pricing" && (
+                  <motion.div
+                    key="pricing"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
                       PRICING SUBMISSIONS
                     </p>
@@ -514,7 +514,7 @@ export default function AdminDashboardPage() {
                         ))}
                       </div>
                     )}
-                   </motion.div>
+                  </motion.div>
                 )}
               </AnimatePresence>
             </div>
@@ -572,9 +572,9 @@ function StatCard({
   sub: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl p-5">
+    <div className="bg-white rounded-2xl p-6 border border-neutral-100 hover:shadow-md transition-shadow">
       <div
-        className={`w-9 h-9 rounded-lg flex items-center justify-center mb-4 ${iconBg}`}
+        className={`w-10 h-10 rounded-xl flex items-center justify-center mb-5 ${iconBg}`}
       >
         <Icon size={16} />
       </div>
