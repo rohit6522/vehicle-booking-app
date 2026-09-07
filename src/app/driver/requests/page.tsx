@@ -175,23 +175,23 @@ export default function DriverRequestsPage() {
         <div className="max-w-md w-full">
           <button
             onClick={() => router.push("/driver/dashboard")}
-            className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-4 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-black mb-4 transition-colors"
           >
             <ArrowLeft size={16} />
             Back
           </button>
           <h1 className="text-2xl font-black mb-1">Active ride</h1>
-          <p className="text-neutral-500 mb-6">
+          <p className="text-neutral-600 mb-6">
             Sharing your live location with the rider.
           </p>
 
           <div className="border border-neutral-200 rounded-2xl p-5 mb-6">
             <div className="flex items-start gap-2 mb-2">
-              <MapPin size={14} className="mt-0.5 text-neutral-400" />
+              <MapPin size={14} className="mt-0.5 text-neutral-600" />
               <p className="text-sm">{activeRide.pickup.address}</p>
             </div>
             <div className="flex items-start gap-2 mb-4">
-              <Navigation2 size={14} className="mt-0.5 text-neutral-400" />
+              <Navigation2 size={14} className="mt-0.5 text-neutral-600" />
               <p className="text-sm">{activeRide.drop.address}</p>
             </div>
             <p className="font-black text-xl">₹{activeRide.fare.estimated}</p>
@@ -247,7 +247,7 @@ export default function DriverRequestsPage() {
                 ) : (
                   <>
                     {!activeRide.cashConfirmedByRider && (
-                      <p className="text-xs text-neutral-400 text-center mb-1">
+                      <p className="text-xs text-neutral-600 text-center mb-1">
                         Rider hasn&apos;t confirmed payment yet
                       </p>
                     )}
@@ -263,7 +263,7 @@ export default function DriverRequestsPage() {
                   </>
                 )
               ) : (
-                <p className="text-neutral-500 bg-neutral-50 border border-neutral-100 rounded-xl px-4 py-3 text-center text-sm">
+                <p className="text-neutral-600 bg-neutral-50 border border-neutral-100 rounded-xl px-4 py-3 text-center text-sm">
                   Waiting for rider to choose a payment method…
                 </p>
               )}
@@ -296,13 +296,13 @@ export default function DriverRequestsPage() {
       <div className="max-w-lg mx-auto">
         <button
           onClick={() => router.push("/driver/dashboard")}
-          className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-6 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-black mb-6 transition-colors"
         >
           <ArrowLeft size={16} />
           Back
         </button>
         <h1 className="text-3xl font-black mb-1">Ride requests</h1>
-        <p className="text-neutral-500 mb-8">
+        <p className="text-neutral-600 mb-8">
           New requests matching your vehicle type appear here automatically.
         </p>
 
@@ -334,7 +334,7 @@ export default function DriverRequestsPage() {
             ))}
           </div>
         ) : rides.length === 0 ? (
-          <p className="text-neutral-400 text-sm">
+          <p className="text-neutral-600 text-sm">
             No ride requests right now. This list refreshes every few seconds.
           </p>
         ) : (
@@ -358,7 +358,7 @@ export default function DriverRequestsPage() {
                       <div className="flex items-start gap-2 mb-1.5">
                         <MapPin
                           size={14}
-                          className="mt-0.5 text-neutral-400 flex-shrink-0"
+                          className="mt-0.5 text-neutral-600 flex-shrink-0"
                         />
                         <p className="text-sm break-words">
                           {ride.pickup.address}
@@ -367,7 +367,7 @@ export default function DriverRequestsPage() {
                       <div className="flex items-start gap-2">
                         <Navigation2
                           size={14}
-                          className="mt-0.5 text-neutral-400 flex-shrink-0"
+                          className="mt-0.5 text-neutral-600 flex-shrink-0"
                         />
                         <p className="text-sm break-words">
                           {ride.drop.address}
@@ -380,7 +380,7 @@ export default function DriverRequestsPage() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <p className="text-xs text-neutral-400">
+                    <p className="text-xs text-neutral-600">
                       {ride.distanceKm} km · {ride.rider?.name ?? "Rider"}
                     </p>
                     <button

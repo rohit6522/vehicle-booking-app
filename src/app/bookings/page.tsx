@@ -42,13 +42,13 @@ export default function BookingsPage() {
                 <div className="max-w-2xl mx-auto">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-6 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-black mb-6 transition-colors"
           >
             <ArrowLeft size={16} />
             Back
           </button>
           <h1 className="text-3xl font-black mb-1">My Bookings</h1>
-          <p className="text-neutral-500 mb-8">
+          <p className="text-neutral-600 mb-8">
             {role === "driver" ? "Your ride history as a driver" : "Your past and current rides"}
           </p>
 
@@ -71,7 +71,7 @@ export default function BookingsPage() {
               ))}
             </div>
           ) : rides.length === 0 ? (
-            <p className="text-neutral-400 text-sm">No bookings yet.</p>
+            <p className="text-neutral-600 text-sm">No bookings yet.</p>
           ) : (
             <div className="space-y-4">
               {rides.map((ride) => (
@@ -82,11 +82,11 @@ export default function BookingsPage() {
                  <div className="flex flex-col sm:flex-row items-start justify-between gap-2 mb-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start gap-2 mb-1.5">
-                        <MapPin size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
+                        <MapPin size={14} className="mt-0.5 text-neutral-600 flex-shrink-0" />
                         <p className="text-sm break-words">{ride.pickup?.address}</p>
                       </div>
                       <div className="flex items-start gap-2">
-                        <Navigation2 size={14} className="mt-0.5 text-neutral-400 flex-shrink-0" />
+                        <Navigation2 size={14} className="mt-0.5 text-neutral-600 flex-shrink-0" />
                         <p className="text-sm break-words">{ride.drop?.address}</p>
                       </div>
                     </div>
@@ -99,7 +99,7 @@ export default function BookingsPage() {
                     </span>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm text-neutral-400">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm text-neutral-600">
                     <span>
                       {new Date(ride.requestedAt).toLocaleDateString("en-IN", {
                         day: "numeric",
@@ -115,7 +115,7 @@ export default function BookingsPage() {
 
                   {ride.status === "completed" && (
                     <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
-                      <p className="text-xs text-neutral-400">
+                      <p className="text-xs text-neutral-600">
                         Payment:{" "}
                         {ride.paymentStatus === "paid"
                           ? `Paid (${ride.paymentMethod === "cash" ? "Cash" : "Online"})`
@@ -125,7 +125,7 @@ export default function BookingsPage() {
                         {role !== "driver" && (
                           <button
                             onClick={() => generateReceipt(ride)}
-                            className="flex items-center gap-1 text-xs font-medium text-neutral-500 hover:text-black"
+                            className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-black"
                           >
                             <Download size={12} />
                             Receipt

@@ -55,12 +55,12 @@ export default function DriverDashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-black mb-2 tracking-tight">
             Welcome back, {session?.user?.name?.split(" ")[0]}
           </h1>
-          <p className="text-neutral-500 mb-10">
+          <p className="text-neutral-600 mb-10">
             Here&apos;s how you&apos;re doing today.
           </p>
 
           {loading ? (
-            <p className="text-neutral-400 text-sm">Loading...</p>
+            <p className="text-neutral-600 text-sm">Loading...</p>
           ) : (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -73,13 +73,13 @@ export default function DriverDashboardPage() {
                   href="/driver/requests"
                   className="block bg-black text-white rounded-3xl p-6 sm:p-7 mb-10 hover:bg-neutral-900 transition-colors shadow-xl shadow-black/5"
                 >
-                  <p className="text-xs uppercase tracking-wide text-neutral-400 mb-2">
+                  <p className="text-xs uppercase tracking-wide text-neutral-600 mb-2">
                     Active ride
                   </p>
                   <div className="flex items-start gap-2 mb-1.5">
                     <MapPin
                       size={14}
-                      className="mt-0.5 text-neutral-400 flex-shrink-0"
+                      className="mt-0.5 text-neutral-600 flex-shrink-0"
                     />
                     <p className="text-sm break-words">
                       {activeRide.pickup.address}
@@ -88,13 +88,13 @@ export default function DriverDashboardPage() {
                   <div className="flex items-start gap-2">
                     <Navigation2
                       size={14}
-                      className="mt-0.5 text-neutral-400 flex-shrink-0"
+                      className="mt-0.5 text-neutral-600 flex-shrink-0"
                     />
                     <p className="text-sm break-words">
                       {activeRide.drop.address}
                     </p>
                   </div>
-                  <p className="text-xs text-neutral-400 mt-3">
+                  <p className="text-xs text-neutral-600 mt-3">
                     Tap to manage →
                   </p>
                 </a>
@@ -113,7 +113,7 @@ export default function DriverDashboardPage() {
                           ? `${pendingCount} ride${pendingCount > 1 ? "s" : ""} waiting`
                           : "No active ride"}
                       </p>
-                      <p className="text-sm text-neutral-400 truncate">
+                      <p className="text-sm text-neutral-600 truncate">
                         {pendingCount > 0
                           ? "Tap to view and accept"
                           : "New requests will show up here"}
@@ -130,7 +130,7 @@ export default function DriverDashboardPage() {
               <div className="flex items-center gap-2 mb-5">
                 <TrendingUp size={16} />
                 <h2 className="font-bold text-lg">Daily Earnings</h2>
-                <span className="text-sm text-neutral-400">
+                <span className="text-sm text-neutral-600">
                   · Last 7 days performance
                 </span>
               </div>
@@ -155,7 +155,7 @@ export default function DriverDashboardPage() {
 function EarningsCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="group rounded-xl sm:rounded-2xl p-3 sm:p-5 bg-white border border-neutral-200 hover:bg-black hover:border-black transition-colors cursor-default">
-      <p className="text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 sm:mb-2 text-neutral-400 group-hover:text-neutral-500 truncate">
+      <p className="text-[10px] sm:text-xs uppercase tracking-wide mb-1.5 sm:mb-2 text-neutral-600 group-hover:text-neutral-600 truncate">
         {label}
       </p>
       <p className="text-lg sm:text-2xl font-black text-black group-hover:text-white transition-colors">

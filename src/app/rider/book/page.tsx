@@ -203,7 +203,7 @@ function BookRidePageInner() {
             {ride.status === "requested" && (
               <button
                 onClick={() => router.push("/")}
-                className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-4 transition-colors mx-auto"
+                className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-black mb-4 transition-colors mx-auto"
               >
                 <ArrowLeft size={16} />
                 Back to Home
@@ -216,7 +216,7 @@ function BookRidePageInner() {
               {ride.status === "completed" && "Ride completed"}
               {ride.status === "cancelled" && "Ride cancelled"}
             </h1>
-            <p className="text-neutral-500 mb-6">
+            <p className="text-neutral-600 mb-6">
               {ride.pickup.address} → {ride.drop.address}
             </p>
             <motion.p
@@ -237,7 +237,7 @@ function BookRidePageInner() {
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
-                  className="text-neutral-400 text-sm mb-4"
+                  className="text-neutral-600 text-sm mb-4"
                 >
                   Waiting for a nearby {vehicleType} driver to accept…
                 </motion.div>
@@ -259,7 +259,7 @@ function BookRidePageInner() {
                       lng={driverLocation.lng}
                     />
                   ) : (
-                    <div className="h-48 bg-neutral-50 flex items-center justify-center text-sm text-neutral-400">
+                    <div className="h-48 bg-neutral-50 flex items-center justify-center text-sm text-neutral-600">
                       Waiting for driver&apos;s live location…
                     </div>
                   )}
@@ -279,17 +279,17 @@ function BookRidePageInner() {
                       ★ {ride.driver?.rating ?? 5}
                     </span>
                   </div>
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-neutral-600">
                     {ride.driver?.vehicle?.make} {ride.driver?.vehicle?.model}
                     {ride.driver?.vehicle?.color
                       ? ` · ${ride.driver.vehicle.color}`
                       : ""}
                   </p>
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-neutral-600">
                     Plate: {ride.driver?.vehicle?.numberPlate}
                   </p>
                   {ride.driver?.phone && (
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-neutral-600">
                       Phone: {ride.driver.phone}
                     </p>
                   )}
@@ -305,7 +305,7 @@ function BookRidePageInner() {
                       }}
                       className="mt-3 pt-3 border-t border-neutral-200"
                     >
-                      <p className="text-xs text-neutral-400 mb-1">
+                      <p className="text-xs text-neutral-600 mb-1">
                         Share this OTP with your driver
                       </p>
                       <p className="text-2xl font-black tracking-[0.3em]">
@@ -348,7 +348,7 @@ function BookRidePageInner() {
           >
             <button
               onClick={() => router.push("/")}
-              className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-black mb-6 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-black mb-6 transition-colors"
             >
               <ArrowLeft size={16} />
               Back
@@ -356,7 +356,7 @@ function BookRidePageInner() {
             <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tight">
               Book a ride
             </h1>
-            <p className="text-neutral-500 mb-10">Enter your trip details</p>
+            <p className="text-neutral-600 mb-10">Enter your trip details</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
               {VEHICLE_TYPES.map((v) => (
@@ -416,13 +416,13 @@ function BookRidePageInner() {
                   className="bg-neutral-50 rounded-2xl p-5 mb-6 flex items-center justify-between overflow-hidden border border-neutral-100"
                 >
                   <div>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-neutral-600">
                       Estimated distance
                     </p>
                     <p className="font-semibold">{estimate.distanceKm} km</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-neutral-500">Estimated fare</p>
+                    <p className="text-xs text-neutral-600">Estimated fare</p>
                     <p className="font-black text-xl">₹{estimate.fare}</p>
                   </div>
                 </motion.div>
@@ -674,7 +674,7 @@ function RatingSection({ rideId }: { rideId: string }) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3, ease: "backOut" }}
-        className="text-sm text-neutral-500 bg-neutral-50 rounded-xl px-4 py-3"
+        className="text-sm text-neutral-600 bg-neutral-50 rounded-xl px-4 py-3"
       >
         Thanks for rating your driver! 🙌
       </motion.p>

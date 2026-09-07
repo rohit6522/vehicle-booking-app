@@ -265,7 +265,7 @@ export function TripLocationPicker({
                   useMyLocation();
                 }}
                 title="Use my current location"
-                className="text-neutral-400 hover:text-black"
+                className="text-neutral-600 hover:text-black"
               >
                 <Navigation size={14} />
               </button>
@@ -296,7 +296,7 @@ export function TripLocationPicker({
             <button
               type="button"
               onClick={() => setShowSaveForm(false)}
-              className="text-xs text-neutral-400"
+              className="text-xs text-neutral-600"
             >
               Cancel
             </button>
@@ -306,7 +306,7 @@ export function TripLocationPicker({
             <button
               type="button"
               onClick={() => setShowSaveForm(true)}
-              className="flex items-center gap-1 text-xs text-neutral-500 hover:text-black mt-1"
+              className="flex items-center gap-1 text-xs text-neutral-600 hover:text-black mt-1"
             >
               <Plus size={12} />
               Save {active} as a favorite
@@ -324,7 +324,7 @@ export function TripLocationPicker({
               onClick={() => selectSuggestion(s)}
               className="flex items-start gap-2 w-full text-left px-3 py-2 text-sm hover:bg-neutral-50 border-b border-neutral-100 last:border-0"
             >
-              <Search size={13} className="mt-0.5 text-neutral-400 flex-shrink-0" />
+              <Search size={13} className="mt-0.5 text-neutral-600 flex-shrink-0" />
               {s.display_name}
             </button>
           ))}
@@ -350,7 +350,7 @@ export function TripLocationPicker({
           {drop.lat != null && <Marker position={[drop.lat, drop.lng!]} icon={dropIcon} />}
         </MapContainer>
       </div>
-      <p className="text-xs text-neutral-400 mt-1.5">
+      <p className="text-xs text-neutral-600 mt-1.5">
         Editing <span className="font-medium">{active === "pickup" ? "pickup" : "drop"}</span> —
         search above or tap the map.
       </p>

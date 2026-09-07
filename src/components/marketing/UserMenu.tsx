@@ -46,7 +46,7 @@ export function UserMenu({
           className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-neutral-100 p-5 text-left"
         >
           <p className="font-bold text-black">{name}</p>
-          <p className="text-xs tracking-wide text-neutral-400 uppercase mt-0.5">
+          <p className="text-xs tracking-wide text-neutral-600 uppercase mt-0.5">
             {role}
           </p>
 
@@ -67,7 +67,7 @@ export function UserMenu({
               </span>
               <ChevronRight
                 size={16}
-                className="text-neutral-400 group-hover:translate-x-0.5 transition-transform"
+                className="text-neutral-600 group-hover:translate-x-0.5 transition-transform"
               />
             </a>
 
@@ -89,7 +89,7 @@ export function UserMenu({
               </span>
               <ChevronRight
                 size={16}
-                className="text-neutral-400 group-hover:translate-x-0.5 transition-transform"
+                className="text-neutral-600 group-hover:translate-x-0.5 transition-transform"
               />
             </a>
           )}

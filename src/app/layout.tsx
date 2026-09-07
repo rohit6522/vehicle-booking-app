@@ -6,9 +6,27 @@ import { LenisProvider } from "@/components/LenisProvider";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 export const metadata: Metadata = {
-  title: "RideFlow — Book a ride in seconds",
+  title: "RideFlow — Book a Ride in Seconds",
   description: "Real-time vehicle booking platform",
+
+  openGraph: {
+    title: "RideFlow — Book a Ride in Seconds",
+    description: "Real-time vehicle booking platform",
+    url: "https://rydex-eo9t.onrender.com/",
+    siteName: "RideFlow",
+    type: "website",
+    images: [
+      {
+        url: "https://rydex-eo9t.onrender.com/rydex.png",
+        width: 1200,
+        height: 630,
+        alt: "RideFlow - Vehicle Booking Platform",
+      },
+    ],
+  },
 };
+
+
 
 export default function RootLayout({
   children,
