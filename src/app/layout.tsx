@@ -4,7 +4,7 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { LenisProvider } from "@/components/LenisProvider";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/ThemeProvider";
+
 export const metadata: Metadata = {
   title: "RideFlow — Book a Ride in Seconds",
   description: "Real-time vehicle booking platform",
@@ -39,11 +39,11 @@ export default function RootLayout({
       className="h-full antialiased"
     >
 <body className="min-h-full flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white transition-colors">
-        <ThemeProvider>
+        
           <Providers>
             <LenisProvider>{children}</LenisProvider>
           </Providers>
-        </ThemeProvider>
+        
         <Toaster
           position="top-center"
           richColors
