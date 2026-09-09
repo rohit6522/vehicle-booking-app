@@ -311,12 +311,11 @@ export function AuthModal({
                   </form>
                   <p className="text-center text-sm text-neutral-500 mt-5">
                     Don&apos;t have an account?{" "}
-                    <button
-                      onClick={() => switchMode("register")}
-                      className="font-semibold text-black"
-                    >
+
+                   <button onClick={() => switchMode("register")} className="font-semibold text-black cursor-pointer">
                       Sign up
                     </button>
+                    
                   </p>
                 </motion.div>
               )}
@@ -418,10 +417,7 @@ export function AuthModal({
                   </form>
                   <p className="text-center text-sm text-neutral-500 mt-5">
                     Already have an account?{" "}
-                    <button
-                      onClick={() => switchMode("login")}
-                      className="font-semibold text-black"
-                    >
+                   <button onClick={() => switchMode("register")} className="font-semibold text-black cursor-pointer">
                       Login
                     </button>
                   </p>
