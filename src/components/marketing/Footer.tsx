@@ -130,7 +130,7 @@ export function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-16 pt-8 border-t border-white/10">
           <p className="text-xs text-neutral-500">
-            © {new Date().getFullYear()} RYDEX. All rights reserved.
+          © {new Date().getFullYear()} RYDEX. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <a
