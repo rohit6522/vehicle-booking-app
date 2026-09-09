@@ -87,7 +87,7 @@ export default function VendorDetailPage() {
             Back
           </button>
 
-                    {loading ? (
+          {loading ? (
             <p className="text-neutral-400 text-sm">Loading...</p>
           ) : !vendor ? (
             <p className="text-red-500 text-sm">{error}</p>
@@ -97,10 +97,14 @@ export default function VendorDetailPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
                 <div className="min-w-0">
-                  <h1 className="text-2xl font-black truncate">{vendor.name}</h1>
-                  <p className="text-neutral-500 text-sm truncate">{vendor.email}</p>
+                  <h1 className="text-2xl font-black truncate">
+                    {vendor.name}
+                  </h1>
+                  <p className="text-neutral-500 text-sm truncate">
+                    {vendor.email}
+                  </p>
                 </div>
                 <StatusBadge status={vendor.partnerStatus} />
               </div>
@@ -108,12 +112,18 @@ export default function VendorDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card icon={Car} title="Vehicle Details">
                   <Row label="Vehicle Type" value={vendor.vehicle?.type} />
-                  <Row label="Registration Number" value={vendor.vehicle?.numberPlate} />
+                  <Row
+                    label="Registration Number"
+                    value={vendor.vehicle?.numberPlate}
+                  />
                   <Row label="Model" value={vendor.vehicle?.model} />
                 </Card>
 
                 <Card icon={Landmark} title="Bank Details">
-                  <Row label="Account Holder" value={vendor.bankDetails?.accountHolderName} />
+                  <Row
+                    label="Account Holder"
+                    value={vendor.bankDetails?.accountHolderName}
+                  />
                   <Row label="IFSC Code" value={vendor.bankDetails?.ifsc} />
                   <Row label="UPI ID" value={vendor.bankDetails?.upi || "—"} />
                 </Card>
@@ -122,13 +132,17 @@ export default function VendorDetailPage() {
                   <div className="flex items-center gap-2 mb-4">
                     <FileText size={16} />
                     <h2 className="font-bold">Documents</h2>
-                  
                   </div>
 
-
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <DocPreview label="Aadhaar" url={vendor.documents?.aadhaarUrl} />
-                    <DocPreview label="License" url={vendor.documents?.licenseUrl} />
+                    <DocPreview
+                      label="Aadhaar"
+                      url={vendor.documents?.aadhaarUrl}
+                    />
+                    <DocPreview
+                      label="License"
+                      url={vendor.documents?.licenseUrl}
+                    />
                     <DocPreview label="RC" url={vendor.documents?.rcUrl} />
                   </div>
                 </div>
@@ -170,15 +184,16 @@ export default function VendorDetailPage() {
                       <p className="text-sm text-neutral-500">
                         This application has already been reviewed.
                       </p>
-                      {vendor.partnerStatus === "rejected" && vendor.rejectionReason && (
-                        <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mt-3">
-                          Reason: {vendor.rejectionReason}
-                        </p>
-                      )}
+                      {vendor.partnerStatus === "rejected" &&
+                        vendor.rejectionReason && (
+                          <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mt-3">
+                            Reason: {vendor.rejectionReason}
+                          </p>
+                        )}
                     </div>
                   )}
                 </div>
-                            </div>
+              </div>
             </motion.div>
           )}
         </div>
@@ -224,7 +239,15 @@ export default function VendorDetailPage() {
   );
 }
 
-function Card({ icon: Icon, title, children }: { icon: any; title: string; children: React.ReactNode }) {
+function Card({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: any;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl p-6">
       <div className="flex items-center gap-2 mb-4">
@@ -248,16 +271,25 @@ function Row({ label, value }: { label: string; value?: string }) {
 function DocPreview({ label, url }: { label: string; url?: string }) {
   return (
     <div className="border border-neutral-200 rounded-xl overflow-hidden">
-      <p className="text-xs font-semibold px-3 py-2 border-b border-neutral-200">{label}</p>
+      <p className="text-xs font-semibold px-3 py-2 border-b border-neutral-200">
+        {label}
+      </p>
       {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="block">
-          <img src={url} alt={label} className="w-full h-32 object-cover" />
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+         <img src={url} alt={label} loading="lazy" className="w-full h-32 object-cover" />
           <p className="text-xs text-center py-2 text-neutral-500 hover:text-black">
             Open full document
           </p>
         </a>
       ) : (
-        <p className="text-xs text-neutral-400 text-center py-10">Not uploaded</p>
+        <p className="text-xs text-neutral-400 text-center py-10">
+          Not uploaded
+        </p>
       )}
     </div>
   );
@@ -270,7 +302,9 @@ function StatusBadge({ status }: { status: string }) {
     rejected: "bg-red-100 text-red-600",
   };
   return (
-    <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${styles[status] ?? "bg-neutral-100 text-neutral-600"}`}>
+    <span
+      className={`text-xs font-semibold px-3 py-1.5 rounded-full ${styles[status] ?? "bg-neutral-100 text-neutral-600"}`}
+    >
       {status?.charAt(0).toUpperCase() + status?.slice(1)}
     </span>
   );
