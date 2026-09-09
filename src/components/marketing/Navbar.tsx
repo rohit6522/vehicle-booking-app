@@ -21,7 +21,9 @@ const DRIVER_LINKS = [
   { label: "My Bookings", href: "/bookings", authRequired: false },
 ];
 
-const ADMIN_LINKS = [{ label: "Dashboard", href: "/admin/dashboard", authRequired: false }];
+const ADMIN_LINKS = [
+  { label: "Dashboard", href: "/admin/dashboard", authRequired: false },
+];
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -58,16 +60,13 @@ export function Navbar() {
     status === "loading"
       ? []
       : role === "driver"
-      ? DRIVER_LINKS
-      : role === "admin"
-      ? ADMIN_LINKS
-      : RIDER_LINKS;
+        ? DRIVER_LINKS
+        : role === "admin"
+          ? ADMIN_LINKS
+          : RIDER_LINKS;
 
   return (
     <>
-      {/* Fixed-height wrapper so this element's own internal resize never
-          reflows the rest of the page — everything below stays put while
-          the bar itself gradually morphs. */}
       <header className="sticky top-0 z-40 h-[76px] px-0">
         <div
           className={`mx-auto bg-black/90 backdrop-blur-md border border-white/10 transition-[max-width,border-radius,padding,margin-top] duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[max-width,padding] ${
@@ -81,28 +80,30 @@ export function Navbar() {
               RYDEX
             </span>
 
-                    <nav className="hidden md:flex items-center gap-8">
-          {links.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-                           onClick={(e) => {
-                if (link.authRequired && status !== "authenticated") {
-                  e.preventDefault();
-                  setModalOpen(true);
-                }
-              }}
+            <nav className="hidden md:flex items-center gap-8">
+              {links.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={(e) => {
+                    if (link.authRequired && status !== "authenticated") {
+                      e.preventDefault();
+                      setModalOpen(true);
+                    }
+                  }}
+                  className="text-sm text-neutral-300 hover:text-white transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
 
-              className="text-sm text-neutral-300 hover:text-white transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-
-                        <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
               {status === "authenticated" && session?.user ? (
-                <UserMenu name={session.user.name ?? "User"} role={role ?? "rider"} />
+                <UserMenu
+                  name={session.user.name ?? "User"}
+                  role={role ?? "rider"}
+                />
               ) : (
                 <button
                   onClick={() => setModalOpen(true)}
@@ -124,33 +125,32 @@ export function Navbar() {
 
           <div
             className={`md:hidden overflow-hidden transition-[max-height,opacity,margin-top] duration-300 ease-out ${
-              mobileOpen ? "max-h-64 opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+              mobileOpen
+                ? "max-h-64 opacity-100 mt-4"
+                : "max-h-0 opacity-0 mt-0"
             }`}
           >
-                    <nav className="flex flex-col gap-1 pb-2 border-t border-white/10 pt-3">
-          {links.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-                           onClick={(e) => {
-                setMobileOpen(false);
-                if (link.authRequired && status !== "authenticated") {
-                  e.preventDefault();
-                  setModalOpen(true);
-                }
-              }}
-              className="text-sm text-neutral-300 hover:text-white transition-colors py-2.5"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-
-
+            <nav className="flex flex-col gap-1 pb-2 border-t border-white/10 pt-3">
+              {links.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={(e) => {
+                    setMobileOpen(false);
+                    if (link.authRequired && status !== "authenticated") {
+                      e.preventDefault();
+                      setModalOpen(true);
+                    }
+                  }}
+                  className="text-sm text-neutral-300 hover:text-white transition-colors py-2.5"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
           </div>
         </div>
       </header>
-
       <AuthModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   );

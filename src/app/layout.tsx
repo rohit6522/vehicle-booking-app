@@ -6,7 +6,7 @@ import { LenisProvider } from "@/components/LenisProvider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "RideFlow — Book a Ride in Seconds",
+  title: "RYDEX — Book a ride in seconds",
   description: "Real-time vehicle booking platform",
 
   openGraph: {
@@ -26,24 +26,18 @@ export const metadata: Metadata = {
   },
 };
 
-
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className="h-full antialiased"
-    >
-<body className="min-h-full flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white transition-colors">
-        
-          <Providers>
-            <LenisProvider>{children}</LenisProvider>
-          </Providers>
-        
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white transition-colors">
+        <Providers>
+          <LenisProvider>{children}</LenisProvider>
+        </Providers>
+
         <Toaster
           position="top-center"
           richColors
