@@ -271,11 +271,19 @@ export function AuthModal({
                         minLength={6}
                         placeholder="Password"
                         value={form.password}
-                       onChange={(e) => setForm({ ...form, email: e.target.value.trim().toLowerCase() })}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            email: e.target.value.trim().toLowerCase(),
+                          })
+                        }
                         className="w-full pl-11 pr-11 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
                       <button
                         type="button"
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
                         onClick={() => setShowPassword((s) => !s)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
                       >
@@ -385,6 +393,9 @@ export function AuthModal({
                       />
                       <button
                         type="button"
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
                         onClick={() => setShowPassword((s) => !s)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
                       >
