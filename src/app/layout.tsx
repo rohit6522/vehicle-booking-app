@@ -10,11 +10,13 @@ export const metadata: Metadata = {
   description: "Real-time vehicle booking platform",
 
   openGraph: {
-    title: "RideFlow — Book a Ride in Seconds",
-    description: "Real-time vehicle booking platform",
+    title: "RYDEX",
+    description:
+      "Book any vehicle — bikes to trucks. Real-time tracking, transparent pricing.",
     url: "https://rydex-eo9t.onrender.com/",
-    siteName: "RideFlow",
     type: "website",
+    siteName: "RideFlow",
+
     images: [
       {
         url: "https://rydex-eo9t.onrender.com/rydex.png",
@@ -25,7 +27,6 @@ export const metadata: Metadata = {
     ],
   },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
