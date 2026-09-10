@@ -423,10 +423,15 @@ function BookRidePageInner() {
                   className="bg-neutral-50 rounded-2xl p-5 mb-6 flex items-center justify-between overflow-hidden border border-neutral-100"
                 >
                   <div>
-                    <p className="text-xs text-neutral-600">
+                    <p className="text-xs text-neutral-500">
                       Estimated distance
                     </p>
-                    <p className="font-semibold">{estimate.distanceKm} km</p>
+                    <p className="font-semibold">
+                      {estimate.distanceKm} km
+                      <span className="text-neutral-400 font-normal text-xs ml-1">
+                        (~{Math.round(estimate.distanceKm * 3)} min)
+                      </span>
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-neutral-600">Estimated fare</p>
