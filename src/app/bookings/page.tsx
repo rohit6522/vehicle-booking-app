@@ -70,8 +70,13 @@ export default function BookingsPage() {
                 </div>
               ))}
             </div>
-          ) : rides.length === 0 ? (
-            <p className="text-neutral-600 text-sm">No bookings yet.</p>
+                  ) : rides.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-neutral-400 text-sm mb-3">No bookings yet.</p>
+              <a href="/rider/book" className="text-sm font-semibold text-black underline">
+                Book your first ride →
+              </a>
+            </div>
           ) : (
             <div className="space-y-4">
               {rides.map((ride) => (
