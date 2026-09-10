@@ -305,12 +305,19 @@ function BookRidePageInner() {
                       }}
                       className="mt-3 pt-3 border-t border-neutral-200"
                     >
-                      <p className="text-xs text-neutral-600 mb-1">
+                      <p className="text-xs text-neutral-400 mb-1">
                         Share this OTP with your driver
                       </p>
-                      <p className="text-2xl font-black tracking-[0.3em]">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(ride.otpForRider);
+                          toast.success("OTP copied!");
+                        }}
+                        className="text-2xl font-black tracking-[0.3em] hover:opacity-70 transition-opacity"
+                        title="Tap to copy"
+                      >
                         {ride.otpForRider}
-                      </p>
+                      </button>
                     </motion.div>
                   )}
                 </motion.div>
