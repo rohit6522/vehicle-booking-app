@@ -47,6 +47,19 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [earnings, setEarnings] = useState<any>(null);
 
+  const AVATAR_COLORS = [
+    "bg-violet-100 text-violet-600",
+    "bg-blue-100 text-blue-600",
+    "bg-emerald-100 text-emerald-600",
+    "bg-amber-100 text-amber-600",
+    "bg-pink-100 text-pink-600",
+  ];
+
+  function avatarColor(name: string) {
+    const idx = name?.charCodeAt(0) % AVATAR_COLORS.length || 0;
+    return AVATAR_COLORS[idx];
+  }
+
   const fetchAll = useCallback(async () => {
     const [statsRes, appsRes, kycRes, pricingRes, earningsRes] =
       await Promise.all([
@@ -381,9 +394,12 @@ export default function AdminDashboardPage() {
                             className="flex items-center justify-between border border-neutral-200 rounded-xl px-4 py-3"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-sm font-bold">
+                              <div
+                                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${avatarColor(d.name)}`}
+                              >
                                 {d.name?.charAt(0).toUpperCase()}
                               </div>
+
                               <div>
                                 <p className="text-sm font-semibold">
                                   {d.name}
