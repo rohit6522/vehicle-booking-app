@@ -252,7 +252,10 @@ export function AuthModal({
                         placeholder="Email"
                         value={form.email}
                         onChange={(e) =>
-                          setForm({ ...form, email: e.target.value })
+                          setForm({
+                            ...form,
+                            email: e.target.value.trim().toLowerCase(),
+                          })
                         }
                         className="w-full pl-11 pr-4 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
@@ -268,9 +271,7 @@ export function AuthModal({
                         minLength={6}
                         placeholder="Password"
                         value={form.password}
-                        onChange={(e) =>
-                          setForm({ ...form, password: e.target.value })
-                        }
+                       onChange={(e) => setForm({ ...form, email: e.target.value.trim().toLowerCase() })}
                         className="w-full pl-11 pr-11 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
                       <button
@@ -311,11 +312,12 @@ export function AuthModal({
                   </form>
                   <p className="text-center text-sm text-neutral-500 mt-5">
                     Don&apos;t have an account?{" "}
-
-                   <button onClick={() => switchMode("register")} className="font-semibold text-black cursor-pointer">
+                    <button
+                      onClick={() => switchMode("register")}
+                      className="font-semibold text-black cursor-pointer"
+                    >
                       Sign up
                     </button>
-                    
                   </p>
                 </motion.div>
               )}
@@ -417,7 +419,10 @@ export function AuthModal({
                   </form>
                   <p className="text-center text-sm text-neutral-500 mt-5">
                     Already have an account?{" "}
-                   <button onClick={() => switchMode("register")} className="font-semibold text-black cursor-pointer">
+                    <button
+                      onClick={() => switchMode("register")}
+                      className="font-semibold text-black cursor-pointer"
+                    >
                       Login
                     </button>
                   </p>
