@@ -449,7 +449,14 @@ function BookRidePageInner() {
               whileTap={coordsReady ? { scale: 0.98 } : {}}
               className="w-full py-4 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-40 text-[15px]"
             >
-              {booking ? "Booking..." : "Confirm Booking"}
+              {booking ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Booking...
+                </span>
+              ) : (
+                "Confirm Booking"
+              )}
             </motion.button>
           </motion.div>
         )}
