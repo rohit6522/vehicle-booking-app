@@ -66,3 +66,7 @@ html {
 .dark html {
   scrollbar-color: #404040 transparent;
 }
+
+button:disabled {
+  cursor: not-allowed;
+}
