@@ -36,7 +36,7 @@ export function Footer() {
         toast.error(data.error ?? "Something went wrong");
         return;
       }
-      toast.success(data.message ?? "Subscribed!");
+      toast.success(data.message ?? "Subscribed!", { duration: 4000 });
       setEmail("");
     } catch {
       toast.error("Network error. Please try again.");
