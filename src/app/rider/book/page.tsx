@@ -147,8 +147,9 @@ function BookRidePageInner() {
     }
   }
 
-  async function handleCancel() {
+   async function handleCancel() {
     if (!ride?._id) return;
+    if (!confirm("Are you sure you want to cancel this ride?")) return;
     await fetch(`/api/rides/${ride._id}/cancel`, { method: "POST" });
     toast.info("Ride cancelled");
     setRide(null);
