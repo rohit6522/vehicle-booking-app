@@ -129,8 +129,9 @@ export default function DriverRequestsPage() {
     }
   }
 
-  async function handleCancel() {
+   async function handleCancel() {
     if (!activeRide) return;
+    if (!confirm("Are you sure you want to cancel this ride?")) return;
     setCompleting(true);
     try {
       await fetch(`/api/rides/${activeRide._id}/cancel`, { method: "POST" });
