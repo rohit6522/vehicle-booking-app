@@ -118,7 +118,11 @@ export default function BookingsPage() {
                     </span>
                   </div>
 
-                  {ride.status === "completed" && (
+                                    {ride.rating?.score && (
+                    <p className="text-xs text-amber-500 mt-1 mb-2">
+                      {"★".repeat(ride.rating.score)}{"☆".repeat(5 - ride.rating.score)} You rated this ride
+                    </p>
+                  )}
                     <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
                       <p className="text-xs text-neutral-600">
                         Payment:{" "}
