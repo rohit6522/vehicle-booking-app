@@ -4,6 +4,13 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { LenisProvider } from "@/components/LenisProvider";
 import { Toaster } from "sonner";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "RYDEX — Book a ride in seconds",
@@ -33,7 +40,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" 
+      className={`h-full antialiased ${inter.variable}`}
+      >
+      
       <body className="min-h-full flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white transition-colors">
         <Providers>
           <LenisProvider>{children}</LenisProvider>
