@@ -257,6 +257,8 @@ export function AuthModal({
                       />
                       <input
                         type="email"
+                          autoComplete="email"
+
                         required
                         placeholder="Email"
                         value={form.email}
@@ -276,6 +278,7 @@ export function AuthModal({
                       />
                       <input
                         type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
                         required
                         minLength={6}
                         placeholder="Password"
@@ -375,6 +378,8 @@ export function AuthModal({
                       />
                       <input
                         type="email"
+                          autoComplete="email"
+
                         required
                         placeholder="Email address"
                         value={form.email}
@@ -391,6 +396,7 @@ export function AuthModal({
                       />
                       <input
                         type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
                         required
                         minLength={6}
                         placeholder="Password"
