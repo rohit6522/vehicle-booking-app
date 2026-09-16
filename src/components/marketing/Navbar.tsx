@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 import { AuthModal } from "./AuthModal";
 import { UserMenu } from "./UserMenu";
 // import { ThemeToggle } from "@/components/ThemeToggle";
-
+import { usePathname } from "next/navigation";
 const RIDER_LINKS = [
   { label: "Home", href: "/", authRequired: false },
   { label: "Book a Ride", href: "/rider/book", authRequired: true },
@@ -31,6 +31,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const tickingRef = useRef(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     function onScroll() {
@@ -91,7 +92,11 @@ export function Navbar() {
                       setModalOpen(true);
                     }
                   }}
-                  className="text-sm text-neutral-300 hover:text-white transition-colors"
+                  className={`text-sm transition-colors ${
+                    pathname === link.href
+                      ? "text-white font-semibold"
+                      : "text-neutral-300 hover:text-white"
+                  }`}
                 >
                   {link.label}
                 </a>
