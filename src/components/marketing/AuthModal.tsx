@@ -49,7 +49,7 @@ export function AuthModal({
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [otp, setOtp] = useState("");
 
-    useEffect(() => {
+  useEffect(() => {
     function handleEsc(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -257,8 +257,7 @@ export function AuthModal({
                       />
                       <input
                         type="email"
-                          autoComplete="email"
-
+                        autoComplete="email"
                         required
                         placeholder="Email"
                         value={form.email}
@@ -284,10 +283,7 @@ export function AuthModal({
                         placeholder="Password"
                         value={form.password}
                         onChange={(e) =>
-                          setForm({
-                            ...form,
-                            email: e.target.value.trim().toLowerCase(),
-                          })
+                          setForm({ ...form, password: e.target.value })
                         }
                         className="w-full pl-11 pr-11 py-3 rounded-full border border-neutral-200 text-sm placeholder:text-neutral-400 focus:outline-none focus:border-black"
                       />
@@ -378,8 +374,7 @@ export function AuthModal({
                       />
                       <input
                         type="email"
-                          autoComplete="email"
-
+                        autoComplete="email"
                         required
                         placeholder="Email address"
                         value={form.email}
@@ -446,7 +441,7 @@ export function AuthModal({
                   <p className="text-center text-sm text-neutral-500 mt-5">
                     Already have an account?{" "}
                     <button
-                      onClick={() => switchMode("register")}
+                      onClick={() => switchMode("login")}
                       className="font-semibold text-black cursor-pointer"
                     >
                       Login
