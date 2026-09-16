@@ -16,6 +16,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "RYDEX — Book a ride in seconds",
   description: "Real-time vehicle booking platform",
+  themeColor: "#000000",
 
   openGraph: {
     title: "RYDEX",
