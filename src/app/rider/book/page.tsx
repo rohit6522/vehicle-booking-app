@@ -226,7 +226,7 @@ function BookRidePageInner() {
               transition={{ delay: 0.1, duration: 0.3, ease: "backOut" }}
               className="text-3xl font-black mb-6"
             >
-              ₹{ride.fare.estimated}
+              ₹{ride.fare.estimated.toLocaleString("en-IN")}
             </motion.p>
 
             {ride.status === "requested" && (
