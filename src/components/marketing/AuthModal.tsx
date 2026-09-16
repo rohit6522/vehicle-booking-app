@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -49,6 +49,14 @@ export function AuthModal({
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [otp, setOtp] = useState("");
 
+    useEffect(() => {
+    function handleEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    if (open) document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [open, onClose]);
+
   async function handleGoogle() {
     await signIn("google", { callbackUrl: "/" });
   }
@@ -81,6 +89,7 @@ export function AuthModal({
   // SMTP, and Resend's free tier needs a verified domain to email real
   // users. This creates the account directly instead. To re-enable OTP:
   // change the register form's onSubmit back to handleSendOtp.
+
   async function handleRegisterDirect(e: React.FormEvent) {
     e.preventDefault();
     setError("");

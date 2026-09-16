@@ -156,9 +156,7 @@ export default function BookingsPage() {
                           )}
                       </div>
                     </div>
-                  )}
-
-
+                  
                 </div>
               ))}
             </div>
