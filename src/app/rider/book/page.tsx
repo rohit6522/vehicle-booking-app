@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { VEHICLE_TYPES, VehicleType } from "@/lib/vehicleTypes";
@@ -96,8 +96,11 @@ function BookRidePageInner() {
       });
   }, []);
 
+  const estimateRequestId = useRef(0);
+
   const getEstimate = useCallback(async () => {
     if (!coordsReady) return;
+    const requestId = ++estimateRequestId.current;
     setEstimating(true);
     setError("");
     try {
@@ -111,9 +114,11 @@ function BookRidePageInner() {
         }),
       });
       const data = await res.json();
-      if (res.ok) setEstimate(data);
+      // Ignore this response if a newer request has since been fired
+      // (e.g. user switched vehicle type quickly).
+      if (res.ok && requestId === estimateRequestId.current) setEstimate(data);
     } finally {
-      setEstimating(false);
+      if (requestId === estimateRequestId.current) setEstimating(false);
     }
   }, [pickup.lat, pickup.lng, drop.lat, drop.lng, vehicleType, coordsReady]);
 
@@ -147,7 +152,7 @@ function BookRidePageInner() {
     }
   }
 
-   async function handleCancel() {
+  async function handleCancel() {
     if (!ride?._id) return;
     if (!confirm("Are you sure you want to cancel this ride?")) return;
     await fetch(`/api/rides/${ride._id}/cancel`, { method: "POST" });
