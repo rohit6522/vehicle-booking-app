@@ -55,10 +55,10 @@ export default function AdminDashboardPage() {
     "bg-pink-100 text-pink-600",
   ];
 
-  function avatarColor(name: string) {
-    const idx = name?.charCodeAt(0) % AVATAR_COLORS.length || 0;
-    return AVATAR_COLORS[idx];
-  }
+function avatarColor(name: string) {
+  const code = name?.charCodeAt(0) ?? 0;
+  return AVATAR_COLORS[code % AVATAR_COLORS.length];
+}
 
   const fetchAll = useCallback(async () => {
     const [statsRes, appsRes, kycRes, pricingRes, earningsRes] =
