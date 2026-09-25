@@ -23,7 +23,7 @@ export function Footer() {
 
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || loading) return;
     setLoading(true);
     try {
       const res = await fetch("/api/newsletter", {
