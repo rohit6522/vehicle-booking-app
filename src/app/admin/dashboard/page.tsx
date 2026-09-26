@@ -46,6 +46,7 @@ export default function AdminDashboardPage() {
   const [tab, setTab] = useState<Tab>("kyc");
   const [loading, setLoading] = useState(true);
   const [earnings, setEarnings] = useState<any>(null);
+  const [vendorSearch, setVendorSearch] = useState("");
 
   const AVATAR_COLORS = [
     "bg-violet-100 text-violet-600",
@@ -55,10 +56,10 @@ export default function AdminDashboardPage() {
     "bg-pink-100 text-pink-600",
   ];
 
-function avatarColor(name: string) {
-  const code = name?.charCodeAt(0) ?? 0;
-  return AVATAR_COLORS[code % AVATAR_COLORS.length];
-}
+  function avatarColor(name: string) {
+    const code = name?.charCodeAt(0) ?? 0;
+    return AVATAR_COLORS[code % AVATAR_COLORS.length];
+  }
 
   const fetchAll = useCallback(async () => {
     const [statsRes, appsRes, kycRes, pricingRes, earningsRes] =
@@ -439,6 +440,12 @@ function avatarColor(name: string) {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
+                    <input
+                      placeholder="Search by name or email..."
+                      value={vendorSearch}
+                      onChange={(e) => setVendorSearch(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm mb-4 focus:outline-none focus:border-black"
+                    />
                     <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
                       PENDING APPLICATIONS
                     </p>
