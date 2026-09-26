@@ -39,10 +39,6 @@ export async function GET() {
     ? Math.round(values.reduce((a, b) => a + b, 0) / 7)
     : 0;
 
-  return NextResponse.json({
-    today,
-    bestDay,
-    dailyAvg,
-    completedRides: rides.length,
-  });
+  const lifetimeRides = await Ride.countDocuments({ driver: driverId, status: "completed" });
+  return NextResponse.json({ today, bestDay, dailyAvg, completedRides: rides.length, lifetimeRides });
 }
