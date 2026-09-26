@@ -48,6 +48,21 @@ function BookRidePageInner() {
     : "car";
 
   const [vehicleType, setVehicleType] = useState<VehicleType>(validVehicle);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("rydex-last-vehicle");
+    if (
+      saved &&
+      VEHICLE_TYPES.some((v) => v.type === saved) &&
+      !initialVehicle
+    ) {
+      setVehicleType(saved as VehicleType);
+    }
+  }, [initialVehicle]);
+  useEffect(() => {
+    localStorage.setItem("rydex-last-vehicle", vehicleType);
+  }, [vehicleType]);
+
   const [pickup, setPickup] = useState<Point>({
     address: "",
     lat: null,
@@ -76,11 +91,17 @@ function BookRidePageInner() {
   > | null>(null);
 
   const samePickupDrop =
-    pickup.lat != null && drop.lat != null &&
-    Math.abs(pickup.lat - drop.lat) < 0.0005 && Math.abs(pickup.lng! - drop.lng!) < 0.0005;
+    pickup.lat != null &&
+    drop.lat != null &&
+    Math.abs(pickup.lat - drop.lat) < 0.0005 &&
+    Math.abs(pickup.lng! - drop.lng!) < 0.0005;
 
   const coordsReady =
-    pickup.lat != null && pickup.lng != null && drop.lat != null && drop.lng != null && !samePickupDrop;
+    pickup.lat != null &&
+    pickup.lng != null &&
+    drop.lat != null &&
+    drop.lng != null &&
+    !samePickupDrop;
 
   useEffect(() => {
     fetch("/api/drivers/availability")
