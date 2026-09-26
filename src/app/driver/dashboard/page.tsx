@@ -14,6 +14,7 @@ export default function DriverDashboardPage() {
     today: number;
     bestDay: number;
     dailyAvg: number;
+     lifetimeRides: number;
   } | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -143,6 +144,12 @@ export default function DriverDashboardPage() {
                 />
                 <EarningsCard label="Today" value={earnings?.today ?? 0} />
               </div>
+
+              {earnings?.lifetimeRides != null && (
+                <p className="text-xs text-neutral-400 mt-4 text-center">
+                  {earnings.lifetimeRides} total rides completed
+                </p>
+              )}
             </motion.div>
           )}
         </motion.div>
