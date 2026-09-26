@@ -75,11 +75,12 @@ function BookRidePageInner() {
     number
   > | null>(null);
 
+  const samePickupDrop =
+    pickup.lat != null && drop.lat != null &&
+    Math.abs(pickup.lat - drop.lat) < 0.0005 && Math.abs(pickup.lng! - drop.lng!) < 0.0005;
+
   const coordsReady =
-    pickup.lat != null &&
-    pickup.lng != null &&
-    drop.lat != null &&
-    drop.lng != null;
+    pickup.lat != null && pickup.lng != null && drop.lat != null && drop.lng != null && !samePickupDrop;
 
   useEffect(() => {
     fetch("/api/drivers/availability")
