@@ -79,6 +79,10 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
+  document.title = "Admin — RYDEX";
+}, []);
+
+  useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 

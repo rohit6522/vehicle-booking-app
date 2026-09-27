@@ -20,6 +20,10 @@ export default function DriverDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+  document.title = "Driver Dashboard — RYDEX";
+}, []);
+
+  useEffect(() => {
     async function load() {
       const [activeRes, earningsRes, availableRes] = await Promise.all([
         fetch("/api/rides/active"),

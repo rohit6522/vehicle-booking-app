@@ -27,8 +27,13 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
 
   const role = (session?.user as any)?.role;
+  
+  useEffect(() => {
+  document.title = "My Bookings — RYDEX";
+}, []);
 
   useEffect(() => {
+    
     if (sessionStatus !== "authenticated") return;
     fetch("/api/rides")
       .then((res) => res.json())

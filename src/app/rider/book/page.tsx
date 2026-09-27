@@ -41,6 +41,7 @@ interface Point {
 
 function BookRidePageInner() {
   const router = useRouter();
+  useEffect(() => { document.title = "Book a Ride — RYDEX"; }, []);
   const searchParams = useSearchParams();
   const initialVehicle = searchParams.get("vehicle");
   const validVehicle = VEHICLE_TYPES.some((v) => v.type === initialVehicle)
