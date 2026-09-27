@@ -10,18 +10,19 @@ import { Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useRouter } from "next/navigation";
 
-
 const STATUS_STYLES: Record<string, string> = {
-  requested: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400",
+  requested:
+    "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400",
   accepted: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
   ongoing: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
-  completed: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400",
+  completed:
+    "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400",
   cancelled: "bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400",
 };
 
 export default function BookingsPage() {
   const { data: session, status: sessionStatus } = useSession();
-    const router = useRouter();
+  const router = useRouter();
   const [rides, setRides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +40,7 @@ export default function BookingsPage() {
     <>
       <Navbar />
       <main className="min-h-screen bg-white px-4 py-16">
-                <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <button
             onClick={() => router.back()}
             className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-black mb-6 transition-colors"
@@ -49,13 +50,18 @@ export default function BookingsPage() {
           </button>
           <h1 className="text-3xl font-black mb-1">My Bookings</h1>
           <p className="text-neutral-600 mb-8">
-            {role === "driver" ? "Your ride history as a driver" : "Your past and current rides"}
+            {role === "driver"
+              ? "Your ride history as a driver"
+              : "Your past and current rides"}
           </p>
 
-         {loading ? (
+          {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="border border-neutral-200 rounded-2xl p-5">
+                <div
+                  key={i}
+                  className="border border-neutral-200 rounded-2xl p-5"
+                >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-4 w-2/3" />
@@ -70,10 +76,13 @@ export default function BookingsPage() {
                 </div>
               ))}
             </div>
-                  ) : rides.length === 0 ? (
+          ) : rides.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-neutral-400 text-sm mb-3">No bookings yet.</p>
-              <a href="/rider/book" className="text-sm font-semibold text-black underline">
+              <a
+                href="/rider/book"
+                className="text-sm font-semibold text-black underline"
+              >
                 Book your first ride →
               </a>
             </div>
@@ -84,20 +93,31 @@ export default function BookingsPage() {
                   key={ride._id}
                   className="border border-neutral-200 rounded-2xl p-5"
                 >
-                 <div className="flex flex-col sm:flex-row items-start justify-between gap-2 mb-3">
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-2 mb-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start gap-2 mb-1.5">
-                        <MapPin size={14} className="mt-0.5 text-neutral-600 flex-shrink-0" />
-                        <p className="text-sm break-words">{ride.pickup?.address}</p>
+                        <MapPin
+                          size={14}
+                          className="mt-0.5 text-neutral-600 flex-shrink-0"
+                        />
+                        <p className="text-sm break-words">
+                          {ride.pickup?.address}
+                        </p>
                       </div>
                       <div className="flex items-start gap-2">
-                        <Navigation2 size={14} className="mt-0.5 text-neutral-600 flex-shrink-0" />
-                        <p className="text-sm break-words">{ride.drop?.address}</p>
+                        <Navigation2
+                          size={14}
+                          className="mt-0.5 text-neutral-600 flex-shrink-0"
+                        />
+                        <p className="text-sm break-words">
+                          {ride.drop?.address}
+                        </p>
                       </div>
                     </div>
                     <span
                       className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize flex-shrink-0 ${
-                        STATUS_STYLES[ride.status] ?? "bg-neutral-100 text-neutral-600"
+                        STATUS_STYLES[ride.status] ??
+                        "bg-neutral-100 text-neutral-600"
                       }`}
                     >
                       {ride.status}
@@ -118,20 +138,29 @@ export default function BookingsPage() {
                     </span>
                   </div>
 
-                                    {ride.rating?.score && (
+                  {ride.rating?.score && (
                     <p className="text-xs text-amber-500 mt-1 mb-2">
-                      {"★".repeat(ride.rating.score)}{"☆".repeat(5 - ride.rating.score)} You rated this ride
+                      {"★".repeat(ride.rating.score)}
+                      {"☆".repeat(5 - ride.rating.score)} You rated this ride
                     </p>
                   )}
-                    <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
-                      <p className="text-xs text-neutral-600">
-                        Payment:{" "}
-                        {ride.paymentStatus === "paid"
-                          ? `Paid (${ride.paymentMethod === "cash" ? "Cash" : "Online"})`
-                          : "Pending"}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        {role !== "driver" && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+                    <p className="text-xs text-neutral-600">
+                      Payment:{" "}
+                      {ride.paymentStatus === "paid"
+                        ? `Paid (${ride.paymentMethod === "cash" ? "Cash" : "Online"})`
+                        : "Pending"}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      {role !== "driver" && (
+                        <>
+                          <a
+                            href={`/rider/book?vehicle=${ride.vehicleType}`}
+                            className="text-xs font-medium text-neutral-500 hover:text-black"
+                          >
+                            Book again
+                          </a>
+
                           <button
                             onClick={() => generateReceipt(ride)}
                             className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-black"
@@ -139,24 +168,26 @@ export default function BookingsPage() {
                             <Download size={12} />
                             Receipt
                           </button>
+                        </>
+                      )}
+                      {role === "driver" &&
+                        ride.paymentMethod === "cash" &&
+                        ride.paymentStatus !== "paid" && (
+                          <ConfirmCashButton
+                            rideId={ride._id}
+                            onConfirmed={() =>
+                              setRides((prev) =>
+                                prev.map((r) =>
+                                  r._id === ride._id
+                                    ? { ...r, paymentStatus: "paid" }
+                                    : r,
+                                ),
+                              )
+                            }
+                          />
                         )}
-                        {role === "driver" &&
-                          ride.paymentMethod === "cash" &&
-                          ride.paymentStatus !== "paid" && (
-                            <ConfirmCashButton
-                              rideId={ride._id}
-                              onConfirmed={() =>
-                                setRides((prev) =>
-                                  prev.map((r) =>
-                                    r._id === ride._id ? { ...r, paymentStatus: "paid" } : r
-                                  )
-                                )
-                              }
-                            />
-                          )}
-                      </div>
                     </div>
-                  
+                  </div>
                 </div>
               ))}
             </div>
@@ -167,7 +198,6 @@ export default function BookingsPage() {
     </>
   );
 }
-
 
 function ConfirmCashButton({
   rideId,
@@ -181,7 +211,9 @@ function ConfirmCashButton({
   async function handleClick() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/rides/${rideId}/confirm-cash`, { method: "POST" });
+      const res = await fetch(`/api/rides/${rideId}/confirm-cash`, {
+        method: "POST",
+      });
       if (res.ok) onConfirmed();
     } finally {
       setLoading(false);
