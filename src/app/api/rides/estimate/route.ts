@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { distanceKm, estimateFare } from "@/lib/fare";
+import { distanceKm, estimateFare, FARE_RATES } from "@/lib/fare";
 
 const schema = z.object({
   pickup: z.object({ lat: z.number(), lng: z.number() }),
@@ -24,9 +24,11 @@ export async function POST(req: Request) {
     const km = distanceKm(pickup, drop);
     const fare = estimateFare(km, vehicleType);
 
+    const rate = FARE_RATES[vehicleType];
     return NextResponse.json({
       distanceKm: Math.round(km * 10) / 10,
       fare,
+      breakdown: { base: rate.base, perKm: rate.perKm, waitingPerMin: rate.perMinute },
     });
   } catch (err) {
     console.error("Estimate error:", err);

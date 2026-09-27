@@ -41,8 +41,17 @@ export const FARE_RATES: Record<RideVehicleType, FareRate> = {
 
 export function estimateFare(km: number, vehicleType: RideVehicleType) {
   const rate = FARE_RATES[vehicleType];
-  const estimatedMinutes = km * 2.5; // rough city-traffic assumption
+
+  const estimatedMinutes = km * 2.5;
   const raw = rate.base + km * rate.perKm + estimatedMinutes * rate.perMinute;
   const fare = Math.max(raw, rate.minFare);
-  return Math.round(fare);
+
+  return {
+    fare: Math.round(fare),
+    breakdown: {
+      base: rate.base,
+      perKm: rate.perKm,
+      waitingPerMin: rate.perMinute,
+    },
+  };
 }
