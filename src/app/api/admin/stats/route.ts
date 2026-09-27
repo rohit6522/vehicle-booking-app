@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import Ride from "@/models/Ride";
 
 export async function GET() {
   const session = await auth();
@@ -18,5 +19,10 @@ export async function GET() {
     User.countDocuments({ partnerStatus: "rejected" }),
   ]);
 
-  return NextResponse.json({ total, approved, pending, rejected });
+const revenueAgg = await Ride.aggregate([
+  { $match: { status: "completed" } },
+  { $group: { _id: null, total: { $sum: "$fare.final" } } },
+]);
+const totalRevenue = revenueAgg[0]?.total ?? 0;
+return NextResponse.json({ total, approved, pending, rejected, totalRevenue });
 }
