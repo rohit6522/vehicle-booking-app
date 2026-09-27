@@ -105,6 +105,16 @@ export default function VendorDetailPage() {
                   <p className="text-neutral-500 text-sm truncate">
                     {vendor.email}
                   </p>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(id);
+                      toast.success("Vendor ID copied");
+                    }}
+                    className="text-xs text-neutral-400 hover:text-black underline"
+                  >
+                    Copy ID
+                  </button>
                 </div>
                 <StatusBadge status={vendor.partnerStatus} />
               </div>
@@ -275,8 +285,18 @@ function DocPreview({ label, url }: { label: string; url?: string }) {
         {label}
       </p>
       {url ? (
-       <a href={url} target="_blank" rel="noopener noreferrer" className="block">
-         <img src={url} alt={label} loading="lazy" className="w-full h-32 object-cover" />
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          <img
+            src={url}
+            alt={label}
+            loading="lazy"
+            className="w-full h-32 object-cover"
+          />
           <p className="text-xs text-center py-2 text-neutral-500 hover:text-black">
             Open full document
           </p>
