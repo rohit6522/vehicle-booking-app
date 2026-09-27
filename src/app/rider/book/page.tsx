@@ -41,7 +41,9 @@ interface Point {
 
 function BookRidePageInner() {
   const router = useRouter();
-  useEffect(() => { document.title = "Book a Ride — RYDEX"; }, []);
+  useEffect(() => {
+    document.title = "Book a Ride — RYDEX";
+  }, []);
   const searchParams = useSearchParams();
   const initialVehicle = searchParams.get("vehicle");
   const validVehicle = VEHICLE_TYPES.some((v) => v.type === initialVehicle)
@@ -77,6 +79,11 @@ function BookRidePageInner() {
   const [estimate, setEstimate] = useState<{
     distanceKm: number;
     fare: number;
+    breakdown?: {
+      base: number;
+      perKm: number;
+      waitingPerMin: number;
+    };
   } | null>(null);
   const [estimating, setEstimating] = useState(false);
   const [booking, setBooking] = useState(false);
@@ -465,6 +472,12 @@ function BookRidePageInner() {
                   <div className="text-right">
                     <p className="text-xs text-neutral-600">Estimated fare</p>
                     <p className="font-black text-xl">₹{estimate.fare}</p>
+                    {estimate.breakdown && (
+                      <p className="text-[10px] text-neutral-400 mt-1">
+                        Base ₹{estimate.breakdown.base} + ₹
+                        {estimate.breakdown.perKm}/km
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               )}
