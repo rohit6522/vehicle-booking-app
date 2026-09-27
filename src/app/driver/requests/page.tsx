@@ -20,10 +20,16 @@ export default function DriverRequestsPage() {
   const [startingRide, setStartingRide] = useState(false);
   const [confirmingCash, setConfirmingCash] = useState(false);
   const router = useRouter();
+
   const fetchRides = useCallback(async () => {
     const res = await fetch("/api/rides/available");
     const data = await res.json();
     if (res.ok) {
+      const sorted = [...data.rides].sort(
+        (a, b) => a.distanceKm - b.distanceKm,
+      );
+      setRides(sorted);
+
       setRides(data.rides);
       setError("");
     } else {
@@ -129,7 +135,7 @@ export default function DriverRequestsPage() {
     }
   }
 
-   async function handleCancel() {
+  async function handleCancel() {
     if (!activeRide) return;
     if (!confirm("Are you sure you want to cancel this ride?")) return;
     setCompleting(true);
