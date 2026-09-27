@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { MapPin, Navigation2, Inbox, TrendingUp } from "lucide-react";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
-
+import { toast } from "sonner";
 export default function DriverDashboardPage() {
   const { data: session } = useSession();
   const [activeRide, setActiveRide] = useState<any>(null);
@@ -14,14 +14,26 @@ export default function DriverDashboardPage() {
     today: number;
     bestDay: number;
     dailyAvg: number;
-     lifetimeRides: number;
+    lifetimeRides: number;
   } | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(true);
+
+  async function toggleOnline() {
+    const next = !isOnline;
+    setIsOnline(next);
+    await fetch("/api/driver/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isOnline: next }),
+    });
+    toast.success(next ? "You're online" : "You're offline");
+  }
 
   useEffect(() => {
-  document.title = "Driver Dashboard — RYDEX";
-}, []);
+    document.title = "Driver Dashboard — RYDEX";
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -60,6 +72,14 @@ export default function DriverDashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-black mb-2 tracking-tight">
             Welcome back, {session?.user?.name?.split(" ")[0]}
           </h1>
+
+          <button
+            onClick={toggleOnline}
+            className={`px-4 py-2 rounded-full text-sm font-semibold ${isOnline ? "bg-emerald-100 text-emerald-700" : "bg-neutral-200 text-neutral-600"}`}
+          >
+            {isOnline ? "● Online" : "○ Offline"}
+          </button>
+          
           <p className="text-neutral-600 mb-10">
             Here&apos;s how you&apos;re doing today.
           </p>
