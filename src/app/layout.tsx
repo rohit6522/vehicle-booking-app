@@ -18,9 +18,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RYDEX — Book a ride in seconds",
+  title: "RYDEX — Book a ride in seconds", 
   description: "Real-time vehicle booking platform",
   themeColor: "#000000",
+
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "RYDEX" },
 
   openGraph: {
     title: "RYDEX",
