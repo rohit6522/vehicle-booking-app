@@ -501,7 +501,13 @@ export default function AdminDashboardPage() {
                           <a
                             key={app._id}
                             href={`/admin/vendors/${app._id}`}
-                            className="block border border-neutral-200 rounded-2xl p-5 hover:border-black transition-colors"
+                            
+                            className={`block border rounded-2xl p-5 transition-colors ${
+                              Date.now() - new Date(app.createdAt).getTime() >
+                              86400000
+                                ? "border-amber-300 bg-amber-50"
+                                : "border-neutral-200 hover:border-black"
+                            }`}
                           >
                             <p className="font-bold">{app.name}</p>
                             <p className="text-sm text-neutral-500">
