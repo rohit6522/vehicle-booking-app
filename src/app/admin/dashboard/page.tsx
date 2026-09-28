@@ -79,8 +79,9 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
-  document.title = "Admin — RYDEX";
-}, []);
+    const count = applications.length + kycQueue.length + pricingQueue.length;
+    document.title = count > 0 ? `(${count}) Admin — RYDEX` : "Admin — RYDEX";
+  }, [applications, kycQueue, pricingQueue]);
 
   useEffect(() => {
     fetchAll();
