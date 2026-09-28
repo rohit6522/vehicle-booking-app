@@ -449,6 +449,10 @@ function BookRidePageInner() {
               />
             </div>
 
+            {estimating && !estimate && (
+              <div className="h-[72px] bg-neutral-100 rounded-2xl mb-6 animate-pulse" />
+            )}
+
             <AnimatePresence>
               {estimate && (
                 <motion.div

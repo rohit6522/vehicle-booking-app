@@ -22,13 +22,12 @@ export async function POST(req: Request) {
 
     const { pickup, drop, vehicleType } = parsed.data;
     const km = distanceKm(pickup, drop);
-    const fare = estimateFare(km, vehicleType);
+    const fareEstimate = estimateFare(km, vehicleType);
 
-    const rate = FARE_RATES[vehicleType];
     return NextResponse.json({
       distanceKm: Math.round(km * 10) / 10,
-      fare,
-      breakdown: { base: rate.base, perKm: rate.perKm, waitingPerMin: rate.perMinute },
+      fare: fareEstimate.fare,
+      breakdown: fareEstimate.breakdown,
     });
   } catch (err) {
     console.error("Estimate error:", err);
