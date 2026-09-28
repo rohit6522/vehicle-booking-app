@@ -36,6 +36,22 @@ export default function DriverDashboardPage() {
   }, []);
 
   useEffect(() => {
+    const timer = setTimeout(
+      async () => {
+        await fetch("/api/driver/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isOnline: false }),
+        });
+        setIsOnline(false);
+        toast.info("You've been set offline due to inactivity");
+      },
+      30 * 60 * 1000,
+    );
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     async function load() {
       const [activeRes, earningsRes, availableRes] = await Promise.all([
         fetch("/api/rides/active"),
@@ -79,7 +95,7 @@ export default function DriverDashboardPage() {
           >
             {isOnline ? "● Online" : "○ Offline"}
           </button>
-          
+
           <p className="text-neutral-600 mb-10">
             Here&apos;s how you&apos;re doing today.
           </p>
