@@ -98,7 +98,7 @@ export function TripLocationPicker({
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [saveLabel, setSaveLabel] = useState("");
   const [saving, setSaving] = useState(false);
-
+const [locating, setLocating] = useState(false);
   const setValue = active === "pickup" ? onPickupChange : onDropChange;
   const currentPoint = active === "pickup" ? pickup : drop;
 
@@ -160,11 +160,13 @@ export function TripLocationPicker({
     }
   }
 
-  function useMyLocation() {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      reverseGeocode({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-    });
-  }
+function useMyLocation() {
+  setLocating(true);
+  navigator.geolocation.getCurrentPosition(
+    (pos) => { reverseGeocode({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocating(false); },
+    () => setLocating(false)
+  );
+}
 
   async function handleSaveAddress() {
     if (!currentPoint.lat || !currentPoint.lng || !saveLabel.trim()) return;
@@ -263,7 +265,9 @@ export function TripLocationPicker({
                 onClick={() => {
                   setActive("pickup");
                   useMyLocation();
+                  
                 }}
+                disabled={locating}
                 title="Use my current location"
                 className="text-neutral-600 hover:text-black"
               >
