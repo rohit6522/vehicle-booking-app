@@ -6,6 +6,7 @@ import { LenisProvider } from "@/components/LenisProvider";
 import { Toaster } from "sonner";
 import { Inter } from "next/font/google";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { NetworkStatus } from "@/components/NetworkStatus";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
             style: { fontFamily: "inherit" },
           }}
         />
+        <NetworkStatus />
       </body>
     </html>
   );
