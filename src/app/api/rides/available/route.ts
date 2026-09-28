@@ -13,6 +13,11 @@ export async function GET() {
   await connectDB();
 
   const driver = await User.findById((session.user as any).id);
+
+  if (!driver.isOnline) {
+    return NextResponse.json({ rides: [] });
+  }
+
   if (!driver?.vehicle?.type) {
     return NextResponse.json(
       { error: "Add your vehicle details before viewing ride requests" },
