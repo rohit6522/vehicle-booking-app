@@ -8,6 +8,8 @@ import { Toaster } from "sonner";
 import { Inter } from "next/font/google";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { NetworkStatus } from "@/components/NetworkStatus";
+import { RouteProgress } from "@/components/RouteProgress";
+
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,6 +51,7 @@ export default function RootLayout({
       >
       
       <body className="min-h-full flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white transition-colors">
+        <RouteProgress />
         <Providers>
           <LenisProvider>{children}</LenisProvider>
         </Providers>
@@ -62,6 +65,7 @@ export default function RootLayout({
           }}
         />
         <NetworkStatus />
+
       </body>
     </html>
   );
