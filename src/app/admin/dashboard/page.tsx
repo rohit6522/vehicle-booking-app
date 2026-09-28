@@ -62,6 +62,20 @@ export default function AdminDashboardPage() {
     return AVATAR_COLORS[code % AVATAR_COLORS.length];
   }
 
+  function exportCSV() {
+    const rows = applications
+      .map((a) => `${a.name},${a.email},${a.vehicle?.type}`)
+      .join("\n");
+    const blob = new Blob([`Name,Email,Vehicle\n${rows}`], {
+      type: "text/csv",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "vendors.csv";
+    a.click();
+  }
+
   const fetchAll = useCallback(async () => {
     const [statsRes, appsRes, kycRes, pricingRes, earningsRes] =
       await Promise.all([
@@ -103,10 +117,10 @@ export default function AdminDashboardPage() {
   const totalForChart = stats?.total || 1;
 
   const sortedApps = [...applications].sort((a, b) =>
-  sortOrder === "newest"
-    ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-);
+    sortOrder === "newest"
+      ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
 
   return (
     <main className="min-h-screen bg-neutral-100">
@@ -458,6 +472,13 @@ export default function AdminDashboardPage() {
                       onChange={(e) => setVendorSearch(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm mb-4 focus:outline-none focus:border-black"
                     />
+
+                    <button
+                      onClick={exportCSV}
+                      className="text-xs text-neutral-500 hover:text-black underline mb-4"
+                    >
+                      Export CSV
+                    </button>
                     <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
                       PENDING APPLICATIONS
                     </p>
