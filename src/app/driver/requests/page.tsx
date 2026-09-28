@@ -22,6 +22,18 @@ export default function DriverRequestsPage() {
   const [isOnline, setIsOnline] = useState(true);
   const router = useRouter();
 
+  const prevCountRef = useRef(0);
+  useEffect(() => {
+    if (rides.length > prevCountRef.current) {
+      new Audio(
+        "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=",
+      )
+        .play()
+        .catch(() => {});
+    }
+    prevCountRef.current = rides.length;
+  }, [rides.length]);
+
   const fetchRides = useCallback(async () => {
     const res = await fetch("/api/rides/available");
     const data = await res.json();
@@ -397,18 +409,17 @@ export default function DriverRequestsPage() {
                           className="mt-0.5 text-neutral-600 flex-shrink-0"
                         />
 
-                       <div>
-                         <p className="text-sm break-words">
-                          {ride.drop.address}
-                        </p>
-
-                        {ride.notes && (
-                          <p className="text-xs text-neutral-400 italic mt-1">
-                            "{ride.notes}"
+                        <div>
+                          <p className="text-sm break-words">
+                            {ride.drop.address}
                           </p>
-                        )}
-                       </div>
 
+                          {ride.notes && (
+                            <p className="text-xs text-neutral-400 italic mt-1">
+                              "{ride.notes}"
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <p className="font-black text-lg flex-shrink-0">
