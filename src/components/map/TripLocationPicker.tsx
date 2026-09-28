@@ -1,13 +1,29 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
-import { Search, Navigation, MapPin, Home, Briefcase, Star, Plus, X } from "lucide-react";
+import {
+  Search,
+  Navigation,
+  MapPin,
+  Home,
+  Briefcase,
+  Star,
+  Plus,
+  X,
+} from "lucide-react";
 
 const pickupIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -15,7 +31,8 @@ const pickupIcon = L.icon({
 
 const dropIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -58,7 +75,7 @@ function FitBounds({ pickup, drop }: { pickup: Point; drop: Point }) {
           [pickup.lat, pickup.lng!],
           [drop.lat!, drop.lng!],
         ],
-        { padding: [40, 40], maxZoom: 15 }
+        { padding: [40, 40], maxZoom: 15 },
       );
     } else if (pickup.lat != null) {
       map.setView([pickup.lat, pickup.lng!], 14);
@@ -89,7 +106,10 @@ export function TripLocationPicker({
   onDropChange: (v: Point) => void;
 }) {
   const [active, setActive] = useState<"pickup" | "drop">("pickup");
-  const [queries, setQueries] = useState({ pickup: pickup.address, drop: drop.address });
+  const [queries, setQueries] = useState({
+    pickup: pickup.address,
+    drop: drop.address,
+  });
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -98,7 +118,7 @@ export function TripLocationPicker({
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [saveLabel, setSaveLabel] = useState("");
   const [saving, setSaving] = useState(false);
-const [locating, setLocating] = useState(false);
+  const [locating, setLocating] = useState(false);
   const setValue = active === "pickup" ? onPickupChange : onDropChange;
   const currentPoint = active === "pickup" ? pickup : drop;
 
@@ -115,7 +135,7 @@ const [locating, setLocating] = useState(false);
       return;
     }
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5`
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5`,
     );
     setSuggestions(await res.json());
   }, []);
@@ -133,6 +153,15 @@ const [locating, setLocating] = useState(false);
     setQueries((q) => ({ ...q, [active]: s.display_name }));
     setShowSuggestions(false);
     setValue({ address: s.display_name, lat, lng });
+
+    const recent = JSON.parse(
+      localStorage.getItem("rydex-recent-addresses") || "[]",
+    );
+    const updated = [
+      s.display_name,
+      ...recent.filter((r: string) => r !== s.display_name),
+    ].slice(0, 3);
+    localStorage.setItem("rydex-recent-addresses", JSON.stringify(updated));
     if (active === "pickup") setActive("drop");
   }
 
@@ -146,10 +175,11 @@ const [locating, setLocating] = useState(false);
   async function reverseGeocode(p: LatLng) {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.lat}&lon=${p.lng}`
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.lat}&lon=${p.lng}`,
       );
       const data = await res.json();
-      const address = data.display_name ?? `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`;
+      const address =
+        data.display_name ?? `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`;
       setQueries((q) => ({ ...q, [active]: address }));
       setValue({ address, lat: p.lat, lng: p.lng });
       if (active === "pickup") setActive("drop");
@@ -160,13 +190,16 @@ const [locating, setLocating] = useState(false);
     }
   }
 
-function useMyLocation() {
-  setLocating(true);
-  navigator.geolocation.getCurrentPosition(
-    (pos) => { reverseGeocode({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocating(false); },
-    () => setLocating(false)
-  );
-}
+  function useMyLocation() {
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        reverseGeocode({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      () => setLocating(false),
+    );
+  }
 
   async function handleSaveAddress() {
     if (!currentPoint.lat || !currentPoint.lng || !saveLabel.trim()) return;
@@ -256,7 +289,9 @@ function useMyLocation() {
                 setActive(key);
                 handleQueryChange(e.target.value);
               }}
-              placeholder={key === "pickup" ? "Pickup location" : "Drop location"}
+              placeholder={
+                key === "pickup" ? "Pickup location" : "Drop location"
+              }
               className="flex-1 bg-transparent text-sm focus:outline-none"
             />
             {key === "pickup" && (
@@ -265,7 +300,6 @@ function useMyLocation() {
                 onClick={() => {
                   setActive("pickup");
                   useMyLocation();
-                  
                 }}
                 disabled={locating}
                 title="Use my current location"
@@ -328,7 +362,10 @@ function useMyLocation() {
               onClick={() => selectSuggestion(s)}
               className="flex items-start gap-2 w-full text-left px-3 py-2 text-sm hover:bg-neutral-50 border-b border-neutral-100 last:border-0"
             >
-              <Search size={13} className="mt-0.5 text-neutral-600 flex-shrink-0" />
+              <Search
+                size={13}
+                className="mt-0.5 text-neutral-600 flex-shrink-0"
+              />
               {s.display_name}
             </button>
           ))}
@@ -351,12 +388,17 @@ function useMyLocation() {
           {pickup.lat != null && (
             <Marker position={[pickup.lat, pickup.lng!]} icon={pickupIcon} />
           )}
-          {drop.lat != null && <Marker position={[drop.lat, drop.lng!]} icon={dropIcon} />}
+          {drop.lat != null && (
+            <Marker position={[drop.lat, drop.lng!]} icon={dropIcon} />
+          )}
         </MapContainer>
       </div>
       <p className="text-xs text-neutral-600 mt-1.5">
-        Editing <span className="font-medium">{active === "pickup" ? "pickup" : "drop"}</span> —
-        search above or tap the map.
+        Editing{" "}
+        <span className="font-medium">
+          {active === "pickup" ? "pickup" : "drop"}
+        </span>{" "}
+        — search above or tap the map.
       </p>
     </div>
   );
