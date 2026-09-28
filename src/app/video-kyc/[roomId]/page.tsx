@@ -72,6 +72,12 @@ export default function VideoKycRoomPage() {
   }, [camOn, micOn]);
 
   useEffect(() => {
+  function handleEsc(e: KeyboardEvent) { if (e.key === "Escape" && !joined) router.back(); }
+  document.addEventListener("keydown", handleEsc);
+  return () => document.removeEventListener("keydown", handleEsc);
+}, [joined, router]);
+
+  useEffect(() => {
     if (!joined || !session?.user) return;
 
     // Preview stream's job is done — the call widget manages its own stream.
@@ -81,12 +87,12 @@ export default function VideoKycRoomPage() {
     let cancelled = false;
 
     async function joinCall() {
-      const { ZegoUIKitPrebuilt } = await import(
-        "@zegocloud/zego-uikit-prebuilt"
-      );
+      const { ZegoUIKitPrebuilt } =
+        await import("@zegocloud/zego-uikit-prebuilt");
 
       const appID = Number(process.env.NEXT_PUBLIC_ZEGO_APP_ID);
-      const serverSecret = process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET_TEST_ONLY!;
+      const serverSecret =
+        process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET_TEST_ONLY!;
       const userId = (session!.user as any).id;
       const userName = session!.user!.name ?? "User";
 
@@ -95,7 +101,7 @@ export default function VideoKycRoomPage() {
         serverSecret,
         roomId,
         userId,
-        userName
+        userName,
       );
 
       const zp = ZegoUIKitPrebuilt.create(kitToken);
@@ -121,7 +127,6 @@ export default function VideoKycRoomPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [joined, session, roomId]);
 
-
   // Partner side: poll status and leave automatically once admin has
   // acted (approved/rejected), even if this tab is stuck on the pre-join
   // screen due to a camera/mic permission issue.
@@ -141,13 +146,13 @@ export default function VideoKycRoomPage() {
 
     return () => clearInterval(interval);
   }, [isAdmin, session, router]);
-  
+
   function handleEndCall() {
     zpRef.current?.destroy();
     router.push(isAdmin ? "/admin/dashboard" : "/become-a-partner");
   }
 
-async function handleDecision(action: "approve" | "reject") {
+  async function handleDecision(action: "approve" | "reject") {
     setProcessing(true);
     setError("");
     try {
@@ -198,12 +203,9 @@ async function handleDecision(action: "approve" | "reject") {
           <div className="w-full lg:w-1/2">
             <h2 className="text-3xl font-black mb-6">Secure Video KYC</h2>
 
-            {error && (
-              <p className="text-sm text-red-400 mb-4">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
 
             <div className="flex items-center gap-3 mb-8">
-
               <button
                 onClick={() => setCamOn((v) => !v)}
                 className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${
@@ -234,7 +236,6 @@ async function handleDecision(action: "approve" | "reject") {
             >
               Join Secure Call
             </button>
-
           </div>
         </div>
       </main>
@@ -246,7 +247,9 @@ async function handleDecision(action: "approve" | "reject") {
     <div className="fixed inset-0 bg-black flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-black z-10">
         <div>
-          <h1 className="text-white font-black text-sm tracking-tight">RYDEX</h1>
+          <h1 className="text-white font-black text-sm tracking-tight">
+            RYDEX
+          </h1>
           <p className="text-xs text-neutral-400">
             {isAdmin ? "Admin Verification" : "Vendor Video KYC"}
           </p>

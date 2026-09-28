@@ -62,7 +62,7 @@ function BookRidePageInner() {
       setVehicleType(saved as VehicleType);
     }
   }, [initialVehicle]);
-  
+
   useEffect(() => {
     localStorage.setItem("rydex-last-vehicle", vehicleType);
   }, [vehicleType]);
@@ -361,6 +361,11 @@ function BookRidePageInner() {
                         {ride.otpForRider}
                       </button>
                     </motion.div>
+                  )}
+                  {ride.status === "accepted" && (
+                    <p className="text-xs text-neutral-400 mt-2">
+                      Driver is on the way — usually arrives in 5-10 min
+                    </p>
                   )}
                 </motion.div>
               </div>
