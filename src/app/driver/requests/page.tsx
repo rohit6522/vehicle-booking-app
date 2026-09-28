@@ -19,6 +19,7 @@ export default function DriverRequestsPage() {
   const [otp, setOtp] = useState("");
   const [startingRide, setStartingRide] = useState(false);
   const [confirmingCash, setConfirmingCash] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   const router = useRouter();
 
   const fetchRides = useCallback(async () => {
@@ -44,6 +45,12 @@ export default function DriverRequestsPage() {
     const interval = setInterval(fetchRides, 5000);
     return () => clearInterval(interval);
   }, [fetchRides, activeRide]);
+
+  useEffect(() => {
+    fetch("/api/driver/me-status")
+      .then((r) => r.json())
+      .then((d) => setIsOnline(d.isOnline));
+  }, []);
 
   // On page load/refresh, check the server for an already-active ride
   // (e.g. accepted in a previous session) instead of assuming there's none.
@@ -308,7 +315,20 @@ export default function DriverRequestsPage() {
           <ArrowLeft size={16} />
           Back
         </button>
-        <h1 className="text-3xl font-black mb-1">Ride requests</h1>
+        <div className="flex items-center justify-between gap-3 mb-1">
+          <h1 className="text-3xl font-black">Ride requests</h1>
+
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              isOnline
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-neutral-200 text-neutral-600"
+            }`}
+          >
+            {isOnline ? "● Online" : "○ Offline"}
+          </span>
+        </div>
+
         <p className="text-neutral-600 mb-8">
           New requests matching your vehicle type appear here automatically.
         </p>
