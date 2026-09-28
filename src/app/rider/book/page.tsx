@@ -62,6 +62,7 @@ function BookRidePageInner() {
       setVehicleType(saved as VehicleType);
     }
   }, [initialVehicle]);
+  
   useEffect(() => {
     localStorage.setItem("rydex-last-vehicle", vehicleType);
   }, [vehicleType]);
@@ -88,11 +89,14 @@ function BookRidePageInner() {
   const [estimating, setEstimating] = useState(false);
   const [booking, setBooking] = useState(false);
   const [error, setError] = useState("");
+  const [notes, setNotes] = useState("");
   const [ride, setRide] = useState<any>(null);
+
   const [driverLocation, setDriverLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
+
   const [availability, setAvailability] = useState<Record<
     string,
     number
@@ -138,9 +142,9 @@ function BookRidePageInner() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          vehicleType,
           pickup: { lat: pickup.lat, lng: pickup.lng },
           drop: { lat: drop.lat, lng: drop.lng },
-          vehicleType,
         }),
       });
       const data = await res.json();
@@ -163,10 +167,12 @@ function BookRidePageInner() {
       const res = await fetch("/api/rides", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+
         body: JSON.stringify({
           vehicleType,
           pickup: { address: pickup.address, lat: pickup.lat, lng: pickup.lng },
           drop: { address: drop.address, lat: drop.lat, lng: drop.lng },
+          notes: notes.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -500,6 +506,14 @@ function BookRidePageInner() {
               )}
             </AnimatePresence>
 
+            <textarea
+              placeholder="Any notes for the driver? (optional)"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm resize-none mb-6 focus:outline-none focus:border-black"
+            />
+
             <motion.button
               onClick={handleBook}
               disabled={!coordsReady || booking || estimating}
@@ -763,6 +777,7 @@ function RatingSection({ rideId }: { rideId: string }) {
           </motion.button>
         ))}
       </div>
+
       <textarea
         placeholder="Leave a comment (optional)"
         value={comment}
@@ -770,6 +785,7 @@ function RatingSection({ rideId }: { rideId: string }) {
         rows={2}
         className="w-full px-3 py-2 rounded-lg border border-neutral-200 text-sm resize-none focus:outline-none focus:border-black mb-3"
       />
+
       {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
       <motion.button
         onClick={handleSubmit}

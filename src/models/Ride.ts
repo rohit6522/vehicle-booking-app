@@ -32,6 +32,7 @@ export interface IRide extends mongoose.Document {
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   startOtp?: string;
+  notes?: string;
     trackedPath?: { lat: number; lng: number }[];
 
   rating?: {
@@ -76,8 +77,9 @@ const RideSchema = new Schema<IRide>({
   paymentDisputed: { type: Boolean, default: false },
   razorpayOrderId: String,
   razorpayPaymentId: String,
-  startOtp: String,
-    trackedPath: [
+startOtp: String,
+notes: { type: String, trim: true },
+trackedPath: [
     {
       lat: Number,
       lng: Number,
