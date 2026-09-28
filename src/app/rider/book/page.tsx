@@ -261,6 +261,14 @@ function BookRidePageInner() {
             <p className="text-neutral-600 mb-6">
               {ride.pickup.address} → {ride.drop.address}
             </p>
+
+            {ride.status === "cancelled" && (
+              <p className="text-sm text-neutral-400 mt-2">
+                Cancelled by{" "}
+                {ride.cancelledBy === "driver" ? "the driver" : "you"}
+              </p>
+            )}
+            
             <motion.p
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
