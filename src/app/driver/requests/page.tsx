@@ -396,9 +396,19 @@ export default function DriverRequestsPage() {
                           size={14}
                           className="mt-0.5 text-neutral-600 flex-shrink-0"
                         />
-                        <p className="text-sm break-words">
+
+                       <div>
+                         <p className="text-sm break-words">
                           {ride.drop.address}
                         </p>
+
+                        {ride.notes && (
+                          <p className="text-xs text-neutral-400 italic mt-1">
+                            "{ride.notes}"
+                          </p>
+                        )}
+                       </div>
+
                       </div>
                     </div>
                     <p className="font-black text-lg flex-shrink-0">
