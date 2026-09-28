@@ -47,6 +47,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [earnings, setEarnings] = useState<any>(null);
   const [vendorSearch, setVendorSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   const AVATAR_COLORS = [
     "bg-violet-100 text-violet-600",
@@ -100,6 +101,12 @@ export default function AdminDashboardPage() {
       ]
     : [];
   const totalForChart = stats?.total || 1;
+
+  const sortedApps = [...applications].sort((a, b) =>
+  sortOrder === "newest"
+    ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+);
 
   return (
     <main className="min-h-screen bg-neutral-100">
@@ -469,7 +476,7 @@ export default function AdminDashboardPage() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {applications.map((app) => (
+                        {sortedApps.map((app) => (
                           <a
                             key={app._id}
                             href={`/admin/vendors/${app._id}`}
