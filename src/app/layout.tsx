@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@/lib/suppressLogs";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
