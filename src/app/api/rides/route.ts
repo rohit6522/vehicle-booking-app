@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         coordinates: [drop.lng, drop.lat],
       },
       distanceKm: Math.round(km * 10) / 10,
-      fare: { estimated: fare },
+     fare: { estimated: fare.fare },
       status: "requested",
     });
 

@@ -19,19 +19,19 @@ export async function GET() {
     User.countDocuments({ partnerStatus: "rejected" }),
   ]);
 
-const revenueAgg = await Ride.aggregate([
-  { $match: { status: "completed" } },
-  { $group: { _id: null, total: { $sum: "$fare.final" } } },
-]);
+  const revenueAgg = await Ride.aggregate([
+    { $match: { status: "completed" } },
+    { $group: { _id: null, total: { $sum: "$fare.final" } } },
+  ]);
 
-const avgApprovalAgg = await User.aggregate([
-  { $match: { partnerStatus: "approved", updatedAt: { $exists: true } } },
-  { $project: { diff: { $subtract: ["$updatedAt", "$createdAt"] } } },
-  { $group: { _id: null, avg: { $avg: "$diff" } } },
-]);
-const avgApprovalHours = avgApprovalAgg[0] ? Math.round(avgApprovalAgg[0].avg / 3600000) : 0;
+  const avgApprovalAgg = await User.aggregate([
+    { $match: { partnerStatus: "approved", updatedAt: { $exists: true } } },
+    { $project: { diff: { $subtract: ["$updatedAt", "$createdAt"] } } },
+    { $group: { _id: null, avg: { $avg: "$diff" } } },
+  ]);
+  const avgApprovalHours = avgApprovalAgg[0] ? Math.round(avgApprovalAgg[0].avg / 3600000) : 0;
 
-const totalRevenue = revenueAgg[0]?.total ?? 0;
+  const totalRevenue = revenueAgg[0]?.total ?? 0;
 
-return NextResponse.json({ total, approved, pending, rejected, totalRevenue ,  avgApprovalHours,});
+  return NextResponse.json({ total, approved, pending, rejected, totalRevenue, avgApprovalHours, });
 }
