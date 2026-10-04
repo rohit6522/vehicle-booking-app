@@ -163,6 +163,8 @@ export function TripLocationPicker({
     ].slice(0, 3);
     localStorage.setItem("rydex-recent-addresses", JSON.stringify(updated));
     if (active === "pickup") setActive("drop");
+
+    
   }
 
   function selectSaved(a: SavedAddress) {

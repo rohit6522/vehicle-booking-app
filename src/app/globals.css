@@ -70,3 +70,8 @@ button:disabled {
   outline: 2px solid #000;
   outline-offset: 2px;
 }
+
+
+@media print {
+  header, footer, button { display: none !important; }
+}
