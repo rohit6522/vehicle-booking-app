@@ -15,6 +15,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 type WizardStep = "vehicle" | "documents" | "bank" | "review";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useRouter } from "next/navigation";
+
 interface PartnerStatus {
   role: string;
   partnerStep: string | null;
@@ -32,13 +34,14 @@ interface PartnerStatus {
 }
 
 export default function BecomePartnerPage() {
- const { data: session, status: sessionStatus } = useSession();
+  const { data: session, status: sessionStatus, update: updateSession } = useSession();
+  const router = useRouter();
   const [status, setStatus] = useState<PartnerStatus | null>(null);
   const [step, setStep] = useState<WizardStep>("vehicle");
   const [editingAfterRejection, setEditingAfterRejection] = useState(false);
   const [loading, setLoading] = useState(true);
 
- useEffect(() => {
+  useEffect(() => {
     if (sessionStatus !== "authenticated") return;
 
     fetch("/api/partner/status")
@@ -75,7 +78,16 @@ export default function BecomePartnerPage() {
   function refreshStatus() {
     fetch("/api/partner/status")
       .then((res) => res.json())
-      .then(setStatus);
+      .then(async (data) => {
+        setStatus(data);
+        // Role just became "driver" but our JWT session doesn't know yet —
+        // force a refresh so Navbar/role-based redirects pick it up
+        // immediately instead of waiting for the next logout/login.
+        if (data.role === "driver" && (session?.user as any)?.role !== "driver") {
+          await updateSession();
+          router.push("/driver/dashboard");
+        }
+      });
   }
 
   if (sessionStatus === "unauthenticated") {
@@ -95,7 +107,7 @@ export default function BecomePartnerPage() {
     );
   }
 
- if (loading || !status) {
+  if (loading || !status) {
     return (
       <>
         <PartnerNavbar />
@@ -149,17 +161,17 @@ export default function BecomePartnerPage() {
       s.kycStatus === "approved"
         ? "done"
         : s.partnerStatus === "approved"
-        ? "current"
-        : "locked";
+          ? "current"
+          : "locked";
 
-   const pricing: StepState =
+    const pricing: StepState =
       s.role === "driver"
         ? "done"
         : s.kycStatus === "approved"
-        ? "current"
-        : "locked";
+          ? "current"
+          : "locked";
 
-   const finalReview: StepState = s.role === "driver" ? "done" : "locked";
+    const finalReview: StepState = s.role === "driver" ? "done" : "locked";
     const live: StepState = s.role === "driver" ? "current" : "locked";
 
     return [
@@ -174,7 +186,7 @@ export default function BecomePartnerPage() {
     ];
   }
 
-   const shell = (children: React.ReactNode) => (
+  const shell = (children: React.ReactNode) => (
     <>
       <PartnerNavbar />
       <main className="min-h-screen bg-neutral-50 px-4 py-10">
@@ -196,7 +208,7 @@ export default function BecomePartnerPage() {
     </>
   );
 
-if (status.role === "driver") {
+  if (status.role === "driver") {
     return shell(
       <div className="bg-black text-white rounded-2xl p-6 flex items-center justify-between">
         <p className="text-lg font-bold">🚀 You&apos;re Live</p>
@@ -243,7 +255,7 @@ if (status.role === "driver") {
             </div>
           </div>
           <a
-           href={`/video-kyc/kyc-${(session?.user as any)?.id}`}
+            href={`/video-kyc/kyc-${(session?.user as any)?.id}`}
             className="px-5 py-2.5 rounded-full bg-black text-white text-sm font-semibold hover:bg-neutral-800 transition-colors"
           >
             Join Call
@@ -306,7 +318,7 @@ if (status.role === "driver") {
         >
           Update Documents
         </button>
-      </div>  
+      </div>
     );
 
   if (status.partnerStatus === "rejected" && !editingAfterRejection) {
@@ -314,7 +326,7 @@ if (status.role === "driver") {
   }
 
   // Actively filling out (or resubmitting) the wizard.
-    return shell(
+  return shell(
     <div className="flex justify-center">
       <AnimatePresence mode="wait">
         <motion.div
