@@ -43,13 +43,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = (user as any).id;
         token.role = (user as any).role ?? "rider";
       }
+
+      // Allow the client to force a fresh role lookup (e.g. right after
+      // becoming a driver) without requiring a full logout/login.
+      if (trigger === "update" && token.id) {
+        await connectDB();
+        const freshUser = await User.findById(token.id).select("role");
+        if (freshUser) token.role = freshUser.role;
+      }
+
       return token;
     },
+
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
