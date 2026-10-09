@@ -27,13 +27,13 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
 
   const role = (session?.user as any)?.role;
-  
-  useEffect(() => {
-  document.title = "My Bookings — RYDEX";
-}, []);
 
   useEffect(() => {
-    
+    document.title = "My Bookings — RYDEX";
+  }, []);
+
+  useEffect(() => {
+
     if (sessionStatus !== "authenticated") return;
     fetch("/api/rides")
       .then((res) => res.json())
@@ -84,12 +84,11 @@ export default function BookingsPage() {
           ) : rides.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-neutral-400 text-sm mb-3">No bookings yet.</p>
-              <a
-                href="/rider/book"
-                className="text-sm font-semibold text-black underline"
-              >
-                Book your first ride →
-              </a>
+              {role !== "driver" && (
+                <a href="/rider/book" className="text-sm font-semibold text-black underline">
+                  Book your first ride →
+                </a>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -120,10 +119,9 @@ export default function BookingsPage() {
                       </div>
                     </div>
                     <span
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize flex-shrink-0 ${
-                        STATUS_STYLES[ride.status] ??
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize flex-shrink-0 ${STATUS_STYLES[ride.status] ??
                         "bg-neutral-100 text-neutral-600"
-                      }`}
+                        }`}
                     >
                       {ride.status}
                     </span>

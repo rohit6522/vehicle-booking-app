@@ -20,6 +20,8 @@ import {
   Video,
   UsersRound,
   ImagePlus,
+  Car,
+
 } from "lucide-react";
 
 import { signOut } from "next-auth/react";
@@ -35,7 +37,7 @@ interface Stats {
 
 const COLORS = { approved: "#10b981", pending: "#f59e0b", rejected: "#ef4444" };
 
-type Tab = "kyc" | "reviews" | "pricing";
+type Tab = "kyc" | "reviews" | "pricing" | "vehicles";
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
@@ -48,6 +50,7 @@ export default function AdminDashboardPage() {
   const [earnings, setEarnings] = useState<any>(null);
   const [vendorSearch, setVendorSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [allVehicles, setAllVehicles] = useState<any[]>([]);
 
   const AVATAR_COLORS = [
     "bg-violet-100 text-violet-600",
@@ -77,19 +80,20 @@ export default function AdminDashboardPage() {
   }
 
   const fetchAll = useCallback(async () => {
-    const [statsRes, appsRes, kycRes, pricingRes, earningsRes] =
-      await Promise.all([
-        fetch("/api/admin/stats"),
-        fetch("/api/admin/partners"),
-        fetch("/api/admin/kyc"),
-        fetch("/api/admin/pricing"),
-        fetch("/api/admin/earnings"),
-      ]);
+    const [statsRes, appsRes, kycRes, pricingRes, earningsRes, vehiclesRes] = await Promise.all([
+      fetch("/api/admin/stats"),
+      fetch("/api/admin/partners"),
+      fetch("/api/admin/kyc"),
+      fetch("/api/admin/pricing"),
+      fetch("/api/admin/earnings"),
+      fetch("/api/admin/all-vehicles"),
+    ]);
     if (statsRes.ok) setStats(await statsRes.json());
     if (appsRes.ok) setApplications((await appsRes.json()).applications);
     if (kycRes.ok) setKycQueue((await kycRes.json()).drivers);
     if (pricingRes.ok) setPricingQueue((await pricingRes.json()).vendors);
     if (earningsRes.ok) setEarnings(await earningsRes.json());
+    if (vehiclesRes.ok) setAllVehicles((await vehiclesRes.json()).drivers);
     setLoading(false);
   }, []);
 
@@ -109,10 +113,10 @@ export default function AdminDashboardPage() {
 
   const chartData = stats
     ? [
-        { name: "Approved", value: stats.approved, color: COLORS.approved },
-        { name: "Pending", value: stats.pending, color: COLORS.pending },
-        { name: "Rejected", value: stats.rejected, color: COLORS.rejected },
-      ]
+      { name: "Approved", value: stats.approved, color: COLORS.approved },
+      { name: "Pending", value: stats.pending, color: COLORS.pending },
+      { name: "Rejected", value: stats.rejected, color: COLORS.rejected },
+    ]
     : [];
   const totalForChart = stats?.total || 1;
 
@@ -246,11 +250,10 @@ export default function AdminDashboardPage() {
                       ₹{earnings.weeklyTotal}
                     </p>
                     <p
-                      className={`text-xs font-medium ${
-                        earnings.changePct >= 0
-                          ? "text-emerald-600"
-                          : "text-red-500"
-                      }`}
+                      className={`text-xs font-medium ${earnings.changePct >= 0
+                        ? "text-emerald-600"
+                        : "text-red-500"
+                        }`}
                     >
                       {earnings.changePct >= 0 ? "↑" : "↓"}{" "}
                       {Math.abs(earnings.changePct)}% vs yesterday
@@ -277,7 +280,7 @@ export default function AdminDashboardPage() {
                             key={i}
                             fill={
                               d.total === earnings.today &&
-                              i === earnings.days.length - 1
+                                i === earnings.days.length - 1
                                 ? "#10b981" // today = green
                                 : d.total === earnings.bestDay && d.total > 0
                                   ? "#8b5cf6" // best day = purple
@@ -386,6 +389,10 @@ export default function AdminDashboardPage() {
                   label="Pricing & Images"
                   count={pricingQueue.length}
                 />
+                <TabButton active={tab === "vehicles"}
+                  onClick={() => setTab("vehicles")}
+                  icon={Car} label="All Vehicles"
+                  count={allVehicles.length} />
               </div>
               {/* </AnimatePresence> */}
               <AnimatePresence mode="wait">
@@ -458,6 +465,68 @@ export default function AdminDashboardPage() {
                   </motion.div>
                 )}
 
+                {tab === "vehicles" && (
+                  <motion.div
+                    key="vehicles"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <p className="text-xs font-semibold text-neutral-400 tracking-wide mb-4">
+                      ALL LIVE DRIVERS &amp; VEHICLES
+                    </p>
+                    {allVehicles.length === 0 ? (
+                      <div className="text-center py-10">
+                        <Car size={28} className="mx-auto text-neutral-300 mb-3" />
+                        <p className="font-semibold text-neutral-600">No live drivers yet</p>
+                        <p className="text-sm text-neutral-400">
+                          Approved drivers will appear here.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {allVehicles.map((d) => (
+                          <div
+                            key={d._id}
+                            className="flex items-center gap-4 border border-neutral-200 rounded-xl p-4"
+                          >
+                            {d.pricing?.vehicleImageUrl ? (
+                              <img
+                                src={d.pricing.vehicleImageUrl}
+                                alt={d.vehicle?.model ?? "Vehicle"}
+                                loading="lazy"
+                                className="w-20 h-16 rounded-lg object-cover flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-20 h-16 rounded-lg bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                                <Car size={20} className="text-neutral-300" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm truncate">{d.name}</p>
+                              <p className="text-xs text-neutral-500 truncate">
+                                {d.vehicle?.type} · {d.vehicle?.model}
+                              </p>
+                              <p className="text-xs text-neutral-400">
+                                Plate: {d.vehicle?.numberPlate}
+                              </p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-xs text-amber-500 font-medium">★ {d.rating ?? 5}</p>
+                              {d.pricing?.baseFare != null && (
+                                <p className="text-[11px] text-neutral-400">
+                                  ₹{d.pricing.baseFare} + ₹{d.pricing.perKm}/km
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
                 {tab === "reviews" && (
                   <motion.div
                     key="reviews"
@@ -501,13 +570,12 @@ export default function AdminDashboardPage() {
                           <a
                             key={app._id}
                             href={`/admin/vendors/${app._id}`}
-                            
-                            className={`block border rounded-2xl p-5 transition-colors ${
-                              Date.now() - new Date(app.createdAt).getTime() >
+
+                            className={`block border rounded-2xl p-5 transition-colors ${Date.now() - new Date(app.createdAt).getTime() >
                               86400000
-                                ? "border-amber-300 bg-amber-50"
-                                : "border-neutral-200 hover:border-black"
-                            }`}
+                              ? "border-amber-300 bg-amber-50"
+                              : "border-neutral-200 hover:border-black"
+                              }`}
                           >
                             <p className="font-bold">{app.name}</p>
                             <p className="text-sm text-neutral-500">
@@ -603,16 +671,14 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
-        active ? "bg-black text-white" : "text-neutral-500 hover:bg-neutral-100"
-      }`}
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${active ? "bg-black text-white" : "text-neutral-500 hover:bg-neutral-100"
+        }`}
     >
       <Icon size={14} />
       {label}
       <span
-        className={`text-xs px-1.5 py-0.5 rounded-full ${
-          active ? "bg-white/20" : "bg-neutral-200 text-neutral-600"
-        }`}
+        className={`text-xs px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-neutral-200 text-neutral-600"
+          }`}
       >
         {count}
       </span>
