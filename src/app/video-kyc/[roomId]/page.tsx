@@ -77,8 +77,11 @@ export default function VideoKycRoomPage() {
   return () => document.removeEventListener("keydown", handleEsc);
 }, [joined, router]);
 
+  const userId = (session?.user as any)?.id as string | undefined;
+  const userName = session?.user?.name ?? "User";
+
   useEffect(() => {
-    if (!joined || !session?.user) return;
+    if (!joined || !userId) return;
 
     // Preview stream's job is done — the call widget manages its own stream.
     previewStreamRef.current?.getTracks().forEach((t) => t.stop());
@@ -87,35 +90,46 @@ export default function VideoKycRoomPage() {
     let cancelled = false;
 
     async function joinCall() {
-      const { ZegoUIKitPrebuilt } =
-        await import("@zegocloud/zego-uikit-prebuilt");
-
       const appID = Number(process.env.NEXT_PUBLIC_ZEGO_APP_ID);
-      const serverSecret =
-        process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET_TEST_ONLY!;
-      const userId = (session!.user as any).id;
-      const userName = session!.user!.name ?? "User";
+      const serverSecret = process.env.NEXT_PUBLIC_ZEGO_SERVER_SECRET_TEST_ONLY;
 
-      const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-        appID,
-        serverSecret,
-        roomId,
-        userId,
-        userName,
-      );
+      if (!appID || !serverSecret) {
+        toast.error("Video service isn't configured on this deployment.");
+        return;
+      }
 
-      const zp = ZegoUIKitPrebuilt.create(kitToken);
-      if (cancelled) return;
-      zpRef.current = zp;
+      try {
+        const { ZegoUIKitPrebuilt } = await import(
+          "@zegocloud/zego-uikit-prebuilt"
+        );
 
-      zp.joinRoom({
-        container: containerRef.current,
-        scenario: { mode: ZegoUIKitPrebuilt.OneONoneCall },
-        showScreenSharingButton: false,
-        showPreJoinView: false,
-        turnOnCameraWhenJoining: camOn,
-        turnOnMicrophoneWhenJoining: micOn,
-      });
+        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+          appID,
+          serverSecret,
+          roomId,
+          userId!,
+          userName
+        );
+
+        const zp = ZegoUIKitPrebuilt.create(kitToken);
+        if (cancelled) {
+          zp.destroy();
+          return;
+        }
+        zpRef.current = zp;
+
+        zp.joinRoom({
+          container: containerRef.current,
+          scenario: { mode: ZegoUIKitPrebuilt.OneONoneCall },
+          showScreenSharingButton: false,
+          showPreJoinView: false,
+          turnOnCameraWhenJoining: camOn,
+          turnOnMicrophoneWhenJoining: micOn,
+        });
+      } catch (err) {
+        console.error("Zego join failed:", err);
+        toast.error("Couldn't join the call. Check camera/mic permission and try again.");
+      }
     }
 
     joinCall();
@@ -123,9 +137,12 @@ export default function VideoKycRoomPage() {
     return () => {
       cancelled = true;
       zpRef.current?.destroy();
+      zpRef.current = null;
     };
+    // camOn/micOn only matter at the moment of joining, so they are
+    // deliberately not dependencies.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [joined, session, roomId]);
+  }, [joined, userId, userName, roomId]);
 
   // Partner side: poll status and leave automatically once admin has
   // acted (approved/rejected), even if this tab is stuck on the pre-join
