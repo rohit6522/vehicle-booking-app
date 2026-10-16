@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
 
+function escapeHtml(s: string) {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const schema = z.object({
@@ -29,18 +38,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
     }
 
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeMessage = escapeHtml(message);
+
     await resend.emails.send({
       from: "RYDEX Contact Form <onboarding@resend.dev>",
       to: receiver,
       replyTo: email,
-      subject: `New contact message from ${name}`,
+      subject: `New contact message from ${name.replace(/[\r\n]+/g, " ")}`,
       html: `
         <div style="font-family: sans-serif; max-width: 480px;">
           <h2>New Contact Message</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Name:</strong> ${safeName}</p>
+          <p><strong>Email:</strong> ${safeEmail}</p>
           <p><strong>Message:</strong></p>
-          <p style="white-space: pre-wrap;">${message}</p>
+          <p style="white-space: pre-wrap;">${safeMessage}</p>
         </div>
       `,
     });
