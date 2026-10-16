@@ -4,10 +4,12 @@ import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import { rateLimit } from "@/lib/rateLimit";
+
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
- 
+
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -21,6 +23,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+
+        const limit = rateLimit(
+          `login:${String(credentials.email).toLowerCase()}`,
+          10,
+          15 * 60 * 1000
+        );
+        if (!limit.ok) return null;
 
         await connectDB();
 
