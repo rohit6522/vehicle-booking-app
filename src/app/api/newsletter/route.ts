@@ -2,12 +2,20 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { connectDB } from "@/lib/db";
 import Subscriber from "@/models/Subscriber";
+import { rateLimit, clientIp } from "@/lib/rateLimit";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address"),
 });
 
 export async function POST(req: Request) {
+  const rl = rateLimit(`newsletter:${clientIp(req)}`, 10, 60 * 60 * 1000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } }
+    );
+  }
   try {
     const body = await req.json();
     const parsed = schema.safeParse(body);

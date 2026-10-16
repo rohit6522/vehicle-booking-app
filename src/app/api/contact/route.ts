@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
+import { rateLimit, clientIp } from "@/lib/rateLimit";
 
 function escapeHtml(s: string) {
   return s
@@ -20,6 +21,14 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+
+  const rl = rateLimit(`contact:${clientIp(req)}`, 5, 60 * 60 * 1000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } }
+    );
+  }
   try {
     const body = await req.json();
     const parsed = schema.safeParse(body);

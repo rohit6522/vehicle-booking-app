@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import { rateLimit, clientIp } from "@/lib/rateLimit";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -12,6 +13,13 @@ const registerSchema = z.object({
 });
 
 export async function POST(req: Request) {
+    const rl = rateLimit(`register:${clientIp(req)}`, 10, 60 * 60 * 1000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } }
+    );
+  }
   try {
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
