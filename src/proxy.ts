@@ -8,7 +8,10 @@ export default auth((req) => {
   const isProtected =
     pathname.startsWith("/rider") ||
     pathname.startsWith("/driver") ||
-    pathname.startsWith("/admin");
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/bookings") ||
+    pathname.startsWith("/become-a-partner") ||
+    pathname.startsWith("/video-kyc");
 
   if (!isProtected) return NextResponse.next();
 
@@ -31,5 +34,12 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/rider/:path*", "/driver/:path*", "/admin/:path*"],
+  matcher: [
+    "/rider/:path*",
+    "/driver/:path*",
+    "/admin/:path*",
+    "/bookings/:path*",
+    "/become-a-partner/:path*",
+    "/video-kyc/:path*",
+  ],
 };
