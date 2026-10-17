@@ -393,8 +393,8 @@ export function AuthModal({
                         type={showPassword ? "text" : "password"}
                         autoComplete="new-password"
                         required
-                        minLength={6}
-                        placeholder="Password"
+                        minLength={8}
+                        placeholder="Password (min 8 characters)"
                         value={form.password}
                         onChange={(e) =>
                           setForm({ ...form, password: e.target.value })
