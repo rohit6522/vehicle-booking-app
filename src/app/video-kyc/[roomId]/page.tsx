@@ -16,6 +16,12 @@ export default function VideoKycRoomPage() {
 
   const role = (session?.user as any)?.role;
   const isAdmin = role === "admin";
+  const userId = (session?.user as any)?.id as string | undefined;
+  const userName = session?.user?.name ?? "User";
+
+  // Only the admin, or the driver this room belongs to, may be here.
+  // NOTE: this is a UI guard only — see the Zego token note below.
+  const allowed = isAdmin || (!!userId && userId === driverId);
 
   const [joined, setJoined] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -28,9 +34,22 @@ export default function VideoKycRoomPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const zpRef = useRef<any>(null);
 
-  // Live camera/mic preview before joining the call.
+  // Send unauthenticated / unauthorized visitors away.
   useEffect(() => {
-    if (joined) return;
+    if (status === "unauthenticated") {
+      router.replace("/");
+      return;
+    }
+    if (status === "authenticated" && !allowed) {
+      toast.error("You don't have access to this call.");
+      router.replace("/");
+    }
+  }, [status, allowed, router]);
+
+  // Live camera/mic preview before joining the call. Gated on `allowed`
+  // so someone who is about to be redirected never gets a permission prompt.
+  useEffect(() => {
+    if (joined || !allowed) return;
 
     let cancelled = false;
 
@@ -61,7 +80,7 @@ export default function VideoKycRoomPage() {
       previewStreamRef.current?.getTracks().forEach((t) => t.stop());
       previewStreamRef.current = null;
     };
-  }, [joined]);
+  }, [joined, allowed]);
 
   // Reflect toggle state onto the actual preview tracks.
   useEffect(() => {
@@ -72,24 +91,14 @@ export default function VideoKycRoomPage() {
   }, [camOn, micOn]);
 
   useEffect(() => {
-    function handleEsc(e: KeyboardEvent) { if (e.key === "Escape" && !joined) router.back(); }
+    function handleEsc(e: KeyboardEvent) {
+      if (e.key === "Escape" && !joined) router.back();
+    }
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, [joined, router]);
 
-  const userId = (session?.user as any)?.id as string | undefined;
-  const userName = session?.user?.name ?? "User";
-
-  const allowed = isAdmin || (!!userId && userId === driverId);
-
-  useEffect(() => {
-    if (status !== "authenticated") return;
-    if (!allowed) {
-      toast.error("You don't have access to this call.");
-      router.replace("/");
-    }
-  }, [status, allowed, router]);
-
+  // Join the Zego room.
   useEffect(() => {
     if (!joined || !userId || !allowed) return;
 
@@ -113,6 +122,12 @@ export default function VideoKycRoomPage() {
           "@zegocloud/zego-uikit-prebuilt"
         );
 
+        // Bail out BEFORE creating an instance if this effect run has
+        // already been cleaned up (React StrictMode double-run in dev,
+        // or a fast dependency change). There is no await between
+        // create() and joinRoom(), so nothing can cancel us after this.
+        if (cancelled) return;
+
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
           appID,
           serverSecret,
@@ -122,10 +137,6 @@ export default function VideoKycRoomPage() {
         );
 
         const zp = ZegoUIKitPrebuilt.create(kitToken);
-        if (cancelled) {
-          zp.destroy();
-          return;
-        }
         zpRef.current = zp;
 
         zp.joinRoom({
@@ -138,7 +149,9 @@ export default function VideoKycRoomPage() {
         });
       } catch (err) {
         console.error("Zego join failed:", err);
-        toast.error("Couldn't join the call. Check camera/mic permission and try again.");
+        toast.error(
+          "Couldn't join the call. Check camera/mic permission and try again."
+        );
       }
     }
 
@@ -150,15 +163,17 @@ export default function VideoKycRoomPage() {
       zpRef.current = null;
     };
     // camOn/micOn only matter at the moment of joining, so they are
-    // deliberately not dependencies.
+    // deliberately not dependencies. `allowed` is a boolean, so it is
+    // safe to depend on (it won't change on every session refetch).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [joined, userId, userName, roomId]);
+  }, [joined, userId, userName, roomId, allowed]);
 
   // Partner side: poll status and leave automatically once admin has
   // acted (approved/rejected), even if this tab is stuck on the pre-join
-  // screen due to a camera/mic permission issue.
+  // screen. Depends on userId (a stable string), not the session object,
+  // which is re-created on every window focus.
   useEffect(() => {
-    if (isAdmin || !session?.user) return;
+    if (isAdmin || !userId) return;
 
     const interval = setInterval(async () => {
       const res = await fetch("/api/partner/status");
@@ -172,7 +187,7 @@ export default function VideoKycRoomPage() {
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isAdmin, session, router]);
+  }, [isAdmin, userId, router]);
 
   function handleEndCall() {
     zpRef.current?.destroy();
@@ -220,7 +235,9 @@ export default function VideoKycRoomPage() {
               autoPlay
               muted
               playsInline
-              className={`w-full h-full object-cover -scale-x-100 ${camOn ? "" : "hidden"}`}
+              className={`w-full h-full object-cover -scale-x-100 ${
+                camOn ? "" : "hidden"
+              }`}
             />
             {!camOn && (
               <span className="text-neutral-500 text-sm">Camera is off</span>
@@ -235,20 +252,22 @@ export default function VideoKycRoomPage() {
             <div className="flex items-center gap-3 mb-8">
               <button
                 onClick={() => setCamOn((v) => !v)}
-                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${camOn
-                  ? "border-white/20 hover:bg-white/10"
-                  : "bg-red-500 border-red-500"
-                  }`}
+                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${
+                  camOn
+                    ? "border-white/20 hover:bg-white/10"
+                    : "bg-red-500 border-red-500"
+                }`}
                 title={camOn ? "Turn camera off" : "Turn camera on"}
               >
                 {camOn ? <Video size={18} /> : <VideoOff size={18} />}
               </button>
               <button
                 onClick={() => setMicOn((v) => !v)}
-                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${micOn
-                  ? "border-white/20 hover:bg-white/10"
-                  : "bg-red-500 border-red-500"
-                  }`}
+                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${
+                  micOn
+                    ? "border-white/20 hover:bg-white/10"
+                    : "bg-red-500 border-red-500"
+                }`}
                 title={micOn ? "Mute microphone" : "Unmute microphone"}
               >
                 {micOn ? <Mic size={18} /> : <MicOff size={18} />}
@@ -257,7 +276,8 @@ export default function VideoKycRoomPage() {
 
             <button
               onClick={() => setJoined(true)}
-              className="w-full py-4 rounded-full bg-white text-black font-semibold hover:bg-neutral-200 transition-colors"
+              disabled={!allowed}
+              className="w-full py-4 rounded-full bg-white text-black font-semibold hover:bg-neutral-200 transition-colors disabled:opacity-50"
             >
               Join Secure Call
             </button>
