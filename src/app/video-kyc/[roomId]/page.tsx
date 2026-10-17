@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export default function VideoKycRoomPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const roomId = params.roomId as string;
   const driverId = roomId.replace(/^kyc-/, "");
@@ -72,16 +72,26 @@ export default function VideoKycRoomPage() {
   }, [camOn, micOn]);
 
   useEffect(() => {
-  function handleEsc(e: KeyboardEvent) { if (e.key === "Escape" && !joined) router.back(); }
-  document.addEventListener("keydown", handleEsc);
-  return () => document.removeEventListener("keydown", handleEsc);
-}, [joined, router]);
+    function handleEsc(e: KeyboardEvent) { if (e.key === "Escape" && !joined) router.back(); }
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [joined, router]);
 
   const userId = (session?.user as any)?.id as string | undefined;
   const userName = session?.user?.name ?? "User";
 
+  const allowed = isAdmin || (!!userId && userId === driverId);
+
   useEffect(() => {
-    if (!joined || !userId) return;
+    if (status !== "authenticated") return;
+    if (!allowed) {
+      toast.error("You don't have access to this call.");
+      router.replace("/");
+    }
+  }, [status, allowed, router]);
+
+  useEffect(() => {
+    if (!joined || !userId || !allowed) return;
 
     // Preview stream's job is done — the call widget manages its own stream.
     previewStreamRef.current?.getTracks().forEach((t) => t.stop());
@@ -225,22 +235,20 @@ export default function VideoKycRoomPage() {
             <div className="flex items-center gap-3 mb-8">
               <button
                 onClick={() => setCamOn((v) => !v)}
-                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${
-                  camOn
-                    ? "border-white/20 hover:bg-white/10"
-                    : "bg-red-500 border-red-500"
-                }`}
+                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${camOn
+                  ? "border-white/20 hover:bg-white/10"
+                  : "bg-red-500 border-red-500"
+                  }`}
                 title={camOn ? "Turn camera off" : "Turn camera on"}
               >
                 {camOn ? <Video size={18} /> : <VideoOff size={18} />}
               </button>
               <button
                 onClick={() => setMicOn((v) => !v)}
-                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${
-                  micOn
-                    ? "border-white/20 hover:bg-white/10"
-                    : "bg-red-500 border-red-500"
-                }`}
+                className={`w-11 h-11 rounded-full border flex items-center justify-center transition-colors ${micOn
+                  ? "border-white/20 hover:bg-white/10"
+                  : "bg-red-500 border-red-500"
+                  }`}
                 title={micOn ? "Mute microphone" : "Unmute microphone"}
               >
                 {micOn ? <Mic size={18} /> : <MicOff size={18} />}
