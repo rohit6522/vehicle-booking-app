@@ -1,161 +1,127 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { AuthModal } from "./AuthModal";
 import { UserMenu } from "./UserMenu";
-// import { ThemeToggle } from "@/components/ThemeToggle";
-import { usePathname } from "next/navigation";
-const RIDER_LINKS = [
-  { label: "Home", href: "/", authRequired: false },
+
+type NavLink = { label: string; href: string; authRequired?: boolean };
+
+const RIDER_LINKS: NavLink[] = [
+  { label: "Home", href: "/" },
   { label: "Book a Ride", href: "/rider/book", authRequired: true },
   { label: "My Bookings", href: "/bookings", authRequired: true },
-  { label: "Fleet", href: "/#fleet", authRequired: false },
-  { label: "Contact", href: "/contact", authRequired: false },
+  { label: "Fleet", href: "/#fleet" },
+  { label: "Contact", href: "/contact" },
 ];
 
-const DRIVER_LINKS = [
-  { label: "Dashboard", href: "/driver/dashboard", authRequired: false },
-  { label: "Ride Requests", href: "/driver/requests", authRequired: false },
-  { label: "My Bookings", href: "/bookings", authRequired: false },
+const DRIVER_LINKS: NavLink[] = [
+  { label: "Dashboard", href: "/driver/dashboard" },
+  { label: "Ride Requests", href: "/driver/requests" },
+  { label: "My Bookings", href: "/bookings" },
 ];
 
-const ADMIN_LINKS = [
-  { label: "Dashboard", href: "/admin/dashboard", authRequired: false },
-];
+const ADMIN_LINKS: NavLink[] = [{ label: "Dashboard", href: "/admin/dashboard" }];
 
 export function Navbar() {
   const { data: session, status } = useSession();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const tickingRef = useRef(false);
   const pathname = usePathname();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    function onScroll() {
-      if (tickingRef.current) return;
-      tickingRef.current = true;
-      requestAnimationFrame(() => {
-        setScrolled((prev) => {
-          const y = window.scrollY;
-          if (!prev && y > 80) return true;
-          if (prev && y < 30) return false;
-          return prev;
-        });
-        tickingRef.current = false;
-      });
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
+  // Close the mobile menu whenever the route changes.
   useEffect(() => {
     setMobileOpen(false);
-  }, [status]);
+  }, [pathname]);
 
   const role = (session?.user as any)?.role;
-  const links =
+  const links: NavLink[] =
     status === "loading"
       ? []
       : role === "driver"
-        ? DRIVER_LINKS
-        : role === "admin"
-          ? ADMIN_LINKS
-          : RIDER_LINKS;
+      ? DRIVER_LINKS
+      : role === "admin"
+      ? ADMIN_LINKS
+      : RIDER_LINKS;
+
+  function handleLinkClick(e: React.MouseEvent, link: NavLink) {
+    setMobileOpen(false);
+    if (link.authRequired && status !== "authenticated") {
+      e.preventDefault();
+      setModalOpen(true);
+    }
+  }
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-[76px] px-0">
-        <div
-          className={`mx-auto bg-black/90 backdrop-blur-md border border-white/10 transition-[max-width,border-radius,padding,margin-top] duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[max-width,padding] ${
-            scrolled
-              ? "max-w-6xl rounded-full px-6 py-3 mt-6 mx-4 sm:mx-auto"
-              : "max-w-full rounded-none px-5 sm:px-8 py-[18px] mt-0"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-white font-black text-lg tracking-tight">
-              RYDEX
-            </span>
+      <header className="sticky top-0 z-40 bg-black border-b border-white/10">
+        <div className="mx-auto max-w-6xl flex items-center justify-between px-5 sm:px-8 py-4">
+          <Link href="/" className="text-white font-black text-lg tracking-tight">
+            RYDEX
+          </Link>
 
-            <nav className="hidden md:flex items-center gap-8">
-              {links.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={(e) => {
-                    if (link.authRequired && status !== "authenticated") {
-                      e.preventDefault();
-                      setModalOpen(true);
-                    }
-                  }}
-                  className={`text-sm transition-colors ${
-                    pathname === link.href
-                      ? "text-white font-semibold"
-                      : "text-neutral-300 hover:text-white"
-                  }`}
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-
-            <div className="flex items-center gap-3">
-              {status === "authenticated" && session?.user ? (
-                <UserMenu
-                  name={session.user.name ?? "User"}
-                  role={role ?? "rider"}
-                />
-              ) : (
-                <button
-                  onClick={() => setModalOpen(true)}
-                  className="px-5 sm:px-6 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 transition-colors"
-                >
-                  Login
-                </button>
-              )}
-
-              <button
-                onClick={() => setMobileOpen((o) => !o)}
-                aria-label="Toggle menu"
-                className="md:hidden w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white"
+          <nav className="hidden md:flex items-center gap-8">
+            {links.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={(e) => handleLinkClick(e, link)}
+                className={`text-sm transition-colors ${
+                  pathname === link.href
+                    ? "text-white font-semibold"
+                    : "text-neutral-300 hover:text-white"
+                }`}
               >
-                {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-              </button>
-            </div>
-          </div>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
-          <div
-            className={`md:hidden overflow-hidden transition-[max-height,opacity,margin-top] duration-300 ease-out ${
-              mobileOpen
-                ? "max-h-64 opacity-100 mt-4"
-                : "max-h-0 opacity-0 mt-0"
-            }`}
-          >
-            <nav className="flex flex-col gap-1 pb-2 border-t border-white/10 pt-3">
-              {links.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={(e) => {
-                    setMobileOpen(false);
-                    if (link.authRequired && status !== "authenticated") {
-                      e.preventDefault();
-                      setModalOpen(true);
-                    }
-                  }}
-                  className="text-sm text-neutral-300 hover:text-white transition-colors py-2.5"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
+          <div className="flex items-center gap-3">
+            {status === "authenticated" && session?.user ? (
+              <UserMenu
+                name={session.user.name ?? "User"}
+                role={role ?? "rider"}
+              />
+            ) : (
+              <button
+                onClick={() => setModalOpen(true)}
+                className="px-5 sm:px-6 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 transition-colors"
+              >
+                Login
+              </button>
+            )}
+
+            <button
+              onClick={() => setMobileOpen((o) => !o)}
+              aria-label="Toggle menu"
+              title="Menu"
+              className="md:hidden w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white"
+            >
+              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
           </div>
         </div>
+
+        {mobileOpen && links.length > 0 && (
+          <nav className="md:hidden flex flex-col px-5 sm:px-8 pb-3 border-t border-white/10">
+            {links.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={(e) => handleLinkClick(e, link)}
+                className="text-sm text-neutral-300 hover:text-white transition-colors py-3"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
       </header>
+
       <AuthModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   );
