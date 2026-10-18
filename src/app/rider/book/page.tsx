@@ -196,39 +196,61 @@ function BookRidePageInner() {
     setRide(null);
   }
 
-  useEffect(() => {
-    if (!ride?._id) return;
 
-    const socket = getSocket();
-    socket.emit("ride:join", ride._id);
+const lastStatusRef = useRef<string | null>(null);
 
-    function handleUpdate({ ride: updatedRide }: { ride: any }) {
-      setRide(updatedRide);
-    }
-    function handleLocation({ lat, lng }: { lat: number; lng: number }) {
-      setDriverLocation({ lat, lng });
-    }
+useEffect(() => {
+  if (!ride?._id) return;
 
-    function toastOnStatusChange({ ride: updatedRide }: { ride: any }) {
-      if (updatedRide.status === "accepted" && ride?.status === "requested") {
-        toast.success("A driver accepted your ride!");
+  const rideId: string = ride._id;
+  lastStatusRef.current = ride.status;
+
+  const socket = getSocket();
+  socket.emit("ride:join", rideId);
+
+  async function refreshRide() {
+    try {
+      const res = await fetch(`/api/rides/${rideId}`);
+      if (!res.ok) return;
+
+      const { ride: fresh } = await res.json();
+
+      if (fresh.status !== lastStatusRef.current) {
+        if (fresh.status === "accepted") {
+          toast.success("A driver accepted your ride!");
+        }
+        if (fresh.status === "completed") {
+          toast.success("Ride completed!");
+        }
+        lastStatusRef.current = fresh.status;
       }
-      if (updatedRide.status === "completed" && ride?.status !== "completed") {
-        toast.success("Ride completed!");
-      }
+
+      setRide(fresh);
+    } catch {
     }
+  }
 
-    socket.on("ride:update", handleUpdate);
-    socket.on("ride:update", toastOnStatusChange);
-    socket.on("driver:location", handleLocation);
+  function handleLocation({
+    lat,
+    lng,
+  }: {
+    lat: number;
+    lng: number;
+  }) {
+    setDriverLocation({ lat, lng });
+  }
 
-    return () => {
-      socket.emit("ride:leave", ride._id);
-      socket.off("ride:update", handleUpdate);
-      socket.off("ride:update", toastOnStatusChange);
-      socket.off("driver:location", handleLocation);
-    };
-  }, [ride?._id]);
+  socket.on("ride:update", refreshRide);
+  socket.on("driver:location", handleLocation);
+
+  return () => {
+    socket.emit("ride:leave", rideId);
+    socket.off("ride:update", refreshRide);
+    socket.off("driver:location", handleLocation);
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [ride?._id]);
+
 
   return (
     <main className="min-h-screen bg-white px-4 py-20">
@@ -633,7 +655,7 @@ function PaymentSection({ ride }: { ride: any }) {
     }
   }
 
-  if (paid) {
+if (paid || ride.paymentStatus === "paid") {
     return (
       <motion.p
         initial={{ opacity: 0, scale: 0.95 }}
