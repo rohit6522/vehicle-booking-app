@@ -30,6 +30,7 @@ app.prepare().then(() => {
   // Make the io instance reachable from Next.js API routes (same process).
   global._io = io;
 
+
   io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
 
@@ -43,24 +44,18 @@ app.prepare().then(() => {
       socket.leave(`ride:${rideId}`);
     });
 
-    // Driver periodically emits their live coordinates while on a ride.
+    // Live map relay only. The GPS path used for the final fare is saved
+    // through the authenticated POST /api/rides/[id]/location route.
     socket.on("driver:location", ({ rideId, lat, lng }) => {
       if (typeof lat !== "number" || typeof lng !== "number") return;
       socket.to(`ride:${rideId}`).emit("driver:location", { lat, lng });
     });
 
-    // Also append to the ride's tracked path so we can compute the
-    // actual distance travelled once the ride completes — but only
-    // while the ride is "ongoing" (started via OTP), not just accepted.
-    try {
-      await Ride.updateOne(
-        { _id: rideId, status: "ongoing" },
-        { $push: { trackedPath: { lat, lng } } }
-      );
-    } catch (err) {
-      console.error("Failed to append tracked path:", err);
-    }
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected:", socket.id);
+    });
   });
+
 
   socket.on("disconnect", () => {
     console.log("Socket disconnected:", socket.id);
@@ -98,5 +93,4 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
   }, 60 * 1000); // check every 1 minute
 }).catch((err) => {
   console.error("Auto-expiry: MongoDB connection failed:", err);
-});
 });

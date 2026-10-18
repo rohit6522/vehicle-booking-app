@@ -29,7 +29,7 @@ export default function DriverRequestsPage() {
         "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=",
       )
         .play()
-        .catch(() => {});
+        .catch(() => { });
     }
     prevCountRef.current = rides.length;
   }, [rides.length]);
@@ -170,29 +170,60 @@ export default function DriverRequestsPage() {
   useEffect(() => {
     if (!activeRide?._id) return;
 
+    const rideId: string = activeRide._id;
     const socket = getSocket();
-    socket.emit("ride:join", activeRide._id);
+    socket.emit("ride:join", rideId);
 
+    async function refreshActiveRide() {
+      try {
+        const res = await fetch(`/api/rides/${rideId}`);
+        if (!res.ok) return;
+        const { ride } = await res.json();
+        if (ride.status === "cancelled") {
+          toast.info("This ride was cancelled");
+          setActiveRide(null);
+        } else {
+          setActiveRide(ride);
+        }
+      } catch {
+        // next ping will retry
+      }
+    }
+    socket.on("ride:update", refreshActiveRide);
+
+    let lastSaved = 0;
     if ("geolocation" in navigator) {
       watchIdRef.current = navigator.geolocation.watchPosition(
         (pos) => {
-          socket.emit("driver:location", {
-            rideId: activeRide._id,
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          });
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          socket.emit("driver:location", { rideId, lat, lng });
+
+          // Persist for the final-fare calculation, at most every 5s.
+          const now = Date.now();
+          if (now - lastSaved >= 5000) {
+            lastSaved = now;
+            fetch(`/api/rides/${rideId}/location`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ lat, lng }),
+            }).catch(() => { });
+          }
         },
         (err) => console.error("Geolocation error:", err),
-        { enableHighAccuracy: true, maximumAge: 5000 },
+        { enableHighAccuracy: true, maximumAge: 5000 }
       );
     }
 
     return () => {
-      socket.emit("ride:leave", activeRide._id);
+      socket.emit("ride:leave", rideId);
+      socket.off("ride:update", refreshActiveRide);
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeRide?._id]);
 
   if (activeRide) {
@@ -261,9 +292,17 @@ export default function DriverRequestsPage() {
           ) : activeRide.status === "completed" ? (
             <div className="space-y-3">
               {activeRide.paymentStatus === "paid" ? (
-                <p className="text-emerald-600 font-medium bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
-                  ✓ Ride paid
-                </p>
+                <>
+                  <p className="text-emerald-600 font-medium bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
+                    ✓ Ride paid
+                  </p>
+                  <button
+                    onClick={() => setActiveRide(null)}
+                    className="w-full py-3.5 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors"
+                  >
+                    Back to requests
+                  </button>
+                </>
               ) : activeRide.paymentMethod === "cash" ? (
                 activeRide.cashConfirmedByDriver ? (
                   <p className="text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-center text-sm">
@@ -331,11 +370,10 @@ export default function DriverRequestsPage() {
           <h1 className="text-3xl font-black">Ride requests</h1>
 
           <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              isOnline
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${isOnline
                 ? "bg-emerald-100 text-emerald-700"
                 : "bg-neutral-200 text-neutral-600"
-            }`}
+              }`}
           >
             {isOnline ? "● Online" : "○ Offline"}
           </span>
