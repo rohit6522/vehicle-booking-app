@@ -43,58 +43,60 @@ app.prepare().then(() => {
       socket.leave(`ride:${rideId}`);
     });
 
-       // Driver periodically emits their live coordinates while on a ride.
-    socket.on("driver:location", async ({ rideId, lat, lng }) => {
+    // Driver periodically emits their live coordinates while on a ride.
+    socket.on("driver:location", ({ rideId, lat, lng }) => {
+      if (typeof lat !== "number" || typeof lng !== "number") return;
       socket.to(`ride:${rideId}`).emit("driver:location", { lat, lng });
-
-      // Also append to the ride's tracked path so we can compute the
-      // actual distance travelled once the ride completes — but only
-      // while the ride is "ongoing" (started via OTP), not just accepted.
-      try {
-        await Ride.updateOne(
-          { _id: rideId, status: "ongoing" },
-          { $push: { trackedPath: { lat, lng } } }
-        );
-      } catch (err) {
-        console.error("Failed to append tracked path:", err);
-      }
     });
 
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected:", socket.id);
+    // Also append to the ride's tracked path so we can compute the
+    // actual distance travelled once the ride completes — but only
+    // while the ride is "ongoing" (started via OTP), not just accepted.
+    try {
+      await Ride.updateOne(
+        { _id: rideId, status: "ongoing" },
+        { $push: { trackedPath: { lat, lng } } }
+      );
+    } catch (err) {
+      console.error("Failed to append tracked path:", err);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
+
+httpServer.listen(port, () => {
+  console.log(`> Ready on http://${hostname}:${port}`);
+});
+
+
+// --- Auto-expire stale ride requests (Rapido/Uber-style) ---
+mongoose.connect(process.env.MONGODB_URI).then(() => {
+  const RideSchema = new mongoose.Schema({}, { strict: false });
+
+  const Ride = mongoose.models.RideAutoExpire || mongoose.model("RideAutoExpire", RideSchema, "rides");
+
+  const EXPIRY_MINUTES = 10;
+
+  setInterval(async () => {
+    const cutoff = new Date(Date.now() - EXPIRY_MINUTES * 60 * 1000);
+    const staleRides = await Ride.find({
+      status: "requested",
+      requestedAt: { $lt: cutoff },
     });
-  });
 
-  httpServer.listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`);
-  });
-
-
-  // --- Auto-expire stale ride requests (Rapido/Uber-style) ---
-  mongoose.connect(process.env.MONGODB_URI).then(() => {
-    const RideSchema = new mongoose.Schema({}, { strict: false });
-
-   const Ride = mongoose.models.RideAutoExpire || mongoose.model("RideAutoExpire", RideSchema, "rides");
-
-    const EXPIRY_MINUTES = 10;
-
-    setInterval(async () => {
-      const cutoff = new Date(Date.now() - EXPIRY_MINUTES * 60 * 1000);
-      const staleRides = await Ride.find({
-        status: "requested",
-        requestedAt: { $lt: cutoff },
-      });
-
-      for (const ride of staleRides) {
-        ride.status = "cancelled";
-        ride.cancelledAt = new Date();
-        ride.cancelledBy = "rider"; // system-expired, closest existing enum value
-        await ride.save();
-        io.to(`ride:${ride._id}`).emit("ride:update", { ride });
-        console.log(`Auto-cancelled stale ride ${ride._id}`);
-      }
-    }, 60 * 1000); // check every 1 minute
-  }).catch((err) => {
-    console.error("Auto-expiry: MongoDB connection failed:", err);
-  });
+    for (const ride of staleRides) {
+      ride.status = "cancelled";
+      ride.cancelledAt = new Date();
+      ride.cancelledBy = "rider"; // system-expired, closest existing enum value
+      await ride.save();
+      io.to(`ride:${ride._id}`).emit("ride:update", { ride });
+      console.log(`Auto-cancelled stale ride ${ride._id}`);
+    }
+  }, 60 * 1000); // check every 1 minute
+}).catch((err) => {
+  console.error("Auto-expiry: MongoDB connection failed:", err);
+});
 });
