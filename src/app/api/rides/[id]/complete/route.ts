@@ -40,15 +40,28 @@ export async function POST(
   // Falls back to the original estimate for older/short rides where
   // tracking didn't produce a usable path.
   const path = ride.trackedPath ?? [];
+
   if (path.length >= 2) {
+    // Count movement only once we are 20 m from the last counted point,
+    // so GPS jitter while stopped doesn't accumulate as distance.
+    const MIN_STEP_KM = 0.02;
     let travelledKm = 0;
+    let anchor = path[0];
     for (let i = 1; i < path.length; i++) {
-      travelledKm += distanceKm(path[i - 1], path[i]);
+      const step = distanceKm(anchor, path[i]);
+      if (step >= MIN_STEP_KM) {
+        travelledKm += step;
+        anchor = path[i];
+      }
     }
-    // Guard against GPS noise producing an unrealistically small distance
-    // (e.g. driver barely moved) — never charge less than the estimate's
-    // straight-line distance.
-    const finalDistanceKm = Math.max(travelledKm, ride.distanceKm);
+
+    // Never below the quoted route, never above 1.5x it (upfront-price
+    // style cap). Tune MAX_OVERAGE to taste.
+    const MAX_OVERAGE = 1.5;
+    const finalDistanceKm = Math.min(
+      Math.max(travelledKm, ride.distanceKm),
+      ride.distanceKm * MAX_OVERAGE
+    );
     ride.fare.final = estimateFare(finalDistanceKm, ride.vehicleType);
   } else {
     ride.fare.final = ride.fare.estimated;
