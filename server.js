@@ -57,6 +57,7 @@ app.prepare().then(() => {
   });
 
   // --- Auto-expire stale ride requests (Rapido/Uber-style) ---
+
   mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => {
@@ -69,7 +70,10 @@ app.prepare().then(() => {
 
       setInterval(async () => {
         try {
-          const cutoff = new Date(Date.now() - EXPIRY_MINUTES * 60 * 1000);
+          const cutoff = new Date(
+            Date.now() - EXPIRY_MINUTES * 60 * 1000
+          );
+
           const stale = await Ride.find({
             status: "requested",
             requestedAt: { $lt: cutoff },
@@ -78,10 +82,9 @@ app.prepare().then(() => {
             .lean();
 
           if (stale.length === 0) return;
+
           const ids = stale.map((r) => r._id);
 
-          // updateMany, not doc.save(): this model has an empty non-strict
-          // schema, so plain property assignment would not be persisted.
           await Ride.updateMany(
             { _id: { $in: ids }, status: "requested" },
             {
@@ -93,10 +96,12 @@ app.prepare().then(() => {
             }
           );
 
-          // Clients treat this as a ping and re-fetch the ride.
           for (const id of ids) {
-            io.to(`ride:${id}`).emit("ride:update", { rideId: String(id) });
+            io.to(`ride:${id}`).emit("ride:update", {
+              rideId: String(id),
+            });
           }
+
           console.log(`Auto-cancelled ${ids.length} stale ride(s)`);
         } catch (err) {
           console.error("Auto-expiry job failed:", err);
@@ -106,4 +111,7 @@ app.prepare().then(() => {
     .catch((err) => {
       console.error("Auto-expiry: MongoDB connection failed:", err);
     });
+
+
+
 });

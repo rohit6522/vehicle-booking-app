@@ -119,7 +119,7 @@ function BookRidePageInner() {
     fetch("/api/drivers/availability")
       .then((res) => res.json())
       .then((data) => setAvailability(data.counts))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -197,59 +197,59 @@ function BookRidePageInner() {
   }
 
 
-const lastStatusRef = useRef<string | null>(null);
+  const lastStatusRef = useRef<string | null>(null);
 
-useEffect(() => {
-  if (!ride?._id) return;
+  useEffect(() => {
+    if (!ride?._id) return;
 
-  const rideId: string = ride._id;
-  lastStatusRef.current = ride.status;
+    const rideId: string = ride._id;
+    lastStatusRef.current = ride.status;
 
-  const socket = getSocket();
-  socket.emit("ride:join", rideId);
+    const socket = getSocket();
+    socket.emit("ride:join", rideId);
 
-  async function refreshRide() {
-    try {
-      const res = await fetch(`/api/rides/${rideId}`);
-      if (!res.ok) return;
+    async function refreshRide() {
+      try {
+        const res = await fetch(`/api/rides/${rideId}`);
+        if (!res.ok) return;
 
-      const { ride: fresh } = await res.json();
+        const { ride: fresh } = await res.json();
 
-      if (fresh.status !== lastStatusRef.current) {
-        if (fresh.status === "accepted") {
-          toast.success("A driver accepted your ride!");
+        if (fresh.status !== lastStatusRef.current) {
+          if (fresh.status === "accepted") {
+            toast.success("A driver accepted your ride!");
+          }
+          if (fresh.status === "completed") {
+            toast.success("Ride completed!");
+          }
+          lastStatusRef.current = fresh.status;
         }
-        if (fresh.status === "completed") {
-          toast.success("Ride completed!");
-        }
-        lastStatusRef.current = fresh.status;
+
+        setRide(fresh);
+      } catch {
       }
-
-      setRide(fresh);
-    } catch {
     }
-  }
 
-  function handleLocation({
-    lat,
-    lng,
-  }: {
-    lat: number;
-    lng: number;
-  }) {
-    setDriverLocation({ lat, lng });
-  }
+    function handleLocation({
+      lat,
+      lng,
+    }: {
+      lat: number;
+      lng: number;
+    }) {
+      setDriverLocation({ lat, lng });
+    }
 
-  socket.on("ride:update", refreshRide);
-  socket.on("driver:location", handleLocation);
+    socket.on("ride:update", refreshRide);
+    socket.on("driver:location", handleLocation);
 
-  return () => {
-    socket.emit("ride:leave", rideId);
-    socket.off("ride:update", refreshRide);
-    socket.off("driver:location", handleLocation);
-  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [ride?._id]);
+    return () => {
+      socket.emit("ride:leave", rideId);
+      socket.off("ride:update", refreshRide);
+      socket.off("driver:location", handleLocation);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ride?._id]);
 
 
   return (
@@ -290,7 +290,7 @@ useEffect(() => {
                 {ride.cancelledBy === "driver" ? "the driver" : "you"}
               </p>
             )}
-            
+
             <motion.p
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -420,6 +420,22 @@ useEffect(() => {
                 </button>
               </div>
             )}
+
+            {ride.status === "cancelled" && (
+              <div className="mt-4 space-y-3">
+                <p className="text-sm text-neutral-500">
+                  {ride.cancelledBy === "system"
+                    ? "No driver accepted in time, so this request expired."
+                    : `Cancelled by ${ride.cancelledBy === "driver" ? "the driver" : "you"}`}
+                </p>
+                <button
+                  onClick={() => setRide(null)}
+                  className="w-full py-3 rounded-full bg-black text-white font-semibold hover:bg-neutral-800 transition-colors"
+                >
+                  Book another ride
+                </button>
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -449,11 +465,10 @@ useEffect(() => {
                   onClick={() => setVehicleType(v.type)}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.96 }}
-                  className={`flex flex-col items-center gap-2 py-4 rounded-2xl border text-xs font-medium transition-all ${
-                    vehicleType === v.type
+                  className={`flex flex-col items-center gap-2 py-4 rounded-2xl border text-xs font-medium transition-all ${vehicleType === v.type
                       ? "border-black bg-black text-white shadow-lg shadow-black/10"
                       : "border-neutral-200 text-neutral-600 hover:border-neutral-400 hover:shadow-sm"
-                  }`}
+                    }`}
                 >
                   <v.icon size={18} strokeWidth={1.5} />
                   {v.label}
@@ -655,7 +670,7 @@ function PaymentSection({ ride }: { ride: any }) {
     }
   }
 
-if (paid || ride.paymentStatus === "paid") {  
+  if (paid || ride.paymentStatus === "paid") {
     return (
       <motion.p
         initial={{ opacity: 0, scale: 0.95 }}

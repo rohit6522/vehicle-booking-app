@@ -44,7 +44,7 @@ export interface IRide extends mongoose.Document {
   acceptedAt?: Date;
   completedAt?: Date;
   cancelledAt?: Date;
-  cancelledBy?: "rider" | "driver";
+ cancelledBy?: "rider" | "driver" | "system";
 }
 const PointSchema = new Schema<IPoint>(
   {
@@ -101,7 +101,10 @@ trackedPath: [
   acceptedAt: Date,
   completedAt: Date,
   cancelledAt: Date,
-  cancelledBy: { type: String, enum: ["rider", "driver"] },
+ cancelledBy: {
+  type: String,
+  enum: ["rider", "driver", "system"],
+},
 });
 
 RideSchema.index({ status: 1, vehicleType: 1 });
