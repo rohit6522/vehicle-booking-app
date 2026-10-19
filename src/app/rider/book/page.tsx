@@ -655,7 +655,7 @@ function PaymentSection({ ride }: { ride: any }) {
     }
   }
 
-if (paid || ride.paymentStatus === "paid") {
+if (paid || ride.paymentStatus === "paid") {  
     return (
       <motion.p
         initial={{ opacity: 0, scale: 0.95 }}
