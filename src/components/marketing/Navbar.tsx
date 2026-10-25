@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -29,6 +29,17 @@ const ADMIN_LINKS: NavLink[] = [{ label: "Dashboard", href: "/admin/dashboard" }
 export function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  // After logging in via the modal, continue to the page the user clicked.
+  useEffect(() => {
+    if (status === "authenticated" && pendingHref) {
+      const target = pendingHref;
+      setPendingHref(null);
+      router.push(target);
+    }
+  }, [status, pendingHref, router]);
   const [modalOpen, setModalOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -42,15 +53,16 @@ export function Navbar() {
     status === "loading"
       ? []
       : role === "driver"
-      ? DRIVER_LINKS
-      : role === "admin"
-      ? ADMIN_LINKS
-      : RIDER_LINKS;
+        ? DRIVER_LINKS
+        : role === "admin"
+          ? ADMIN_LINKS
+          : RIDER_LINKS;
 
   function handleLinkClick(e: React.MouseEvent, link: NavLink) {
     setMobileOpen(false);
     if (link.authRequired && status !== "authenticated") {
       e.preventDefault();
+      setPendingHref(link.href);
       setModalOpen(true);
     }
   }
@@ -69,11 +81,10 @@ export function Navbar() {
                 key={link.label}
                 href={link.href}
                 onClick={(e) => handleLinkClick(e, link)}
-                className={`text-sm transition-colors ${
-                  pathname === link.href
-                    ? "text-white font-semibold"
-                    : "text-neutral-300 hover:text-white"
-                }`}
+                className={`text-sm transition-colors ${pathname === link.href
+                  ? "text-white font-semibold"
+                  : "text-neutral-300 hover:text-white"
+                  }`}
               >
                 {link.label}
               </Link>
@@ -88,7 +99,10 @@ export function Navbar() {
               />
             ) : (
               <button
-                onClick={() => setModalOpen(true)}
+                onClick={() => {
+                  setPendingHref(null);
+                  setModalOpen(true);
+                }}
                 className="px-5 sm:px-6 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 transition-colors"
               >
                 Login
