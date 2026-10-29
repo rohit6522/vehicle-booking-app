@@ -5,25 +5,15 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { LenisProvider } from "@/components/LenisProvider";
 import { Toaster } from "sonner";
-import { Inter } from "next/font/google";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { RouteProgress } from "@/components/RouteProgress";
 
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "RYDEX — Book a ride in seconds", 
+  title: "RYDEX — Book a ride in seconds",
   description: "Real-time vehicle booking platform",
   themeColor: "#000000",
-
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "RYDEX" },
-
   openGraph: {
     title: "RYDEX",
     description:
@@ -31,7 +21,6 @@ export const metadata: Metadata = {
     url: "https://rydex-eo9t.onrender.com/",
     type: "website",
     siteName: "RideFlow",
-
     images: [
       {
         url: "https://rydex-eo9t.onrender.com/rydex.png",
@@ -42,17 +31,23 @@ export const metadata: Metadata = {
     ],
   },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" 
-      className={`h-full antialiased ${inter.variable}`}
-      >
-      
-      <body className="min-h-full flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white transition-colors">
+    <html lang="en" className="h-full antialiased">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white transition-colors font-sans">
         <RouteProgress />
         <Providers>
           <LenisProvider>{children}</LenisProvider>
@@ -67,7 +62,6 @@ export default function RootLayout({
           }}
         />
         <NetworkStatus />
-
       </body>
     </html>
   );
