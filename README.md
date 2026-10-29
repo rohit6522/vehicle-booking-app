@@ -2,7 +2,7 @@
 
 A production-grade, real-time vehicle booking platform inspired by Uber/Ola/Rapido — built from scratch with Next.js, MongoDB, Socket.io, and a full partner-onboarding + video-KYC pipeline.
 
-**🔗 Live:** [rydex-eo9t.onrender.com](https://rydex-eo9t.onrender.com)
+**🔗 Live:** [rydex.com](https://vehicle-booking-app-jet.vercel.app/)
 
 ---
 
